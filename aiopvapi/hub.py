@@ -1,4 +1,5 @@
 from aiopvapi.aiorequest import AioRequest
+from aiopvapi.rooms import Rooms
 from .scenes import Scenes
 
 class Hub:
@@ -10,3 +11,4 @@ class Hub:
         self._times_path = "{}/times".format(self._base_path)
 
         self.scenes = Scenes(self._base_path,self.request)
+        self.rooms = Rooms(self._base_path,self.request)

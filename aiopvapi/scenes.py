@@ -7,9 +7,9 @@ LOGGER = logging.getLogger("__name__")
 
 
 class Scenes:
-    def __init__(self, hub_ip, aio_request):
+    def __init__(self, base_api_ip, aio_request):
         self.request = aio_request
-        self._scenes_path = "{}/scenes".format(hub_ip)
+        self._scenes_path = "{}/scenes".format(base_api_ip)
 
     @staticmethod
     def sanitize_scenes(scenes):
@@ -22,8 +22,9 @@ class Scenes:
             for scene in scenes['sceneData']:
                 scene['name'] = decode_base64(scene['name'])
             return scenes
-        except KeyError:
+        except (KeyError, TypeError):
             LOGGER.debug("no scene data available")
+            return None
 
     @asyncio.coroutine
     def get_scenes(self):

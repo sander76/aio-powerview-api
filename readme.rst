@@ -5,4 +5,5 @@ Written for Home-Assistant
 
 Links
 -----
-- http://home-assistant.io
+- https://home-assistant.io/
+- https://www.hunterdouglas.com/operating-systems/powerview-motorization
