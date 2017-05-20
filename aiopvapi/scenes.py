@@ -1,3 +1,6 @@
+"""Scenes class managing all scene data."""
+
+
 import asyncio
 import logging
 
@@ -16,7 +19,7 @@ class Scenes:
         """Cleans up incoming scene data
 
         :param scenes: The dict with scene data to be sanitized.
-        :return: Cleaned up scene dict.
+        :returns: Cleaned up scene dict.
         """
         try:
             for scene in scenes['sceneData']:
@@ -28,7 +31,7 @@ class Scenes:
 
     @asyncio.coroutine
     def get_scenes(self):
-        """Get alist of scenes.
+        """Get a list of scenes.
 
         :returns: A json object.
         """
@@ -40,6 +43,6 @@ class Scenes:
         """Activate a scene
 
         :param scene_id: The id of the scene.
-        :return: Nothing.
+        :returns: Nothing.
         """
         yield from self.request.get(self._scenes_path, {"sceneid": scene_id})

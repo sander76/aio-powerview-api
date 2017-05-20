@@ -1,8 +1,13 @@
+"""Room class managing all room data."""
+
 import logging
+
+import asyncio
 
 from aiopvapi import decode_base64
 
 LOGGER = logging.getLogger("__name__")
+
 
 class Rooms:
     def __init__(self, base_api_ip, aio_request):
@@ -10,7 +15,7 @@ class Rooms:
         self._rooms_path = "{}/rooms".format(base_api_ip)
 
     @staticmethod
-    def sanitize_rooms(rooms):
+    def sanitize_rooms(rooms: dict):
         """Cleans up incoming room data
 
         :param rooms: The dict with scene data to be sanitized.
@@ -20,12 +25,13 @@ class Rooms:
             for room in rooms["roomData"]:
                 room["name"] = decode_base64(room["name"])
             return rooms
-        except (KeyError,TypeError):
+        except (KeyError, TypeError):
             LOGGER.debug("no roomdata available")
             return None
 
+    @asyncio.coroutine
     def get_rooms(self):
-        """Get alist of rooms.
+        """Get a list of rooms.
 
         :returns: A json object.
         """

@@ -1,7 +1,9 @@
+"""Class containing the async http methods."""
+
 import asyncio
+import logging
 import aiohttp
 import async_timeout
-import logging
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -14,6 +16,7 @@ class AioRequest:
 
     @asyncio.coroutine
     def get(self, url, params=None):
+
         data = None
         response = None
         try:
