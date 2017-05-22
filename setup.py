@@ -1,9 +1,7 @@
 from distutils.core import setup
 
-with open('README.rst') as f:
-    long_description = f.read()
 
-VERSION = "1.1"
+VERSION = "1.4"
 
 setup(
     name='aiopvapi',
@@ -26,7 +24,6 @@ setup(
     ],
     author_email='',
     description='Powerview blinds api',
-    long_description=long_description,
     install_requires=[
         'async_timeout',
         'aiohttp',

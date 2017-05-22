@@ -7,3 +7,6 @@
 *.iml
 out
 gen
+dist
+aiopvapi.egg-info
+.vscode
