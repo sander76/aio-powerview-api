@@ -10,3 +10,4 @@ gen
 dist
 aiopvapi.egg-info
 .vscode
+build

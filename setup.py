@@ -1,12 +1,13 @@
 from distutils.core import setup
 
+from setuptools import find_packages
 
-VERSION = "1.4"
+VERSION = "1.5.2"
 
 setup(
     name='aiopvapi',
     version=VERSION,
-    packages=['aiopvapi'],
+    packages=find_packages(),
     download_url='https://github.com/sander76/aio-powerview-api/archive/' + VERSION + '.tar.gz',
     url="https://github.com/sander76/aio-powerview-api",
     license='BSD License',
