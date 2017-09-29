@@ -4,7 +4,7 @@ import aiohttp
 import logging
 
 from aiopvapi.helpers.aiorequest import AioRequest
-from aiopvapi.helpers.constants import ATTR_ID
+from aiopvapi.helpers.constants import ATTR_ID, ATTR_NAME_UNICODE, ATTR_NAME
 from aiopvapi.helpers.tools import join_path
 
 _LOGGER = logging.getLogger(__name__)
@@ -38,7 +38,7 @@ class ApiEntryPoint(ApiBase):
 
 class ApiResource(ApiBase):
     def __init__(self, loop, websession, base_path, raw_data=None):
-        ApiBase.__init__(self, loop, websession,base_path)
+        ApiBase.__init__(self, loop, websession, base_path)
         self._id = raw_data.get(ATTR_ID)
         self._raw_data = raw_data
         self._resource_path = join_path(base_path, str(self._id))
@@ -55,6 +55,16 @@ class ApiResource(ApiBase):
     @property
     def id(self):
         return self._id
+
+    @property
+    def name(self):
+        _name = self._raw_data.get(ATTR_NAME_UNICODE)
+        if _name:
+            return _name
+        _name = self._raw_data.get(ATTR_NAME)
+        if _name:
+            return _name
+        return ''
 
     @property
     def raw_data(self):
