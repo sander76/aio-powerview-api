@@ -23,16 +23,14 @@ class Scene(ApiResource):
     def roomId(self):
         return self._raw_data.get(SCENE_ROOM_ID)
 
-    @asyncio.coroutine
-    def activate(self):
-        _val = yield from self.request.get(self._base_path,
+    async def activate(self):
+        _val = await self.request.get(self._base_path,
                                            params={ATTR_SCENE_ID: self._id})
         return _val
 
-    @asyncio.coroutine
-    def delete(self):
+    async def delete(self):
         """Deletes a scene from a shade"""
-        _val = yield from self.request.delete(
+        _val = await self.request.delete(
             self._resource_path)
         if _val == 200 or _val == 204:
             return True

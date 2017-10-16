@@ -20,7 +20,7 @@ class Shades(ApiEntryPoint):
     def sanitize_resources(resource: dict):
         """Cleans up incoming scene data
 
-        :param scenes: The dict with scene data to be sanitized.
+        :param resource: The dict with scene data to be sanitized.
         :returns: Cleaned up scene dict.
         """
         try:

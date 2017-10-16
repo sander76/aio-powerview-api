@@ -21,10 +21,9 @@ class Shade(ApiResource):
                              get_base_path(hub_ip, URL_SHADES), raw_data)
         self._shade_position = Position(raw_data.get(ATTR_TYPE))
 
-    @asyncio.coroutine
-    def refresh(self):
+    async def refresh(self):
         """Get raw data from the hub and update the shade instance"""
-        _raw_data = yield from self.request.get(self._resource_path,
+        _raw_data = await self.request.get(self._resource_path,
                                                 {'refresh': 'true'})
         self._update(_raw_data)
 
@@ -45,8 +44,7 @@ class Shade(ApiResource):
             base[ATTR_SHADE][ATTR_ROOM_ID] = room_id
         return base
 
-    @asyncio.coroutine
-    def move_to(self, position1=None, position2=None):
+    async def move_to(self, position1=None, position2=None):
         """Moves the shade to a specific position.
 
         Next to move to there are method for move_tilt_to and
@@ -54,16 +52,15 @@ class Shade(ApiResource):
         """
         data = self._create_shade_data(self._shade_position.get_move_data(
             position1, position2))
-        _result = yield from self._move(data)
+        _result = await self._move(data)
         return _result
 
     def get_move_data(self, position1, position2):
         """Return a dict with move data."""
         return self._shade_position.get_move_data(position1, position2)
 
-    @asyncio.coroutine
-    def _move(self, position_data):
-        _result, status = yield from self.request.put(
+    async def _move(self, position_data):
+        _result, status = await self.request.put(
             self._resource_path, data=position_data)
         _LOGGER.debug("move shade returned status code %s" % status)
         if status == 200 or status == 201:
@@ -71,24 +68,21 @@ class Shade(ApiResource):
         else:
             return None
 
-    @asyncio.coroutine
-    def close(self):
+    async def close(self):
         data = self._create_shade_data(
             positiondata=self._shade_position.close_data)
-        _result = yield from self._move(data)
+        _result = await self._move(data)
         return _result
 
-    @asyncio.coroutine
-    def open(self):
+    async def open(self):
         data = self._create_shade_data(
             positiondata=self._shade_position.open_data)
-        _result = yield from self._move(data)
+        _result = await self._move(data)
         return _result
 
-    @asyncio.coroutine
-    def add_shade_to_room(self, room_id):
+    async def add_shade_to_room(self, room_id):
         data = self._create_shade_data(room_id=room_id)
-        _result, _status = yield from self.request.put(self._resource_path,
+        _result, _status = await self.request.put(self._resource_path,
                                                        data)
         if _status == 200:
             _LOGGER.info("Shade successfully added to room.")

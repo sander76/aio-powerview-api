@@ -21,8 +21,7 @@ class SceneMembers(ApiEntryPoint):
         ApiEntryPoint.__init__(self, loop, websession,
                                get_base_path(hub_ip, URL_SCENE_MEMBERS))
 
-    @asyncio.coroutine
-    def create_scene_member(self, shade_position, scene_id, shade_id):
+    async def create_scene_member(self, shade_position, scene_id, shade_id):
         """Adds a shade to an existing scene
 
         """
@@ -33,7 +32,7 @@ class SceneMembers(ApiEntryPoint):
                 ATTR_SHADE_ID: shade_id
             }
         }
-        _result, status = yield from self.request.post(self._base_path,
+        _result, status = await self.request.post(self._base_path,
                                                        data=data)
         if status == 201:
             _LOGGER.info('SceneMember successfully created.')

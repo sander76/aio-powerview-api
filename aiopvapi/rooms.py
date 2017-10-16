@@ -35,8 +35,7 @@ class Rooms(ApiEntryPoint):
             _LOGGER.debug("no roomdata available")
             return None
 
-    @asyncio.coroutine
-    def create_room(self, name, color_id=0, icon_id=0):
+    async def create_room(self, name, color_id=0, icon_id=0):
         name = unicode_to_base64(name)
         data = {
             ATTR_ROOM: {
@@ -45,7 +44,7 @@ class Rooms(ApiEntryPoint):
                 ATTR_ICON_ID: icon_id
             }
         }
-        _result, _status = yield from self.request.post(self._base_path,
+        _result, _status = await self.request.post(self._base_path,
                                                         data=data)
         if _status == 201:
             _LOGGER.info("Room successfully created.")
