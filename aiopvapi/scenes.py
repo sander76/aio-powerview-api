@@ -45,4 +45,4 @@ class Scenes:
         :param scene_id: The id of the scene.
         :returns: Nothing.
         """
-        yield from self.request.get(self._scenes_path, {"sceneid": scene_id})
+        yield from self.request.get(self._scenes_path, {"sceneId": scene_id})
