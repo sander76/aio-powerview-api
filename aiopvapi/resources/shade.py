@@ -10,7 +10,6 @@ from aiopvapi.helpers.tools import get_base_path, join_path
 _LOGGER = logging.getLogger(__name__)
 
 BOTTOM_UP_TILT = None
-ATTR_SHADE = 'shade'
 
 
 class Shade(ApiResource):
@@ -54,8 +53,7 @@ class Shade(ApiResource):
         """
         data = self._create_shade_data(self._shade_position.get_move_data(
             position1, position2))
-        _result = yield from self._move(data)
-        return _result
+        return (yield from self._move(data))
 
     def get_move_data(self, position1, position2):
         """Return a dict with move data."""
@@ -63,11 +61,11 @@ class Shade(ApiResource):
 
     @asyncio.coroutine
     def _move(self, position_data):
-        _result, status = yield from self.request.put(
-            self._resource_path, data=position_data)
+        result, status = yield from self.request.put(self._resource_path,
+                                                     data=position_data)
         _LOGGER.debug("move shade returned status code %s" % status)
         if status == 200 or status == 201:
-            return _result
+            return result
         else:
             return None
 
@@ -75,15 +73,13 @@ class Shade(ApiResource):
     def close(self):
         data = self._create_shade_data(
             positiondata=self._shade_position.close_data)
-        _result = yield from self._move(data)
-        return _result
+        return (yield from self._move(data))
 
     @asyncio.coroutine
     def open(self):
         data = self._create_shade_data(
             positiondata=self._shade_position.open_data)
-        _result = yield from self._move(data)
-        return _result
+        return (yield from self._move(data))
 
     @asyncio.coroutine
     def add_shade_to_room(self, room_id):

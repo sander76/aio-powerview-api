@@ -22,7 +22,6 @@ class ApiBase:
 class ApiEntryPoint(ApiBase):
     def __init__(self, loop, websession, base_path):
         super().__init__(loop, websession, base_path)
-        # self._base_path = base_path
 
     @staticmethod
     def sanitize_resources(resource):
@@ -37,6 +36,7 @@ class ApiEntryPoint(ApiBase):
 
 
 class ApiResource(ApiBase):
+    """Represent a single PowerView resource, i.e. a scene, a shade or a room."""
     def __init__(self, loop, websession, base_path, raw_data=None):
         super().__init__(loop, websession, base_path)
         self._id = raw_data.get(ATTR_ID)
@@ -46,8 +46,7 @@ class ApiResource(ApiBase):
     @asyncio.coroutine
     def delete(self):
         """Deletes a scene from a shade"""
-        _val = yield from self.request.delete(
-            self._resource_path)
+        _val = yield from self.request.delete(self._resource_path)
         if _val == 200 or _val == 204:
             return True
         return False
