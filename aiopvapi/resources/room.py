@@ -18,7 +18,6 @@ class Room(ApiResource):
     def __init__(self, raw_data, hub_ip=None, loop=None, websession=None):
         if ATTR_ROOM in raw_data:
             raw_data = raw_data.get(ATTR_ROOM)
-        ApiResource.__init__(self, loop, websession,
-                             get_base_path(hub_ip, 'api/rooms'), raw_data)
+        super().__init__(loop, websession, get_base_path(hub_ip, 'api/rooms'), raw_data)
 
 

@@ -21,7 +21,7 @@ class ApiBase:
 
 class ApiEntryPoint(ApiBase):
     def __init__(self, loop, websession, base_path):
-        ApiBase.__init__(self, loop, websession, base_path)
+        super().__init__(loop, websession, base_path)
         # self._base_path = base_path
 
     @staticmethod
@@ -38,7 +38,7 @@ class ApiEntryPoint(ApiBase):
 
 class ApiResource(ApiBase):
     def __init__(self, loop, websession, base_path, raw_data=None):
-        ApiBase.__init__(self, loop, websession, base_path)
+        super().__init__(loop, websession, base_path)
         self._id = raw_data.get(ATTR_ID)
         self._raw_data = raw_data
         self._resource_path = join_path(base_path, str(self._id))

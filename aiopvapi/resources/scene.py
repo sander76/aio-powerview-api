@@ -15,9 +15,8 @@ class Scene(ApiResource):
     def __init__(self, raw_data, hub_ip=None, loop=None, websession=None):
         if ATTR_SCENE in raw_data:
             raw_data = raw_data.get(ATTR_SCENE)
-        ApiResource.__init__(
-            self, loop, websession, get_base_path(hub_ip, URL_SCENES),
-            raw_data)
+        super().__init__(loop, websession, get_base_path(hub_ip, URL_SCENES),
+                         raw_data)
 
     @property
     def roomId(self):

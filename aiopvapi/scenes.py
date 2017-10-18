@@ -21,8 +21,7 @@ SCENE_COLOR_ID = 'colorId'
 
 class Scenes(ApiEntryPoint):
     def __init__(self, hub_ip, loop, websession=None):
-        ApiEntryPoint.__init__(self, loop, websession,
-                               get_base_path(hub_ip, URL_SCENES))
+        super().__init__(loop, websession, get_base_path(hub_ip, URL_SCENES))
 
     @staticmethod
     def sanitize_resources(scenes: dict):
