@@ -6,12 +6,7 @@ import asyncio
 
 from aiopvapi.helpers.tools import get_base_path
 from aiopvapi.helpers.api_base import ApiResource
-from aiopvapi.helpers.constants import ATTR_ICON_ID, ATTR_COLOR_ID
-
-ROOM_NAME = 'name'
-ROOM_ID = 'id'
-ROOM_ORDER = 'order'
-ATTR_ROOM = 'room'
+from aiopvapi.helpers.constants import ATTR_ROOM
 
 
 class Room(ApiResource):

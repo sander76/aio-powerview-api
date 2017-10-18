@@ -1,8 +1,9 @@
 import asyncio
 
+from aiopvapi.helpers.constants import ATTR_USER_DATA
 from aiopvapi.helpers.tools import get_base_path
 from aiopvapi.helpers.api_base import ApiResource
-ATTR_USER_DATA = 'user'
+
 
 class UserData(ApiResource):
     def __init__(self, raw_data, hub_ip, loop, websession=None):

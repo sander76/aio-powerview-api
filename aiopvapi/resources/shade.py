@@ -3,7 +3,7 @@ import logging
 
 from aiopvapi.helpers.api_base import ApiResource
 from aiopvapi.helpers.constants import URL_SHADES, ATTR_POSITION_DATA, \
-    ATTR_SHADE, ATTR_TYPE, ATTR_ID, ATTR_ROOM_ID, URL_SCENES
+    ATTR_SHADE, ATTR_TYPE, ATTR_ID, ATTR_ROOM_ID
 from aiopvapi.helpers.position import Position
 from aiopvapi.helpers.tools import get_base_path, join_path
 
