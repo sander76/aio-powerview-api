@@ -28,9 +28,10 @@ class ApiEntryPoint(ApiBase):
     def sanitize_resources(resource):
         raise NotImplemented
 
-    async def get_resources(self):
+    @asyncio.coroutine
+    def get_resources(self):
         """Get a list of resources. """
-        resources = await self.request.get(self._base_path)
+        resources = yield from self.request.get(self._base_path)
 
         return self.sanitize_resources(resources)
 
@@ -42,9 +43,10 @@ class ApiResource(ApiBase):
         self._raw_data = raw_data
         self._resource_path = join_path(base_path, str(self._id))
 
-    async def delete(self):
+    @asyncio.coroutine
+    def delete(self):
         """Deletes a scene from a shade"""
-        _val = await self.request.delete(
+        _val = yield from self.request.delete(
             self._resource_path)
         if _val == 200 or _val == 204:
             return True

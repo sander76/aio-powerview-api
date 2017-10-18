@@ -23,9 +23,10 @@ class SceneMember(ApiResource):
     # def sceneId(self):
     #     return self._
 
-    async def delete(self):
+    @asyncio.coroutine
+    def delete(self):
         """Deletes a scene from a shade"""
-        _val = await self.request.delete(
+        _val = yield from self.request.delete(
             self._base_path,
             params={ATTR_SCENE_ID: self._raw_data.get(ATTR_SCENE_ID),
                     ATTR_SHADE_ID: self._raw_data.get(ATTR_SHADE_ID)})

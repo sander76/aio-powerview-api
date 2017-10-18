@@ -43,8 +43,9 @@ class Scenes(ApiEntryPoint):
             _LOGGER.debug("no scene data available")
             return None
 
-    async def create_scene(self, room_id, name,
-                           color_id=0, icon_id=0):
+    @asyncio.coroutine
+    def create_scene(self, room_id, name,
+                     color_id=0, icon_id=0):
         """Creates am empty scene.
 
         Scenemembers need to be added after the scene has been created.
@@ -58,7 +59,7 @@ class Scenes(ApiEntryPoint):
                       SCENE_COLOR_ID: color_id,
                       SCENE_ICON_ID: icon_id
                       }}
-        _response, status = await self.request.post(
+        _response, status = yield from self.request.post(
             self._base_path, data=_data)
         if status == 200 or status == 201:
             _LOGGER.debug("Scene successfully created")

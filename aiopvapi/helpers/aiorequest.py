@@ -15,16 +15,19 @@ class AioRequest:
         self.loop = loop
         self.websession = websession
 
-    async def get(self, url, params=None) -> dict:
+    @asyncio.coroutine
+    def get(self, url, params=None) -> dict:
         _LOGGER.debug("Sending a get request")
         data = None
+        _status = None
         response = None
         try:
             _LOGGER.info('Sending GET request to: %s' % url)
             with async_timeout.timeout(self._timeout, loop=self.loop):
-                response = await self.websession.get(url, params=params)
+                response = yield from self.websession.get(url, params=params)
+                _status = response.status
                 if response.status == 200:
-                    data = await response.json()
+                    data = yield from response.json()
         except ValueError:
             _LOGGER.error("Error parsing Json message")
         except (asyncio.TimeoutError, aiohttp.ClientError) as error:
@@ -32,24 +35,25 @@ class AioRequest:
                           error)
         finally:
             if response is not None:
-                await response.release()
+                yield from response.release()
         return data
 
-    async def post(self, url, data=None):
+    @asyncio.coroutine
+    def post(self, url, data=None):
         resp = None
         _json = None  # empty result
         _status = None
         if data:
-            data = json.dumps(data, ensure_ascii=True)
+            data =  json.dumps(data, ensure_ascii=True)
         try:
             #conn = aiohttp.ProxyConnector(proxy='127.0.0.1:8888')
             with async_timeout.timeout(self._timeout, loop=self.loop):
-                resp = await self.websession.post(url, data=data)
+                resp = yield from self.websession.post(url, data=data)
                 # '{"name": "dGVzdA==", "iconId": 0, "roomId": 36422, "colorId": 0}'
                 # '{"scene":{"roomId":36422,"name":"dGVzdA==","iconId":0,"colorId":0}}'
                 _status = resp.status
                 if _status == 200 or _status == 201:
-                    _json = await resp.json()
+                    _json = yield from resp.json()
                 else:
                     _LOGGER.error("Error %s on %s", resp.status, url)
         except ValueError:
@@ -60,11 +64,12 @@ class AioRequest:
             _LOGGER.exception(e)
         finally:
             if resp is not None:
-                await resp.release()
+                yield from resp.release()
 
             return _json, _status
 
-    async def put(self, url, data=None):
+    @asyncio.coroutine
+    def put(self, url, data=None):
         if data:
             data = json.dumps(data)
         resp = None
@@ -72,10 +77,10 @@ class AioRequest:
         _status = None
         try:
             with async_timeout.timeout(self._timeout, loop=self.loop):
-                resp = await self.websession.put(url, data=data)
+                resp = yield from self.websession.put(url, data=data)
                 _status = resp.status
                 if _status == 200:
-                    _json = await resp.json()
+                    _json = yield from resp.json()
                 else:
                     _LOGGER.error("Error %s on %s", resp.status, url)
         except ValueError:
@@ -84,16 +89,17 @@ class AioRequest:
             _LOGGER.error("Client connection error")
         finally:
             if resp is not None:
-                await resp.release()
+                yield from resp.release()
 
         return _json, _status
 
-    async def delete(self, url, params=None):
+    @asyncio.coroutine
+    def delete(self, url, params=None):
         resp = None
         _status = False
         try:
             with async_timeout.timeout(self._timeout, loop=self.loop):
-                resp = await self.websession.delete(url, params=params)
+                resp = yield from self.websession.delete(url, params=params)
                 _status = resp.status
                 if resp.status == 200:
                     _LOGGER.debug("Delete responded with code 200")
@@ -105,5 +111,5 @@ class AioRequest:
             _LOGGER.error("Client connection error")
         finally:
             if resp is not None:
-                await resp.release()
+                yield from resp.release()
         return _status
