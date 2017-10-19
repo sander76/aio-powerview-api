@@ -42,7 +42,7 @@ class AioRequest:
         _json = None  # empty result
         _status = None
         if data:
-            data =  json.dumps(data, ensure_ascii=True)
+            data = json.dumps(data, ensure_ascii=True)
         try:
             #conn = aiohttp.ProxyConnector(proxy='127.0.0.1:8888')
             with async_timeout.timeout(self._timeout, loop=self.loop):
@@ -50,7 +50,7 @@ class AioRequest:
                 # '{"name": "dGVzdA==", "iconId": 0, "roomId": 36422, "colorId": 0}'
                 # '{"scene":{"roomId":36422,"name":"dGVzdA==","iconId":0,"colorId":0}}'
                 _status = resp.status
-                if _status == 200 or _status == 201:
+                if _status in [200, 201]:
                     _json = yield from resp.json()
                 else:
                     _LOGGER.error("Error %s on %s", resp.status, url)
@@ -99,10 +99,8 @@ class AioRequest:
             with async_timeout.timeout(self._timeout, loop=self.loop):
                 resp = yield from self.websession.delete(url, params=params)
                 _status = resp.status
-                if resp.status == 200:
-                    _LOGGER.debug("Delete responded with code 200")
-                elif resp.status == 204:
-                    _LOGGER.debug("Delete responded with code 204")
+                if resp.status in [200, 204]:
+                    _LOGGER.debug("Delete responded with code %d", resp.status)
                 else:
                     _LOGGER.error("Error %s on %s", resp.status, url)
         except (asyncio.TimeoutError, aiohttp.ClientError):

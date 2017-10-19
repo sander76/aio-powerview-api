@@ -5,7 +5,7 @@ from aiopvapi.helpers.constants import ATTR_TYPES, \
 from aiopvapi.helpers.shade_types import SHADE_TYPES, DEFAULT_TYPE
 
 
-class Position():
+class Position:
     def __init__(self, shade_type, raw_position_data=None):
         self._raw_data = None
         self.shade_type = shade_type

@@ -29,6 +29,4 @@ class Scene(ApiResource):
         """Deletes a scene from a shade"""
         _val = yield from self.request.delete(
             self._resource_path)
-        if _val == 200 or _val == 204:
-            return True
-        return False
+        return _val in [200, 204]

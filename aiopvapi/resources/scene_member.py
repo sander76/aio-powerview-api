@@ -29,7 +29,5 @@ class SceneMember(ApiResource):
             self._base_path,
             params={ATTR_SCENE_ID: self._raw_data.get(ATTR_SCENE_ID),
                     ATTR_SHADE_ID: self._raw_data.get(ATTR_SHADE_ID)})
-        if _val == 200 or _val == 204:
-            return True
-        return False
+        return _val in [200, 204]
 
