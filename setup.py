@@ -7,7 +7,7 @@ VERSION = "1.5.3"
 setup(
     name='aiopvapi',
     version=VERSION,
-    packages=find_packages(),
+    packages=find_packages(exclude='tests'),
     download_url='https://github.com/sander76/aio-powerview-api/archive/' + VERSION + '.tar.gz',
     url="https://github.com/sander76/aio-powerview-api",
     license='BSD License',
