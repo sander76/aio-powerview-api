@@ -14,51 +14,76 @@ ATTR_HUB_IP = 'hub_ip'
 ATTR_LOOP = 'loop'
 ATTR_WEB_SESSION = 'websession'
 
-ATTR_OPEN = 'open'
-ATTR_CLOSE = 'close'
-
+_LOGGER = logging.getLogger(__name__)
 
 class PowerViewCommands:
-    def __init__(self, hub_ip, _loop, session):
+    def __init__(self, hub_ip, loop, session):
         self._connection_data = {ATTR_HUB_IP: hub_ip,
-                                 ATTR_LOOP: _loop,
+                                 ATTR_LOOP: loop,
                                  ATTR_WEB_SESSION: session
                                  }
 
-        self._rooms = Rooms(hub_ip, _loop, session)
-        self._shades = Shades(hub_ip, _loop, session)
-        self._scenes = Scenes(hub_ip, _loop, session)
-        self._scene_members = SceneMembers(hub_ip, _loop, session)
+        self._rooms = Rooms(hub_ip, loop, session)
+        self._shades = Shades(hub_ip, loop, session)
+        self._scenes = Scenes(hub_ip, loop, session)
+        self._scene_members = SceneMembers(hub_ip, loop, session)
+        # Cache of all shades connected to the system
+        # shadeId -> Shade
+        self._shades_cache = None
 
-    @asyncio.coroutine
-    def create_scene(self, scenename, roomId):
-        result = None
-        _newscene = yield from self._scenes.create_scene(roomId, scenename)
-        if _newscene:
-            result = Scene(_newscene, **self._connection_data)
-        return result
+    # Scenes ###################################################
 
     @asyncio.coroutine
     def get_scenes(self):
+        scenes = yield from self._scenes.get_resources()
+        if scenes:
+            return [Scene(scene, **self._connection_data) for scene in scenes[ATTR_SCENE_DATA]]
+        return None
+
+    @asyncio.coroutine
+    def get_scene(self, sceneId):
         _scenes = yield from self._scenes.get_resources()
-        return _scenes
+        if _scenes:
+            for _scene in _scenes[ATTR_SCENE_DATA]:
+                if _scene[ATTR_ID] == sceneId:
+                    return Scene(_scene, **self._connection_data)
+        return None
+
+    @asyncio.coroutine
+    def create_scene(self, scenename, roomId):
+        _newscene = yield from self._scenes.create_scene(roomId, scenename)
+        if _newscene:
+            return Scene(_newscene, **self._connection_data)
+        return None
 
     @asyncio.coroutine
     def activate_scene(self, scene_id):
-        result = None
         _scene = yield from self.get_scene(scene_id)
         if _scene:
-            result = yield from _scene.activate()
-        return result
+            return (yield from _scene.activate())
+        return None
 
     @asyncio.coroutine
     def delete_scene(self, scene_id):
-        result = None
         _scene = yield from self.get_scene(scene_id)
         if _scene:
-            result = yield from _scene.delete()
+            return (yield from _scene.delete())
+        return None
 
-        return result
+    # Rooms ###################################################
+
+    @asyncio.coroutine
+    def get_rooms(self):
+        return (yield from self._rooms.get_resources())
+
+    @asyncio.coroutine
+    def get_room(self, roomId):
+        _rooms = yield from self._rooms.get_resources()
+        if _rooms:
+            for _room in _rooms[ATTR_ROOM_DATA]:
+                if _room[ATTR_ID] == roomId:
+                    return Room(_room, **self._connection_data)
+        return None
 
     @asyncio.coroutine
     def create_room(self, roomname):
@@ -68,24 +93,65 @@ class PowerViewCommands:
         return None
 
     @asyncio.coroutine
-    def get_rooms(self):
-        _rooms = yield from self._rooms.get_resources()
-        return _rooms
+    def delete_room(self, room_id):
+        room = yield from self.get_room(room_id)
+        if room:
+            return (yield from room.delete())
+        return None
+
+    # Shades ###################################################
 
     @asyncio.coroutine
-    def delete_room(self, room_id):
-        _result = None
-        _room = yield from self.get_room(room_id)
-        if _room:
-            _result = yield from _room.delete()
+    def _refresh_shades_cache(self):
+        self._shades_cache = {}
+        shade_resources = yield from self._scenes.get_resources()
+        if shade_resources:
+            self._shades_cache = {shade[ATTR_ID]: Shade(shade, **self._connection_data)
+                                  for shade in shade_resources[ATTR_SHADE_DATA]}
 
-        return _result
+    @asyncio.coroutine
+    def get_shades(self):
+        if self._shades_cache is None:
+            yield from self._refresh_shades_cache()
+        return list(self._shades_cache.values())
+
+    @asyncio.coroutine
+    def get_shade(self, shadeId):
+        if self._shades_cache is None or shadeId not in self._shades_cache:
+            _LOGGER.debug("Shade with id=%d is not in the cache. "
+                          "Refreshing the cache.", shadeId)
+            yield from self._refresh_shades_cache()
+        # Returns shade or None
+        return self._shades_cache.get(shadeId)
+
+    @asyncio.coroutine
+    def open_shade(self, shadeId):
+        shade = yield from self.get_shade(shadeId)
+        if shade:
+            return (yield from shade.open())
+        return None
+
+    @asyncio.coroutine
+    def move_shade(self, shadeId, position1=None, position2=None):
+        shade = yield from self.get_shade(shadeId)
+        if shade:
+            return (yield from shade.move_to(position1=position1,
+                                             position2=position2))
+        return None
+
+    @asyncio.coroutine
+    def close_shade(self, shadeId):
+        shade = yield from self.get_shade(shadeId)
+        if shade:
+            return (yield from shade.close())
+        return None
+
+    # Misc ###################################################
 
     @asyncio.coroutine
     def create_scene_member(self, scene_id, shade_id, shade_position):
-        _scene_member = yield from self._scene_members.create_scene_member(
-            shade_position, scene_id, shade_id)
-        return _scene_member
+        return (yield from self._scene_members.create_scene_member(
+            shade_position, scene_id, shade_id))
 
     @asyncio.coroutine
     def create_room_scene_scene_member_move(
@@ -110,99 +176,3 @@ class PowerViewCommands:
                 if _result:
                     return _scene
         return _result
-
-    @asyncio.coroutine
-    def open_shade(self, shadeId):
-        _result = None
-        shade = yield from self.get_shade(shadeId)
-        if shade:
-            _result = yield from shade.open()
-        return _result
-
-    @asyncio.coroutine
-    def move_shade(self, shadeId, position1=None, position2=None):
-        result = None
-        shade = yield from self.get_shade(shadeId)
-        if shade:
-            result = yield from shade.move_to(position1=position1,
-                                              position2=position2)
-        return result
-
-    @asyncio.coroutine
-    def close_shade(self, shadeId):
-        result = None
-        shade = yield from self.get_shade(shadeId)
-        if shade:
-            result = yield from shade.close()
-        return result
-
-    @asyncio.coroutine
-    def get_room(self, roomId):
-        new_room = None
-        _rooms = yield from self._rooms.get_resources()
-        if _rooms:
-            for _room in _rooms[ATTR_ROOM_DATA]:
-                if _room[ATTR_ID] == roomId:
-                    new_room = Room(_room, **self._connection_data)
-                    break
-        return new_room
-
-    @asyncio.coroutine
-    def get_scene(self, sceneId):
-        new_scene = None
-        _scenes = yield from self._scenes.get_resources()
-        if _scenes:
-            for _scene in _scenes[ATTR_SCENE_DATA]:
-                if _scene[ATTR_ID] == sceneId:
-                    new_scene = Scene(_scene, **self._connection_data)
-                    break
-        return new_scene
-
-    @asyncio.coroutine
-    def get_shade(self, shadeId):
-        new_shade = None
-        _shades = yield from self._shades.get_resources()
-        if _shades:
-            for _shade in _shades[ATTR_SHADE_DATA]:
-                if _shade[ATTR_ID] == shadeId:
-                    new_shade = Shade(_shade, **self._connection_data)
-                    break
-
-        return new_shade
-
-
-
-# if __name__ == "__main__":
-#     logging.basicConfig(level=logging.DEBUG)
-#     import aiohttp
-#     import pprint
-#
-#     _hub = "192.168.0.118"
-#     _shade_id = 9518
-#
-#     _loop = asyncio.get_event_loop()
-#     session = aiohttp.ClientSession(loop=_loop)
-#     _loop = asyncio.get_event_loop()
-#
-#     # pv = PowerViewCommands(_hub, loop, session, _shade_id, 'test',
-#     #                            'no_location')
-#
-#     # result = loop.run_until_complete(pv.move_shade(_shade_id, position1=30000))
-#     # result = loop.run_until_complete(
-#     # result = loop.run_until_complete(pv.create_scene('test', 36422))
-#     # result = loop.run_until_complete(pv.get_rooms())
-#     # result = loop.run_until_complete(pv.delete_room(56953))
-#     result = _loop.run_until_complete(
-#         pv.create_room_scene_scene_member_move("test1", "test_scene",
-#                                                _shade_id, 30000))
-#
-#     # result = loop.run_until_complete(pv.activate)
-#
-#     # result = loop.run_until_complete(
-#     #     pv.create_scene_member(23010,9518,{'position1':30000,'posKind1':1})
-#     # )
-#     # result = loop.run_until_complete(pv.get_shade(9518))
-#     # loop.run_until_complete(pv.delete_scene(45892))
-#     # loop.run_until_complete(pv.get_scenes())
-#
-#     session.close()

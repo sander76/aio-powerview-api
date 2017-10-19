@@ -5,24 +5,18 @@ import logging
 
 import binascii
 from aiopvapi.helpers.api_base import ApiEntryPoint
-from aiopvapi.helpers.constants import URL_SCENES, ATTR_NAME, ATTR_NAME_UNICODE
+from aiopvapi.helpers.constants import URL_SCENES, ATTR_NAME, \
+    ATTR_NAME_UNICODE, ATTR_ROOM_ID, ATTR_ICON_ID, ATTR_COLOR_ID
 from aiopvapi.helpers.tools import base64_to_unicode, get_base_path, \
     unicode_to_base64
 
 _LOGGER = logging.getLogger("__name__")
 ATTR_SCENE_DATA = 'sceneData'
 
-SCENE_ROOM_ID = 'roomId'
-SCENE_ID = 'id'
-SCENE_ORDER = 'order'
-SCENE_ICON_ID = 'iconId'
-SCENE_COLOR_ID = 'colorId'
-
 
 class Scenes(ApiEntryPoint):
     def __init__(self, hub_ip, loop, websession=None):
-        ApiEntryPoint.__init__(self, loop, websession,
-                               get_base_path(hub_ip, URL_SCENES))
+        super().__init__(loop, websession, get_base_path(hub_ip, URL_SCENES))
 
     @staticmethod
     def sanitize_resources(scenes: dict):
@@ -54,10 +48,10 @@ class Scenes(ApiEntryPoint):
         """
         name = unicode_to_base64(name)
         _data = {"scene":
-                     {SCENE_ROOM_ID: room_id,
+                     {ATTR_ROOM_ID: room_id,
                       ATTR_NAME: name,
-                      SCENE_COLOR_ID: color_id,
-                      SCENE_ICON_ID: icon_id
+                      ATTR_COLOR_ID: color_id,
+                      ATTR_ICON_ID: icon_id
                       }}
         _response, status = yield from self.request.post(
             self._base_path, data=_data)

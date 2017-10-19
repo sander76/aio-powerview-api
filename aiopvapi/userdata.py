@@ -13,7 +13,7 @@ ATTR_HUB_NAME_UNICODE = 'hubNameUnicode'
 
 class UserData(ApiEntryPoint):
     def __init__(self, hub_ip, loop, websession=None):
-        ApiEntryPoint.__init__(self, loop, websession,get_base_path(hub_ip, 'api/userdata'))
+        super().__init__(loop, websession,get_base_path(hub_ip, 'api/userdata'))
 
     @staticmethod
     def sanitize_resources(resource):

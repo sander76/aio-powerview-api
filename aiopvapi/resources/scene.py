@@ -2,26 +2,21 @@ import asyncio
 
 from aiopvapi.helpers.tools import get_base_path
 from aiopvapi.helpers.api_base import ApiResource
-from aiopvapi.helpers.constants import ATTR_ICON_ID, ATTR_COLOR_ID, \
-    ATTR_SCENE_ID, URL_SCENES, URL_SHADES
+from aiopvapi.helpers.constants import ATTR_SCENE, ATTR_ROOM_ID, \
+    ATTR_SCENE_ID, URL_SCENES
 
-SCENE_NAME = 'name'
-SCENE_ROOM_ID = 'roomId'
-SCENE_ORDER = 'order'
-ATTR_SCENE = 'scene'
 
 
 class Scene(ApiResource):
     def __init__(self, raw_data, hub_ip=None, loop=None, websession=None):
         if ATTR_SCENE in raw_data:
             raw_data = raw_data.get(ATTR_SCENE)
-        ApiResource.__init__(
-            self, loop, websession, get_base_path(hub_ip, URL_SCENES),
-            raw_data)
+        super().__init__(loop, websession, get_base_path(hub_ip, URL_SCENES),
+                         raw_data)
 
     @property
     def roomId(self):
-        return self._raw_data.get(SCENE_ROOM_ID)
+        return self._raw_data.get(ATTR_ROOM_ID)
 
     @asyncio.coroutine
     def activate(self):

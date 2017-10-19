@@ -18,8 +18,7 @@ class SceneMembers(ApiEntryPoint):
     """A scene member is a device, like a shade, being a member
     of a specific scene."""
     def __init__(self, hub_ip, loop, websession=None):
-        ApiEntryPoint.__init__(self, loop, websession,
-                               get_base_path(hub_ip, URL_SCENE_MEMBERS))
+        super().__init__(loop, websession, get_base_path(hub_ip, URL_SCENE_MEMBERS))
 
     @asyncio.coroutine
     def create_scene_member(self, shade_position, scene_id, shade_id):
