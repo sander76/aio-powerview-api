@@ -19,13 +19,11 @@ class AioRequest:
     def get(self, url, params=None) -> dict:
         _LOGGER.debug("Sending a get request")
         data = None
-        _status = None
         response = None
         try:
             _LOGGER.info('Sending GET request to: %s' % url)
             with async_timeout.timeout(self._timeout, loop=self.loop):
                 response = yield from self.websession.get(url, params=params)
-                _status = response.status
                 if response.status == 200:
                     data = yield from response.json()
         except ValueError:

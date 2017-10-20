@@ -5,20 +5,18 @@ import logging
 
 from aiopvapi.helpers.api_base import ApiEntryPoint
 from aiopvapi.helpers.constants import ATTR_NAME, ATTR_COLOR_ID, ATTR_ICON_ID, \
-    ATTR_NAME_UNICODE, URL_ROOMS
+    ATTR_NAME_UNICODE, URL_ROOMS, ATTR_ROOM
 from aiopvapi.helpers.tools import base64_to_unicode, get_base_path, \
     unicode_to_base64
 
 _LOGGER = logging.getLogger("__name__")
 
-ATTR_ROOM = 'room'
 ATTR_ROOM_DATA = 'roomData'
 
 
 class Rooms(ApiEntryPoint):
     def __init__(self, hub_ip, loop, websession=None):
-        ApiEntryPoint.__init__(self, loop, websession,
-                               get_base_path(hub_ip, URL_ROOMS))
+        super().__init__(loop, websession, get_base_path(hub_ip, URL_ROOMS))
 
     @staticmethod
     def sanitize_resources(resource):

@@ -13,8 +13,7 @@ ATTR_SHADE_DATA = 'shadeData'
 
 class Shades(ApiEntryPoint):
     def __init__(self, hub_ip, loop, websession=None):
-        ApiEntryPoint.__init__(self, loop, websession,
-                               get_base_path(hub_ip, URL_SHADES))
+        super().__init__(loop, websession, get_base_path(hub_ip, URL_SHADES))
 
     @staticmethod
     def sanitize_resources(resource: dict):

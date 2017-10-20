@@ -14,9 +14,7 @@ ATTR_HUB_IP = 'hub_ip'
 ATTR_LOOP = 'loop'
 ATTR_WEB_SESSION = 'websession'
 
-ATTR_OPEN = 'open'
-ATTR_CLOSE = 'close'
-
+_LOGGER = logging.getLogger(__name__)
 
 class PowerViewCommands:
     def __init__(self, hub_ip, _loop, session):

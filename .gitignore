@@ -11,3 +11,6 @@ dist
 aiopvapi.egg-info
 .vscode
 build
+.pyc
+__pycache__
+venv
