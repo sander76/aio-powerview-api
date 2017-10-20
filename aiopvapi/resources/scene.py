@@ -15,7 +15,7 @@ class Scene(ApiResource):
                          raw_data)
 
     @property
-    def roomId(self):
+    def room_id(self):
         return self._raw_data.get(ATTR_ROOM_ID)
 
     @asyncio.coroutine
