@@ -64,10 +64,7 @@ class Shade(ApiResource):
         result, status = yield from self.request.put(self._resource_path,
                                                      data=position_data)
         _LOGGER.debug("move shade returned status code %s" % status)
-        if status == 200 or status == 201:
-            return result
-        else:
-            return None
+        return result if status in [200, 201] else None
 
     @asyncio.coroutine
     def close(self):

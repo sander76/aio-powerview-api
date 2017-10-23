@@ -31,7 +31,6 @@ class ApiEntryPoint(ApiBase):
     def get_resources(self):
         """Get a list of resources. """
         resources = yield from self.request.get(self._base_path)
-
         return self.sanitize_resources(resources)
 
 
@@ -45,11 +44,9 @@ class ApiResource(ApiBase):
 
     @asyncio.coroutine
     def delete(self):
-        """Deletes a scene from a shade"""
+        """Deletes a resource."""
         _val = yield from self.request.delete(self._resource_path)
-        if _val == 200 or _val == 204:
-            return True
-        return False
+        return _val in [200, 204]
 
     @property
     def id(self):
@@ -57,13 +54,8 @@ class ApiResource(ApiBase):
 
     @property
     def name(self):
-        _name = self._raw_data.get(ATTR_NAME_UNICODE)
-        if _name:
-            return _name
-        _name = self._raw_data.get(ATTR_NAME)
-        if _name:
-            return _name
-        return ''
+        return self._raw_data.get(ATTR_NAME_UNICODE) or \
+               self._raw_data.get(ATTR_NAME) or ''
 
     @property
     def raw_data(self):
