@@ -5,7 +5,7 @@ from aiopvapi.helpers.api_base import ApiResource
 from aiopvapi.helpers.constants import URL_SHADES, ATTR_POSITION_DATA, \
     ATTR_SHADE, ATTR_TYPE, ATTR_ID, ATTR_ROOM_ID
 from aiopvapi.helpers.position import Position
-from aiopvapi.helpers.tools import get_base_path, join_path
+from aiopvapi.helpers.tools import get_base_path
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,14 +23,10 @@ class Shade(ApiResource):
     @asyncio.coroutine
     def refresh(self):
         """Get raw data from the hub and update the shade instance"""
-        _raw_data = yield from self.request.get(self._resource_path,
+        raw_data = yield from self.request.get(self._resource_path,
                                                 {'refresh': 'true'})
-        self._update(_raw_data)
-
-    def _update(self, raw_data):
-        """Update the current shade instance with the latest raw data"""
         if raw_data:
-            self._raw_data = raw_data
+            self._raw_data = raw_data[ATTR_SHADE]
             if ATTR_POSITION_DATA in raw_data[ATTR_SHADE]:
                 self._shade_position.refresh(
                     raw_data[ATTR_SHADE][ATTR_POSITION_DATA])
