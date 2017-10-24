@@ -1,5 +1,3 @@
-from mocket.plugins.httpretty import HTTPretty, httprettified
-
 from aiopvapi.resources.room import Room
 from test_apiresource import TestApiResource
 

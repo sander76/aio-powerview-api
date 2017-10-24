@@ -1,7 +1,8 @@
 import unittest
 import aiohttp
 import asyncio
-from mocket.plugins.httpretty import HTTPretty, httprettified
+from mocket.mocket import mocketize
+from mocket.mockhttp import Entry
 from aiopvapi.helpers.api_base import ApiResource
 
 
@@ -51,29 +52,29 @@ class TestApiResource(unittest.TestCase):
         data['name'] = 'no name'
         self.assertEqual({'name': 'name'}, self.resource.raw_data)
 
-    @httprettified
+    @mocketize
     def test_delete_200(self):
         """Test delete resources with status 200."""
-        HTTPretty.register_uri(HTTPretty.DELETE, self.get_resource_uri(),
+        Entry.single_register(Entry.DELETE, self.get_resource_uri(),
                                body="",
                                status=200,
-                               content_type='application/json')
+                               headers={'content-type': 'application/json'})
         self.assertTrue(self.loop.run_until_complete(self.resource.delete()))
 
-    @httprettified
+    @mocketize
     def test_delete_204(self):
         """Test delete resources with status 204."""
-        HTTPretty.register_uri(HTTPretty.DELETE, self.get_resource_uri(),
+        Entry.single_register(Entry.DELETE, self.get_resource_uri(),
                                body="",
                                status=204,
-                               content_type='application/json')
+                               headers={'content-type': 'application/json'})
         self.assertTrue(self.loop.run_until_complete(self.resource.delete()))
 
-    @httprettified
+    @mocketize
     def test_delete_201(self):
         """Test delete resources with wrong status."""
-        HTTPretty.register_uri(HTTPretty.DELETE, self.get_resource_uri(),
+        Entry.single_register(Entry.DELETE, self.get_resource_uri(),
                                body="",
                                status=201,
-                               content_type='application/json')
+                               headers={'content-type': 'application/json'})
         self.assertFalse(self.loop.run_until_complete(self.resource.delete()))

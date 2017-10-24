@@ -1,7 +1,8 @@
 import unittest
 import aiohttp
 import asyncio
-from mocket.plugins.httpretty import HTTPretty, httprettified
+from mocket.mocket import mocketize
+from mocket.mockhttp import Entry
 from aiopvapi.shades import Shades
 
 RETURN_VALUE = """
@@ -23,13 +24,13 @@ class TestShades(unittest.TestCase):
     def tearDown(self):
         self.websession.close()
 
-    @httprettified
+    @mocketize
     def test_get_resources_200(self):
         """Test get resources with status 200."""
-        HTTPretty.register_uri(HTTPretty.GET, 'http://127.0.0.1/api/shades',
+        Entry.single_register(Entry.GET, 'http://127.0.0.1/api/shades',
                                body=RETURN_VALUE,
                                status=200,
-                               content_type='application/json')
+                               headers={'content-type': 'application/json'})
         resources = self.loop.run_until_complete(self.shades.get_resources())
         self.assertEqual(2, len(resources['shadeIds']))
         self.assertEqual(2, len(resources['shadeData']))
@@ -38,12 +39,12 @@ class TestShades(unittest.TestCase):
         self.assertEqual('Patio Doors',
                          resources['shadeData'][1]['name_unicode'])
 
-    @httprettified
+    @mocketize
     def test_get_resources_201(self):
         """Test get resources with wrong status."""
-        HTTPretty.register_uri(HTTPretty.GET, 'http://127.0.0.1/api/shades',
+        Entry.single_register(Entry.GET, 'http://127.0.0.1/api/shades',
                                body=RETURN_VALUE,
                                status=201,
-                               content_type='application/json')
+                               headers={'content-type': 'application/json'})
         resources = self.loop.run_until_complete(self.shades.get_resources())
         self.assertIsNone(resources)

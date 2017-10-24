@@ -1,4 +1,6 @@
-from mocket.plugins.httpretty import HTTPretty, httprettified
+
+from mocket.mocket import mocketize, Mocket
+from mocket.mockhttp import Entry
 
 from aiopvapi.resources.scene import Scene
 from test_apiresource import TestApiResource
@@ -25,24 +27,24 @@ class TestScene(TestApiResource):
     def test_room_id_property(self):
         self.assertEqual(26756, self.resource.room_id)
 
-    @httprettified
+    @mocketize
     def test_activate_200(self):
-        HTTPretty.register_uri(HTTPretty.GET, 'http://127.0.0.1/api/scenes',
+        Entry.single_register(Entry.GET, 'http://127.0.0.1/api/scenes',
                                body='"ok"',
                                status=200,
-                               content_type='application/json')
+                               headers={'content-type': 'application/json'}, match_querystring=False)
         resp = self.loop.run_until_complete(self.resource.activate())
         self.assertEqual('ok', resp)
-        request = HTTPretty.last_request
+        request = Mocket.last_request()
         self.assertEqual('/api/scenes?sceneId=37217', request.path)
         self.assertEqual('GET', request.command)
 
-    @httprettified
+    @mocketize
     def test_activate_201(self):
         """Test scene activation with wrong status."""
-        HTTPretty.register_uri(HTTPretty.GET, 'http://127.0.0.1/api/scenes',
+        Entry.single_register(Entry.GET, 'http://127.0.0.1/api/scenes',
                                body='"ok"',
                                status=201,
-                               content_type='application/json')
+                               headers={'content-type': 'application/json'}, match_querystring=False)
         resp = self.loop.run_until_complete(self.resource.activate())
         self.assertIsNone(resp)
