@@ -42,11 +42,10 @@ class PowerViewCommands:
 
     @asyncio.coroutine
     def get_scene(self, sceneId):
-        _scenes = yield from self._scenes.get_resources()
-        if _scenes:
-            for _scene in _scenes[ATTR_SCENE_DATA]:
-                if _scene[ATTR_ID] == sceneId:
-                    return Scene(_scene, **self._connection_data)
+        scenes = yield from self.get_scenes() or []
+        for scene in scenes:
+            if scene.id == sceneId:
+                return scene
         return None
 
     @asyncio.coroutine
@@ -74,15 +73,17 @@ class PowerViewCommands:
 
     @asyncio.coroutine
     def get_rooms(self):
-        return (yield from self._rooms.get_resources())
+        rooms = yield from self._rooms.get_resources()
+        if rooms:
+            return [Room(room, **self._connection_data) for room in rooms[ATTR_ROOM_DATA]]
+        return None
 
     @asyncio.coroutine
     def get_room(self, roomId):
-        _rooms = yield from self._rooms.get_resources()
-        if _rooms:
-            for _room in _rooms[ATTR_ROOM_DATA]:
-                if _room[ATTR_ID] == roomId:
-                    return Room(_room, **self._connection_data)
+        rooms = yield from self.get_rooms() or []
+        for room in rooms:
+            if room.id == roomId:
+                return room
         return None
 
     @asyncio.coroutine
@@ -104,7 +105,7 @@ class PowerViewCommands:
     @asyncio.coroutine
     def _refresh_shades_cache(self):
         self._shades_cache = {}
-        shade_resources = yield from self._scenes.get_resources()
+        shade_resources = yield from self._shades.get_resources()
         if shade_resources:
             self._shades_cache = {shade[ATTR_ID]: Shade(shade, **self._connection_data)
                                   for shade in shade_resources[ATTR_SHADE_DATA]}

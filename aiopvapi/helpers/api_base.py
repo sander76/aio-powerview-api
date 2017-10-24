@@ -63,4 +63,4 @@ class ApiResource(ApiBase):
 
     @raw_data.setter
     def raw_data(self, data):
-        self._raw_data = data
+        self._raw_data = dict(data)
