@@ -104,7 +104,7 @@ class PowerViewCommands:
     @asyncio.coroutine
     def _refresh_shades_cache(self):
         self._shades_cache = {}
-        shade_resources = yield from self._scenes.get_resources()
+        shade_resources = yield from self._shades.get_resources()
         if shade_resources:
             self._shades_cache = {shade[ATTR_ID]: Shade(shade, **self._connection_data)
                                   for shade in shade_resources[ATTR_SHADE_DATA]}
