@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 
 from aiopvapi.helpers.api_base import ApiResource
@@ -24,7 +25,7 @@ class Shade(ApiResource):
     def refresh(self):
         """Get raw data from the hub and update the shade instance"""
         raw_data = yield from self.request.get(self._resource_path,
-                                                {'refresh': 'true'})
+                                               {'refresh': 'true'})
         if raw_data:
             self._raw_data = raw_data[ATTR_SHADE]
             if ATTR_POSITION_DATA in raw_data[ATTR_SHADE]:
