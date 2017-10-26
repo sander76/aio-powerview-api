@@ -1,9 +1,8 @@
 import unittest
 import aiohttp
 import asyncio
-from mocket.mocket import mocketize
-from mocket.mockhttp import Entry
 from aiopvapi.shades import Shades
+from aioresponses import aioresponses
 
 RETURN_VALUE = """
 {"shadeIds":[29889,56112],"shadeData":[
@@ -24,13 +23,13 @@ class TestShades(unittest.TestCase):
     def tearDown(self):
         self.websession.close()
 
-    @mocketize
-    def test_get_resources_200(self):
+    @aioresponses()
+    def test_get_resources_200(self, mocked):
         """Test get resources with status 200."""
-        Entry.single_register(Entry.GET, 'http://127.0.0.1/api/shades',
-                               body=RETURN_VALUE,
-                               status=200,
-                               headers={'content-type': 'application/json'})
+        mocked.get('http://127.0.0.1/api/shades',
+                   body=RETURN_VALUE,
+                   status=200,
+                   headers={'content-type': 'application/json'})
         resources = self.loop.run_until_complete(self.shades.get_resources())
         self.assertEqual(2, len(resources['shadeIds']))
         self.assertEqual(2, len(resources['shadeData']))
@@ -39,12 +38,12 @@ class TestShades(unittest.TestCase):
         self.assertEqual('Patio Doors',
                          resources['shadeData'][1]['name_unicode'])
 
-    @mocketize
-    def test_get_resources_201(self):
+    @aioresponses()
+    def test_get_resources_201(self, mocked):
         """Test get resources with wrong status."""
-        Entry.single_register(Entry.GET, 'http://127.0.0.1/api/shades',
-                               body=RETURN_VALUE,
-                               status=201,
-                               headers={'content-type': 'application/json'})
+        mocked.get('http://127.0.0.1/api/shades',
+                   body=RETURN_VALUE,
+                   status=201,
+                   headers={'content-type': 'application/json'})
         resources = self.loop.run_until_complete(self.shades.get_resources())
         self.assertIsNone(resources)

@@ -1,8 +1,6 @@
-from mocket.mocket import mocketize, Mocket
-from mocket.mockhttp import Entry
 import json
-
-from resources.shade import Shade
+from aioresponses import aioresponses
+from aiopvapi.resources.shade import Shade
 from test_apiresource import TestApiResource
 
 SHADE_RAW_DATA = {"id": 29889, "type": 6, "batteryStatus": 0, "batteryStrength": 0,
@@ -26,65 +24,61 @@ class TestShade(TestApiResource):
         # No name_unicode, so base64 encoded is returned
         self.assertEqual('UmlnaHQ=', self.resource.name)
 
-    @mocketize
-    def test_add_shade_to_room(self):
-        Entry.single_register(Entry.PUT, 'http://127.0.0.1/api/shades/29889',
-                               body='"ok"',
-                               status=200,
-                               headers={'content-type': 'application/json'})
+    @aioresponses()
+    def test_add_shade_to_room(self, mocked):
+        mocked.put('http://127.0.0.1/api/shades/29889',
+                   body='"ok"',
+                   status=200,
+                   headers={'content-type': 'application/json'})
         resp = self.loop.run_until_complete(self.resource.add_shade_to_room(123))
         self.assertEqual('ok', resp)
-        request = Mocket.last_request()
+        request = mocked.requests[('PUT', 'http://127.0.0.1/api/shades/29889')][-1]
         self.assertEqual({"shade": {"id": 29889, "roomId": 123}},
-                         json.loads(request.body))
-        self.assertEqual('/api/shades/29889', request.path)
+                         json.loads(request.kwargs['data']))
 
-    @mocketize
-    def test_open(self):
-        Entry.single_register(Entry.PUT, 'http://127.0.0.1/api/shades/29889',
-                               body='"ok"',
-                               status=200,
-                               headers={'content-type': 'application/json'})
+    @aioresponses()
+    def test_open(self, mocked):
+        mocked.put('http://127.0.0.1/api/shades/29889',
+                   body='"ok"',
+                   status=200,
+                   headers={'content-type': 'application/json'})
         resp = self.loop.run_until_complete(self.resource.open())
         self.assertEqual('ok', resp)
-        request = Mocket.last_request()
+        request = mocked.requests[('PUT', 'http://127.0.0.1/api/shades/29889')][-1]
         self.assertEqual({"shade": {"id": 29889, "positions": {"posKind1": 1, "position1": 65535}}},
-                         json.loads(request.body))
-        self.assertEqual('/api/shades/29889', request.path)
+                         json.loads(request.kwargs['data']))
 
-    @mocketize
-    def test_close(self):
-        Entry.single_register(Entry.PUT, 'http://127.0.0.1/api/shades/29889',
-                               body='"ok"',
-                               status=200,
-                               headers={'content-type': 'application/json'})
+    @aioresponses()
+    def test_close(self, mocked):
+        mocked.put('http://127.0.0.1/api/shades/29889',
+                   body='"ok"',
+                   status=200,
+                   headers={'content-type': 'application/json'})
         resp = self.loop.run_until_complete(self.resource.close())
         self.assertEqual('ok', resp)
-        request = Mocket.last_request()
+        request = mocked.requests[('PUT', 'http://127.0.0.1/api/shades/29889')][-1]
         self.assertEqual({"shade": {"id": 29889, "positions": {"posKind1": 1, "position1": 0}}},
-                         json.loads(request.body))
-        self.assertEqual('/api/shades/29889', request.path)
+                         json.loads(request.kwargs['data']))
 
-    @mocketize
-    def test_move_to(self):
-        Entry.single_register(Entry.PUT, 'http://127.0.0.1/api/shades/29889',
-                               body='"ok"',
-                               status=200,
-                               headers={'content-type': 'application/json'})
+    @aioresponses()
+    def test_move_to(self, mocked):
+        mocked.put('http://127.0.0.1/api/shades/29889',
+                   body='"ok"',
+                   status=200,
+                   headers={'content-type': 'application/json'})
         resp = self.loop.run_until_complete(self.resource.move_to(3000, 200))
         self.assertEqual('ok', resp)
-        request = Mocket.last_request()
+        request = mocked.requests[('PUT', 'http://127.0.0.1/api/shades/29889')][-1]
         self.assertEqual({"shade": {"id": 29889, "positions": {"posKind1": 1, "position1": 3000}}},
-                         json.loads(request.body))
-        self.assertEqual('/api/shades/29889', request.path)
+                         json.loads(request.kwargs['data']))
 
-    @mocketize
-    def test_refresh(self):
+    @aioresponses()
+    def test_refresh(self, mocked):
         data = {'shade': dict(SHADE_RAW_DATA)}
         data['shade']['name'] = 'name'
-        Entry.single_register(Entry.GET, 'http://127.0.0.1/api/shades/29889',
-                               body=json.dumps(data),
-                               status=200,
-                               headers={'content-type': 'application/json'}, match_querystring=False)
+        mocked.get('http://127.0.0.1/api/shades/29889',
+                   body=json.dumps(data),
+                   status=200,
+                   headers={'content-type': 'application/json'})
         self.loop.run_until_complete(self.resource.refresh())
         self.assertEqual('name', self.resource.name)

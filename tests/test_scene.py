@@ -1,7 +1,4 @@
-
-from mocket.mocket import mocketize, Mocket
-from mocket.mockhttp import Entry
-
+from aioresponses import aioresponses
 from aiopvapi.resources.scene import Scene
 from test_apiresource import TestApiResource
 
@@ -27,24 +24,23 @@ class TestScene(TestApiResource):
     def test_room_id_property(self):
         self.assertEqual(26756, self.resource.room_id)
 
-    @mocketize
-    def test_activate_200(self):
-        Entry.single_register(Entry.GET, 'http://127.0.0.1/api/scenes',
-                               body='"ok"',
-                               status=200,
-                               headers={'content-type': 'application/json'}, match_querystring=False)
+    @aioresponses()
+    def test_activate_200(self, mocked):
+        mocked.get('http://127.0.0.1/api/scenes',
+                   body='"ok"',
+                   status=200,
+                   headers={'content-type': 'application/json'})
         resp = self.loop.run_until_complete(self.resource.activate())
         self.assertEqual('ok', resp)
-        request = Mocket.last_request()
-        self.assertEqual('/api/scenes?sceneId=37217', request.path)
-        self.assertEqual('GET', request.command)
+        request = mocked.requests[('GET', 'http://127.0.0.1/api/scenes')][-1]
+        self.assertEqual({'sceneId': 37217}, request.kwargs['params'])
 
-    @mocketize
-    def test_activate_201(self):
+    @aioresponses()
+    def test_activate_201(self, mocked):
         """Test scene activation with wrong status."""
-        Entry.single_register(Entry.GET, 'http://127.0.0.1/api/scenes',
-                               body='"ok"',
-                               status=201,
-                               headers={'content-type': 'application/json'}, match_querystring=False)
+        mocked.get('http://127.0.0.1/api/scenes',
+                   body='"ok"',
+                   status=201,
+                   headers={'content-type': 'application/json'})
         resp = self.loop.run_until_complete(self.resource.activate())
         self.assertIsNone(resp)
