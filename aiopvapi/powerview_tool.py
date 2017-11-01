@@ -42,7 +42,7 @@ class PowerViewCommands:
 
     @asyncio.coroutine
     def get_scene(self, sceneId):
-        scenes = yield from self.get_scenes() or []
+        scenes = (yield from self.get_scenes()) or []
         for scene in scenes:
             if scene.id == sceneId:
                 return scene
@@ -80,7 +80,7 @@ class PowerViewCommands:
 
     @asyncio.coroutine
     def get_room(self, roomId):
-        rooms = yield from self.get_rooms() or []
+        rooms = (yield from self.get_rooms()) or []
         for room in rooms:
             if room.id == roomId:
                 return room

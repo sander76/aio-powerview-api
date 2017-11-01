@@ -1,8 +1,7 @@
 import unittest
 import aiohttp
 import asyncio
-from mocket.mocket import mocketize
-from mocket.mockhttp import Entry
+from aioresponses import aioresponses
 from aiopvapi.helpers.api_base import ApiResource
 
 
@@ -52,29 +51,29 @@ class TestApiResource(unittest.TestCase):
         data['name'] = 'no name'
         self.assertEqual({'name': 'name'}, self.resource.raw_data)
 
-    @mocketize
-    def test_delete_200(self):
+    @aioresponses()
+    def test_delete_200(self, mocked):
         """Test delete resources with status 200."""
-        Entry.single_register(Entry.DELETE, self.get_resource_uri(),
-                               body="",
-                               status=200,
-                               headers={'content-type': 'application/json'})
+        mocked.delete(self.get_resource_uri(),
+                      body="",
+                      status=200,
+                      headers={'content-type': 'application/json'})
         self.assertTrue(self.loop.run_until_complete(self.resource.delete()))
 
-    @mocketize
-    def test_delete_204(self):
+    @aioresponses()
+    def test_delete_204(self, mocked):
         """Test delete resources with status 204."""
-        Entry.single_register(Entry.DELETE, self.get_resource_uri(),
-                               body="",
-                               status=204,
-                               headers={'content-type': 'application/json'})
+        mocked.delete(self.get_resource_uri(),
+                      body="",
+                      status=204,
+                      headers={'content-type': 'application/json'})
         self.assertTrue(self.loop.run_until_complete(self.resource.delete()))
 
-    @mocketize
-    def test_delete_201(self):
+    @aioresponses()
+    def test_delete_201(self, mocked):
         """Test delete resources with wrong status."""
-        Entry.single_register(Entry.DELETE, self.get_resource_uri(),
-                               body="",
-                               status=201,
-                               headers={'content-type': 'application/json'})
+        mocked.delete(self.get_resource_uri(),
+                      body="",
+                      status=201,
+                      headers={'content-type': 'application/json'})
         self.assertFalse(self.loop.run_until_complete(self.resource.delete()))
