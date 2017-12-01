@@ -1,8 +1,7 @@
 from distutils.core import setup
-
 from setuptools import find_packages
 
-VERSION = "1.5.6"
+VERSION = "1.5.7"
 
 setup(
     name='aiopvapi',
