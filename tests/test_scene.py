@@ -1,4 +1,6 @@
 from aioresponses import aioresponses
+
+from aiopvapi.helpers.aiorequest import PvApiResponseStatusError
 from aiopvapi.resources.scene import Scene
 from test_apiresource import TestApiResource
 
@@ -42,5 +44,5 @@ class TestScene(TestApiResource):
                    body='"ok"',
                    status=201,
                    headers={'content-type': 'application/json'})
-        resp = self.loop.run_until_complete(self.resource.activate())
-        self.assertIsNone(resp)
+        with self.assertRaises(PvApiResponseStatusError):
+            resp = self.loop.run_until_complete(self.resource.activate())

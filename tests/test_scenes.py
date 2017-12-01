@@ -3,6 +3,8 @@ import json
 import aiohttp
 import asyncio
 from aioresponses import aioresponses
+
+from aiopvapi.helpers.aiorequest import PvApiResponseStatusError
 from aiopvapi.scenes import Scenes
 
 RETURN_VALUE = """
@@ -43,8 +45,8 @@ class TestScenes(unittest.TestCase):
                    body=RETURN_VALUE,
                    status=201,
                    headers={'content-type': 'application/json'})
-        resources = self.loop.run_until_complete(self.scenes.get_resources())
-        self.assertIsNone(resources)
+        with self.assertRaises(PvApiResponseStatusError):
+            resources = self.loop.run_until_complete(self.scenes.get_resources())
 
     @aioresponses()
     def test_create_scene_201(self, mocked):
@@ -55,11 +57,11 @@ class TestScenes(unittest.TestCase):
                     headers={'content-type': 'application/json'})
         resp = self.loop.run_until_complete(
             self.scenes.create_scene(12372, 'New scene', color_id=1, icon_id=2))
-        self.assertEqual('ok', resp)
+        self.assertIsNone(resp)
         request = mocked.requests[('POST', 'http://127.0.0.1/api/scenes')][-1]
         self.assertEqual({"scene": {"roomId": 12372, "name": "TmV3IHNjZW5l",
                                     "colorId": 1, "iconId": 2}},
-                         json.loads(request.kwargs['data']))
+                         request.kwargs['json'])
 
     @aioresponses()
     def test_create_scene_202(self, mocked):
@@ -68,6 +70,6 @@ class TestScenes(unittest.TestCase):
                     body='"ok"',
                     status=202,
                     headers={'content-type': 'application/json'})
-        resp = self.loop.run_until_complete(
-            self.scenes.create_scene(12372, 'New scene', color_id=1, icon_id=2))
-        self.assertIsNone(resp)
+        with self.assertRaises(PvApiResponseStatusError):
+            resp = self.loop.run_until_complete(
+                self.scenes.create_scene(12372, 'New scene', color_id=1, icon_id=2))

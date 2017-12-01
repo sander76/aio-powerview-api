@@ -31,10 +31,10 @@ class TestShade(TestApiResource):
                    status=200,
                    headers={'content-type': 'application/json'})
         resp = self.loop.run_until_complete(self.resource.add_shade_to_room(123))
-        self.assertEqual('ok', resp)
+        self.assertEqual(resp,'ok')
         request = mocked.requests[('PUT', 'http://127.0.0.1/api/shades/29889')][-1]
         self.assertEqual({"shade": {"id": 29889, "roomId": 123}},
-                         json.loads(request.kwargs['data']))
+                        request.kwargs['json'])
 
     @aioresponses()
     def test_open(self, mocked):
@@ -43,10 +43,10 @@ class TestShade(TestApiResource):
                    status=200,
                    headers={'content-type': 'application/json'})
         resp = self.loop.run_until_complete(self.resource.open())
-        self.assertEqual('ok', resp)
+        self.assertIsNone(resp)
         request = mocked.requests[('PUT', 'http://127.0.0.1/api/shades/29889')][-1]
         self.assertEqual({"shade": {"id": 29889, "positions": {"posKind1": 1, "position1": 65535}}},
-                         json.loads(request.kwargs['data']))
+                         request.kwargs['json'])
 
     @aioresponses()
     def test_close(self, mocked):
@@ -55,10 +55,10 @@ class TestShade(TestApiResource):
                    status=200,
                    headers={'content-type': 'application/json'})
         resp = self.loop.run_until_complete(self.resource.close())
-        self.assertEqual('ok', resp)
+        self.assertIsNone(resp)
         request = mocked.requests[('PUT', 'http://127.0.0.1/api/shades/29889')][-1]
         self.assertEqual({"shade": {"id": 29889, "positions": {"posKind1": 1, "position1": 0}}},
-                         json.loads(request.kwargs['data']))
+                         request.kwargs['json'])
 
     @aioresponses()
     def test_move_to(self, mocked):
@@ -67,10 +67,10 @@ class TestShade(TestApiResource):
                    status=200,
                    headers={'content-type': 'application/json'})
         resp = self.loop.run_until_complete(self.resource.move_to(3000, 200))
-        self.assertEqual('ok', resp)
+        self.assertIsNone(resp)
         request = mocked.requests[('PUT', 'http://127.0.0.1/api/shades/29889')][-1]
         self.assertEqual({"shade": {"id": 29889, "positions": {"posKind1": 1, "position1": 3000}}},
-                         json.loads(request.kwargs['data']))
+                         request.kwargs['json'])
 
     @aioresponses()
     def test_refresh(self, mocked):

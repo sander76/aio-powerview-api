@@ -1,6 +1,8 @@
 import unittest
 import aiohttp
 import asyncio
+
+from aiopvapi.helpers.aiorequest import PvApiResponseStatusError
 from aiopvapi.shades import Shades
 from aioresponses import aioresponses
 
@@ -45,5 +47,6 @@ class TestShades(unittest.TestCase):
                    body=RETURN_VALUE,
                    status=201,
                    headers={'content-type': 'application/json'})
-        resources = self.loop.run_until_complete(self.shades.get_resources())
-        self.assertIsNone(resources)
+        with self.assertRaises(PvApiResponseStatusError):
+            resources = self.loop.run_until_complete(self.shades.get_resources())
+

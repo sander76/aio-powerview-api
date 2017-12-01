@@ -45,8 +45,7 @@ class ApiResource(ApiBase):
     @asyncio.coroutine
     def delete(self):
         """Deletes a resource."""
-        _val = yield from self.request.delete(self._resource_path)
-        return _val in [200, 204]
+        return (yield from self.request.delete(self._resource_path))
 
     @property
     def id(self):

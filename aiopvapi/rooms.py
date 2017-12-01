@@ -43,11 +43,4 @@ class Rooms(ApiEntryPoint):
                 ATTR_ICON_ID: icon_id
             }
         }
-        _result, _status = yield from self.request.post(self._base_path,
-                                                        data=data)
-        if _status == 201:
-            _LOGGER.info("Room successfully created.")
-            return _result
-        else:
-            _LOGGER.error("Error creating room.")
-            return None
+        return (yield from self.request.post(self._base_path, data=data))

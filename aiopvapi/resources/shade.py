@@ -78,10 +78,4 @@ class Shade(ApiResource):
     @asyncio.coroutine
     def add_shade_to_room(self, room_id):
         data = self._create_shade_data(room_id=room_id)
-        _result, _status = yield from self.request.put(self._resource_path,
-                                                       data)
-        if _status == 200:
-            _LOGGER.info("Shade successfully added to room.")
-        else:
-            _LOGGER.error("Problem adding shade to room.")
-        return _result
+        return (yield from self.request.put(self._resource_path, data))

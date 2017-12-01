@@ -2,6 +2,8 @@ import unittest
 import aiohttp
 import asyncio
 from aioresponses import aioresponses
+
+from aiopvapi.helpers.aiorequest import PvApiResponseStatusError
 from aiopvapi.helpers.api_base import ApiResource
 
 
@@ -58,7 +60,8 @@ class TestApiResource(unittest.TestCase):
                       body="",
                       status=200,
                       headers={'content-type': 'application/json'})
-        self.assertTrue(self.loop.run_until_complete(self.resource.delete()))
+        val =self.loop.run_until_complete(self.resource.delete())
+        self.assertIsNone(val)
 
     @aioresponses()
     def test_delete_204(self, mocked):
@@ -76,4 +79,5 @@ class TestApiResource(unittest.TestCase):
                       body="",
                       status=201,
                       headers={'content-type': 'application/json'})
-        self.assertFalse(self.loop.run_until_complete(self.resource.delete()))
+        with self.assertRaises(PvApiResponseStatusError):
+            self.loop.run_until_complete(self.resource.delete())

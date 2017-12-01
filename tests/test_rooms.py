@@ -2,6 +2,8 @@ import unittest
 import json
 import aiohttp
 import asyncio
+
+from aiopvapi.helpers.aiorequest import PvApiResponseStatusError
 from aiopvapi.rooms import Rooms
 from aioresponses import aioresponses
 
@@ -43,23 +45,24 @@ class TestRooms(unittest.TestCase):
                    body=RETURN_VALUE,
                    status=201,
                    headers={'content-type': 'application/json'})
-        resources = self.loop.run_until_complete(self.rooms.get_resources())
-        self.assertIsNone(resources)
+        with self.assertRaises(PvApiResponseStatusError):
+            resources = self.loop.run_until_complete(self.rooms.get_resources())
 
     @aioresponses()
     def test_create_room_201(self, mocked):
         """Tests create new room."""
         mocked.post('http://127.0.0.1/api/rooms',
-                    body='"ok"',
+                    body='{}',
                     status=201,
                     headers={'content-type': 'application/json'})
         resp = self.loop.run_until_complete(
             self.rooms.create_room('New room', color_id=1, icon_id=2))
-        self.assertEqual('ok', resp)
+        self.assertEqual({}, resp)
         request = mocked.requests[('POST', 'http://127.0.0.1/api/rooms')][-1]
+
         self.assertEqual({"room": {"name": "TmV3IHJvb20=", "colorId": 1,
                                    "iconId": 2}},
-                         json.loads(request.kwargs['data']))
+                         request.kwargs['json'])
 
     @aioresponses()
     def test_create_room_202(self, mocked):
@@ -68,6 +71,6 @@ class TestRooms(unittest.TestCase):
                     body='"ok"',
                     status=202,
                     headers={'content-type': 'application/json'})
-        resp = self.loop.run_until_complete(
-            self.rooms.create_room('New room', color_id=1, icon_id=2))
-        self.assertIsNone(resp)
+        with self.assertRaises(PvApiResponseStatusError):
+            resp = self.loop.run_until_complete(
+                self.rooms.create_room('New room', color_id=1, icon_id=2))
