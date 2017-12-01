@@ -53,11 +53,5 @@ class Scenes(ApiEntryPoint):
                       ATTR_COLOR_ID: color_id,
                       ATTR_ICON_ID: icon_id
                       }}
-        _response, status = yield from self.request.post(
+        _response= yield from self.request.post(
             self._base_path, data=_data)
-        if status in [200, 201]:
-            _LOGGER.debug("Scene successfully created")
-            return _response
-        else:
-            _LOGGER.error("Error creating scene")
-            return None

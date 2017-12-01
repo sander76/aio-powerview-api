@@ -17,8 +17,10 @@ _LOGGER = logging.getLogger("__name__")
 class SceneMembers(ApiEntryPoint):
     """A scene member is a device, like a shade, being a member
     of a specific scene."""
+
     def __init__(self, hub_ip, loop, websession=None):
-        super().__init__(loop, websession, get_base_path(hub_ip, URL_SCENE_MEMBERS))
+        super().__init__(loop, websession,
+                         get_base_path(hub_ip, URL_SCENE_MEMBERS))
 
     @asyncio.coroutine
     def create_scene_member(self, shade_position, scene_id, shade_id):
@@ -32,11 +34,4 @@ class SceneMembers(ApiEntryPoint):
                 ATTR_SHADE_ID: shade_id
             }
         }
-        _result, status = yield from self.request.post(self._base_path,
-                                                       data=data)
-        if status == 201:
-            _LOGGER.info('SceneMember successfully created.')
-            return _result
-        else:
-            _LOGGER.error('Error creating SceneMember, status: %s' % status)
-            return None
+        yield from self.request.post(self._base_path, data=data)

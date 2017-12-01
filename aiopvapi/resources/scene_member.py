@@ -29,5 +29,4 @@ class SceneMember(ApiResource):
             self._base_path,
             params={ATTR_SCENE_ID: self._raw_data.get(ATTR_SCENE_ID),
                     ATTR_SHADE_ID: self._raw_data.get(ATTR_SHADE_ID)})
-        return _val in [200, 204]
 

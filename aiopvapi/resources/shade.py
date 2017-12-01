@@ -58,10 +58,8 @@ class Shade(ApiResource):
 
     @asyncio.coroutine
     def _move(self, position_data):
-        result, status = yield from self.request.put(self._resource_path,
+        result = yield from self.request.put(self._resource_path,
                                                      data=position_data)
-        _LOGGER.debug("move shade returned status code %s" % status)
-        return result if status in [200, 201] else None
 
     @asyncio.coroutine
     def close(self):
