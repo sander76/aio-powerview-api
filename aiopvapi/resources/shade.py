@@ -59,7 +59,7 @@ class Shade(ApiResource):
     @asyncio.coroutine
     def _move(self, position_data):
         result = yield from self.request.put(self._resource_path,
-                                                     data=position_data)
+                                             data=position_data)
 
     @asyncio.coroutine
     def close(self):
@@ -72,6 +72,11 @@ class Shade(ApiResource):
         data = self._create_shade_data(
             positiondata=self._shade_position.open_data)
         return (yield from self._move(data))
+
+    @asyncio.coroutine
+    def jog(self):
+        yield from self.request.put(self._resource_path,
+                                    {"shade": {"motion": "jog"}})
 
     @asyncio.coroutine
     def add_shade_to_room(self, room_id):

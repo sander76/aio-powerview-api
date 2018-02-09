@@ -1,15 +1,22 @@
 from distutils.core import setup
 from setuptools import find_packages
 
-VERSION = "1.5.8"
+
+def readme():
+    with open('README.rst') as f:
+        return f.read()
+
+
+VERSION = "1.5.9"
 
 setup(
-    name='aiopvapi',
+    name='PowerView api',
     version=VERSION,
     packages=find_packages(exclude='tests'),
+    long_description=readme(),
     download_url='https://github.com/sander76/aio-powerview-api/archive/' + VERSION + '.tar.gz',
     url="https://github.com/sander76/aio-powerview-api",
-    license='BSD License',
+    license='Apache License 2.0',
     author='Sander Teunissen',
     classifiers=[
         'Programming Language :: Python',
@@ -18,7 +25,6 @@ setup(
         'Operating System :: OS Independent',
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ],
@@ -26,7 +32,6 @@ setup(
     description='Powerview blinds api',
     install_requires=[
         'async_timeout',
-        'aiohttp',
-        'yarl'
+        'aiohttp'
     ]
 )
