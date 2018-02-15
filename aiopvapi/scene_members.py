@@ -1,13 +1,9 @@
 """Scenes class managing all scene data."""
 
-import asyncio
 import logging
 
-import aiohttp
-
-from aiopvapi.helpers.tools import get_base_path
 from aiopvapi.helpers.api_base import ApiEntryPoint
-from aiopvapi.helpers.constants import URL_SCENE_MEMBERS, ATTR_SCENE_ID, \
+from aiopvapi.helpers.constants import ATTR_SCENE_ID, \
     ATTR_SHADE_ID, ATTR_POSITION_DATA
 from aiopvapi.resources.scene_member import ATTR_SCENE_MEMBER
 
@@ -18,15 +14,14 @@ class SceneMembers(ApiEntryPoint):
     """A scene member is a device, like a shade, being a member
     of a specific scene."""
 
-    def __init__(self, hub_ip, loop, websession=None):
-        super().__init__(loop, websession,
-                         get_base_path(hub_ip, URL_SCENE_MEMBERS))
+    api_path = 'api/scenemembers'
 
-    @asyncio.coroutine
-    def create_scene_member(self, shade_position, scene_id, shade_id):
-        """Adds a shade to an existing scene
+    def __init__(self, request):
+        super().__init__(request, self.api_path)
 
-        """
+    async def create_scene_member(self, shade_position, scene_id, shade_id):
+        """Adds a shade to an existing scene"""
+
         data = {
             ATTR_SCENE_MEMBER: {
                 ATTR_POSITION_DATA: shade_position,
@@ -34,4 +29,4 @@ class SceneMembers(ApiEntryPoint):
                 ATTR_SHADE_ID: shade_id
             }
         }
-        yield from self.request.post(self._base_path, data=data)
+        return await self.request.post(self._base_path, data=data)

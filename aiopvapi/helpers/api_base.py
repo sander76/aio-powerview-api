@@ -1,51 +1,43 @@
-import asyncio
-
-import aiohttp
 import logging
 
 from aiopvapi.helpers.aiorequest import AioRequest
 from aiopvapi.helpers.constants import ATTR_ID, ATTR_NAME_UNICODE, ATTR_NAME
-from aiopvapi.helpers.tools import join_path
+from aiopvapi.helpers.tools import join_path, get_base_path
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class ApiBase:
-    def __init__(self, loop, websession, base_path):
-        if websession is None:
-            _LOGGER.debug("No session defined. Creating a new one")
-            websession = aiohttp.ClientSession(loop=loop)
-        self.request = AioRequest(loop, websession)
-        self._base_path = base_path
+    def __init__(self, request: AioRequest, base_path):
+        self.request = request
+        self._base_path = get_base_path(request.hub_ip, base_path)
 
 
 class ApiEntryPoint(ApiBase):
-    def __init__(self, loop, websession, base_path):
-        super().__init__(loop, websession, base_path)
-
     @staticmethod
     def sanitize_resources(resource):
         raise NotImplemented
 
-    @asyncio.coroutine
-    def get_resources(self):
+    async def get_resources(self):
         """Get a list of resources. """
-        resources = yield from self.request.get(self._base_path)
+        resources = await self.request.get(self._base_path)
         return self.sanitize_resources(resources)
 
 
 class ApiResource(ApiBase):
-    """Represent a single PowerView resource, i.e. a scene, a shade or a room."""
-    def __init__(self, loop, websession, base_path, raw_data=None):
-        super().__init__(loop, websession, base_path)
-        self._id = raw_data.get(ATTR_ID)
-        self._raw_data = raw_data
-        self._resource_path = join_path(base_path, str(self._id))
+    """Represent a single PowerView resource,
+    i.e. a scene, a shade or a room."""
 
-    @asyncio.coroutine
-    def delete(self):
+    def __init__(self, request, api_endpoint, raw_data=None):
+        super().__init__(request, api_endpoint)
+        if raw_data:
+            self._id = raw_data.get(ATTR_ID)
+        self._raw_data = raw_data
+        self._resource_path = join_path(self._base_path, str(self._id))
+
+    async def delete(self):
         """Deletes a resource."""
-        return (yield from self.request.delete(self._resource_path))
+        return await self.request.delete(self._resource_path)
 
     @property
     def id(self):

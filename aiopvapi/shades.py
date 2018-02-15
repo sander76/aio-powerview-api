@@ -2,9 +2,10 @@
 
 import logging
 
+from aiopvapi.helpers.aiorequest import AioRequest
 from aiopvapi.helpers.api_base import ApiEntryPoint
-from aiopvapi.helpers.constants import ATTR_NAME, URL_SHADES, ATTR_NAME_UNICODE
-from aiopvapi.helpers.tools import base64_to_unicode, get_base_path
+from aiopvapi.helpers.constants import ATTR_NAME, ATTR_NAME_UNICODE
+from aiopvapi.helpers.tools import base64_to_unicode
 
 LOGGER = logging.getLogger("__name__")
 
@@ -12,14 +13,16 @@ ATTR_SHADE_DATA = 'shadeData'
 
 
 class Shades(ApiEntryPoint):
-    def __init__(self, hub_ip, loop, websession=None):
-        super().__init__(loop, websession, get_base_path(hub_ip, URL_SHADES))
+    api_path = 'api/shades'
+
+    def __init__(self, request: AioRequest):
+        super().__init__(request, self.api_path)
 
     @staticmethod
     def sanitize_resources(resource: dict):
         """Cleans up incoming scene data
 
-        :param scenes: The dict with scene data to be sanitized.
+        :param resource: The dict with scene data to be sanitized.
         :returns: Cleaned up scene dict.
         """
         try:

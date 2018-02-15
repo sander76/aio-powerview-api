@@ -1,38 +1,19 @@
-import unittest
-import aiohttp
-import asyncio
-
-from aiopvapi.helpers.aiorequest import PvApiResponseStatusError
 from aiopvapi.shades import Shades
-from aioresponses import aioresponses
-
-RETURN_VALUE = """
-{"shadeIds":[29889,56112],"shadeData":[
-{"id":29889,"type":6,"batteryStatus":0,"batteryStrength":0,"name":"UmlnaHQ=","roomId":12372,"groupId":18480,
-"positions":{"posKind1":1,"position1":0},"firmware":{"revision":1,"subRevision":8,"build":1944}},
-{"id":56112,"type":16,"batteryStatus":4,"batteryStrength":180,"name":"UGF0aW8gRG9vcnM=",
-"roomId":15103,"groupId":49380,"positions":{"posKind1":3,"position1":65535},
-"firmware":{"revision":1,"subRevision":8,"build":1944}}]}
-"""
+from tests.fake_server import TestFakeServer
 
 
-class TestShades(unittest.TestCase):
-    def setUp(self):
-        self.loop = asyncio.get_event_loop()
-        self.websession = aiohttp.ClientSession(loop=self.loop)
-        self.shades = Shades('127.0.0.1', self.loop, self.websession)
+class TestShades(TestFakeServer):
 
-    def tearDown(self):
-        self.websession.close()
-
-    @aioresponses()
-    def test_get_resources_200(self, mocked):
+    def test_get_resources_200(self):
         """Test get resources with status 200."""
-        mocked.get('http://127.0.0.1/api/shades',
-                   body=RETURN_VALUE,
-                   status=200,
-                   headers={'content-type': 'application/json'})
-        resources = self.loop.run_until_complete(self.shades.get_resources())
+
+        async def go():
+            await self.start_fake_server()
+            shades = Shades(self.request)
+            res = await shades.get_resources()
+            return res
+
+        resources = self.loop.run_until_complete(go())
         self.assertEqual(2, len(resources['shadeIds']))
         self.assertEqual(2, len(resources['shadeData']))
         self.assertEqual('Right',
@@ -40,13 +21,11 @@ class TestShades(unittest.TestCase):
         self.assertEqual('Patio Doors',
                          resources['shadeData'][1]['name_unicode'])
 
-    @aioresponses()
-    def test_get_resources_201(self, mocked):
-        """Test get resources with wrong status."""
-        mocked.get('http://127.0.0.1/api/shades',
-                   body=RETURN_VALUE,
-                   status=201,
-                   headers={'content-type': 'application/json'})
-        with self.assertRaises(PvApiResponseStatusError):
-            resources = self.loop.run_until_complete(self.shades.get_resources())
-
+    # def test_get_resources_201(self):
+    #     """Test get resources with wrong status."""
+    #     mocked.get('http://127.0.0.1/api/shades',
+    #                body=RETURN_VALUE,
+    #                status=201,
+    #                headers={'content-type': 'application/json'})
+    #     with self.assertRaises(PvApiResponseStatusError):
+    #         resources = self.loop.run_until_complete(self.shades.get_resources())

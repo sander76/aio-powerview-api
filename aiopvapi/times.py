@@ -1,7 +1,3 @@
-import asyncio
-
-
-
 # class Times(ApiEntryPoint):
 #     def __init__(self, hub_ip, loop, websession=None):
 #         ApiEntryPoint.__init__(self, loop, websession)
@@ -13,5 +9,5 @@ import asyncio
 #
 #         :returns: A json object.
 #         """
-#         _time = yield from self.request.get(self._times_path)
+#         _time = await self.request.get(self._times_path)
 #         return _time

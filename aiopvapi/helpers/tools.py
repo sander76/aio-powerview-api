@@ -1,5 +1,7 @@
 import base64
 
+from aiopvapi.helpers.constants import ATTR_ID
+
 
 def unicode_to_base64(string):
     """converts unicode to base64"""
@@ -27,3 +29,11 @@ def join_path(base, *parts):
     else:
         url = base + '/' + _parts
     return url
+
+
+def get_raw_id(id_):
+    """Creates a dict with the resource id.
+
+    This can serve as the minimal raw input for ie scene instantiation
+    and allows for simple activation of that scene."""
+    return {ATTR_ID: id_}

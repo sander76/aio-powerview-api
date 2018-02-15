@@ -7,10 +7,10 @@ def readme():
         return f.read()
 
 
-VERSION = "1.5.9"
+VERSION = "1.6.0"
 
 setup(
-    name='PowerView api',
+    name='aiopvapi',
     version=VERSION,
     packages=find_packages(exclude='tests'),
     long_description=readme(),

@@ -25,10 +25,6 @@ ATTR_CLOSE_POSITION = 'close_position'
 # ATTR_POSITION2_CLOSE = 'position2_close'
 ATTR_ALLOWED_POSITIONS = 'allowed_positions'
 
-URL_SCENE_MEMBERS = 'api/scenemembers'
-URL_SCENES = 'api/scenes'
-URL_SHADES = 'api/shades'
-URL_ROOMS = 'api/rooms'
 MAX_POSITION = 65535
 ATTR_POSITION_DATA = 'positions'
 ATTR_SCENE = 'scene'
