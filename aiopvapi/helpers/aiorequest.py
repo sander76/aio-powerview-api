@@ -42,7 +42,7 @@ class AioRequest:
         if websession:
             self.websession = websession
         else:
-            self.websession = aiohttp.ClientSession(loop=loop)
+            self.websession = aiohttp.ClientSession(loop=self.loop)
 
     async def get(self, url: str, params: str = None) -> dict:
         _LOGGER.debug("Sending a get request")

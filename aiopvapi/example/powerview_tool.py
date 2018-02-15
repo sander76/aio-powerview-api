@@ -46,17 +46,17 @@ class PowerViewCommands:
         except PvApiError as err:
             print(err)
 
-    async def get_scene(self, sceneId):
+    async def get_scene(self, sceneId: int):
         scenes = (await self.get_scenes()) or []
         for scene in scenes:
             if scene.id == sceneId:
                 return scene
         return None
 
-    async def create_scene(self, scenename, roomId):
+    async def create_scene(self, scenename:str, roomId:int):
         _newscene = await self._scenes.create_scene(roomId, scenename)
         if _newscene:
-            return Scene(_newscene, **self._connection_data)
+            return Scene(_newscene, self.request)
         return None
 
     async def activate_scene(self, scene_id):
@@ -76,7 +76,7 @@ class PowerViewCommands:
     async def get_rooms(self):
         rooms = await self._rooms.get_resources()
         if rooms:
-            return [Room(room, **self._connection_data) for room in
+            return [Room(room, self.request) for room in
                     rooms[ATTR_ROOM_DATA]]
         return None
 
@@ -90,7 +90,7 @@ class PowerViewCommands:
     async def create_room(self, roomname):
         _newroom = await self._rooms.create_room(roomname)
         if _newroom:
-            return Room(_newroom, **self._connection_data)
+            return Room(_newroom, self.request)
         return None
 
     async def delete_room(self, room_id):
@@ -106,7 +106,7 @@ class PowerViewCommands:
         shade_resources = await self._shades.get_resources()
         if shade_resources:
             self._shades_cache = {
-                shade[ATTR_ID]: Shade(shade, **self._connection_data)
+                shade[ATTR_ID]: Shade(shade, self.request)
                 for shade in shade_resources[ATTR_SHADE_DATA]}
 
     async def get_shades(self):

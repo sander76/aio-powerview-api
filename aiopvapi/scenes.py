@@ -25,6 +25,7 @@ class Scenes(ApiEntryPoint):
 
         :param scenes: The dict with scene data to be sanitized.
         :returns: Cleaned up scene dict.
+
         """
         try:
             for scene in scenes[ATTR_SCENE_DATA]:

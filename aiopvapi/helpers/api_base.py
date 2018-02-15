@@ -19,7 +19,10 @@ class ApiEntryPoint(ApiBase):
         raise NotImplemented
 
     async def get_resources(self):
-        """Get a list of resources. """
+        """Get a list of resources.
+
+        :raises PvApiError when an error occurs.
+        """
         resources = await self.request.get(self._base_path)
         return self.sanitize_resources(resources)
 
