@@ -1,4 +1,5 @@
 import logging
+from typing import List
 
 from aiopvapi.helpers.aiorequest import AioRequest
 from aiopvapi.helpers.constants import ATTR_ID, ATTR_NAME_UNICODE, ATTR_NAME
@@ -11,20 +12,6 @@ class ApiBase:
     def __init__(self, request: AioRequest, base_path):
         self.request = request
         self._base_path = get_base_path(request.hub_ip, base_path)
-
-
-class ApiEntryPoint(ApiBase):
-    @staticmethod
-    def sanitize_resources(resource):
-        raise NotImplemented
-
-    async def get_resources(self):
-        """Get a list of resources.
-
-        :raises PvApiError when an error occurs.
-        """
-        resources = await self.request.get(self._base_path)
-        return self.sanitize_resources(resources)
 
 
 class ApiResource(ApiBase):
@@ -58,3 +45,26 @@ class ApiResource(ApiBase):
     @raw_data.setter
     def raw_data(self, data):
         self._raw_data = dict(data)
+
+
+class ApiEntryPoint(ApiBase):
+    @staticmethod
+    def sanitize_resources(resource):
+        raise NotImplemented
+
+    async def get_resources(self) -> dict:
+        """Get a list of resources.
+
+        :raises PvApiError when an error occurs.
+        """
+        resources = await self.request.get(self._base_path)
+        return self.sanitize_resources(resources)
+
+    async def get_instances(self) -> List[ApiResource]:
+        """Returns a list of resource instances."""
+        raw = await self.get_resources()
+        return self._factory(raw)
+
+    def _factory(self, raw):
+        """Converts raw incoming data to a list of resource instances"""
+        raise NotImplemented

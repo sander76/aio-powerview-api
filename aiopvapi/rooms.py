@@ -6,6 +6,7 @@ from aiopvapi.helpers.api_base import ApiEntryPoint
 from aiopvapi.helpers.constants import ATTR_NAME, ATTR_COLOR_ID, \
     ATTR_ICON_ID, ATTR_NAME_UNICODE, ATTR_ROOM
 from aiopvapi.helpers.tools import base64_to_unicode, unicode_to_base64
+from aiopvapi.resources.room import Room
 
 _LOGGER = logging.getLogger("__name__")
 
@@ -43,3 +44,8 @@ class Rooms(ApiEntryPoint):
             }
         }
         return await self.request.post(self._base_path, data=data)
+
+    def _factory(self, raw):
+        return [
+            Room(_raw, self.request) for _raw in raw[ATTR_ROOM_DATA]
+        ]

@@ -25,7 +25,7 @@ ATTR_CLOSE_POSITION = 'close_position'
 # ATTR_POSITION2_CLOSE = 'position2_close'
 ATTR_ALLOWED_POSITIONS = 'allowed_positions'
 
-MAX_POSITION = 65535
+#MAX_POSITION = 65535
 ATTR_POSITION_DATA = 'positions'
 ATTR_SCENE = 'scene'
 ATTR_SHADE = 'shade'
@@ -34,5 +34,5 @@ ATTR_SCENE_MEMBER = 'sceneMember'
 ATTR_USER_DATA = 'user'
 ATTR_TYPE = 'type'
 ATTR_TYPES = 'types'
-MIN_POSITION = 0
+# MIN_POSITION = 0
 ATTR_ID = 'id'

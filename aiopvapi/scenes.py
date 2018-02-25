@@ -8,6 +8,7 @@ from aiopvapi.helpers.api_base import ApiEntryPoint
 from aiopvapi.helpers.constants import ATTR_NAME, \
     ATTR_NAME_UNICODE, ATTR_ROOM_ID, ATTR_ICON_ID, ATTR_COLOR_ID
 from aiopvapi.helpers.tools import base64_to_unicode, unicode_to_base64
+from aiopvapi.resources.scene import Scene
 
 _LOGGER = logging.getLogger("__name__")
 ATTR_SCENE_DATA = 'sceneData'
@@ -38,6 +39,11 @@ class Scenes(ApiEntryPoint):
         except (KeyError, TypeError):
             _LOGGER.debug("no scene data available")
             return None
+
+    def _factory(self, raw):
+        return [
+            Scene(_raw, self.request) for _raw in raw[ATTR_SCENE_DATA]
+        ]
 
     async def create_scene(self, room_id, name,
                            color_id=0, icon_id=0):

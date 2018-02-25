@@ -5,7 +5,7 @@ from aiopvapi.helpers.aiorequest import AioRequest, PvApiError
 from aiopvapi.helpers.constants import ATTR_ID
 from aiopvapi.resources.room import Room
 from aiopvapi.resources.scene import Scene
-from aiopvapi.resources.shade import Shade
+
 from aiopvapi.rooms import Rooms, ATTR_ROOM_DATA
 from aiopvapi.scene_members import SceneMembers
 from aiopvapi.scenes import Scenes, ATTR_SCENE_DATA
@@ -150,8 +150,8 @@ class PowerViewCommands:
     async def create_room_scene_scene_member_move(
             self, room_name=None, scene_name=None,
             shade_id=None, position1=None, position2=None):
-        """Creates a room, scene and adds a shade to the scene using a position
-        object."""
+        """Creates a room, scene and adds a shade to the scene using a
+        position object."""
         _result = None
 
         _room = await self.create_room(room_name)
