@@ -14,6 +14,8 @@ ATTR_SHADE_DATA = 'shadeData'
 
 
 class Shades(ApiEntryPoint):
+    """Shades entry point"""
+
     api_path = 'api/shades'
 
     def __init__(self, request: AioRequest):
@@ -36,7 +38,19 @@ class Shades(ApiEntryPoint):
             LOGGER.debug("no shade data available")
             return None
 
-    def _factory(self, raw):
-        return [
-            shade.factory(_raw, self.request) for _raw in raw[ATTR_SHADE_DATA]
-        ]
+    def _resource_factory(self, raw):
+        return shade.factory(raw, self.request)
+
+    @staticmethod
+    def _loop_raw(raw):
+        for _raw in raw[ATTR_SHADE_DATA]:
+            yield _raw
+
+    @staticmethod
+    def _get_to_actual_data(raw):
+        return raw.get('shade')
+
+    # async def get_shade(self, shade_id: int):
+    #     _url = '{}/{}'.format(self.api_path, shade_id)
+    #     _raw = await self.request.get(_url)
+    #     return shade.factory(_raw, self.request)

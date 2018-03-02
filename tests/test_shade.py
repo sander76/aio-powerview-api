@@ -1,8 +1,7 @@
-import json
 from unittest.mock import Mock
 
-from aiopvapi.resources.shade import Shade
-
+from aiopvapi.helpers.aiorequest import AioRequest
+from aiopvapi.resources.shade import BaseShade, shade_type
 from tests.fake_server import FAKE_BASE_URL
 from tests.test_apiresource import TestApiResource
 
@@ -23,9 +22,9 @@ class TestShade(TestApiResource):
         return 'http://{}/api/shades/29889'.format(FAKE_BASE_URL)
 
     def get_resource(self):
-        _request = Mock()
+        _request = Mock(spec=AioRequest)
         _request.hub_ip = FAKE_BASE_URL
-        return Shade(SHADE_RAW_DATA, _request)
+        return BaseShade(SHADE_RAW_DATA, shade_type(0, ''), _request)
 
     def test_full_path(self):
         self.assertEqual(
@@ -39,7 +38,7 @@ class TestShade(TestApiResource):
     def test_add_shade_to_room(self):
         async def go():
             await self.start_fake_server()
-            shade = Shade({'id': 111}, self.request)
+            shade = BaseShade({'id': 111}, shade_type(0, ''), self.request)
             res = await shade.add_shade_to_room(123)
             return res
 

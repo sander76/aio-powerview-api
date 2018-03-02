@@ -1,10 +1,8 @@
 import asyncio
 import socket
 import unittest
-from json import JSONDecodeError
 
 import aiohttp
-
 from aiohttp import web
 from aiohttp.resolver import DefaultResolver
 from aiohttp.test_utils import unused_port
@@ -19,6 +17,10 @@ ROOMS_VALUE = """
 {"order":2,"name":"RGluaW5nIFJvb20=","colorId":0,"iconId":0,"id":26756,"type":0}]}
 """
 
+ROOM_VALUE = """
+{"room":{"id":46688,"name":"TGl2aW5nIHJvb20=","order":0,"colorId":7,"iconId":0,"type":0}}
+"""
+
 SHADES_VALUE = """
 {"shadeIds":[29889,56112],"shadeData":[
 {"id":29889,"type":6,"batteryStatus":0,"batteryStrength":0,"name":"UmlnaHQ=","roomId":12372,"groupId":18480,
@@ -28,10 +30,18 @@ SHADES_VALUE = """
 "firmware":{"revision":1,"subRevision":8,"build":1944}}]}
 """
 
+SHADE_VALUE = """
+{"shade":{"id":11155,"name":"U2hhZGUgMQ==","roomId":46688,"groupId":38058,"order":0,"type":8,"batteryStrength":146,"batteryStatus":3,"positions":{"position1":8404,"posKind1":1,"position2":42209,"posKind2":2},"firmware":{"revision":1,"subRevision":4,"build":1643},"signalStrength":4}}
+"""
+
 SCENES_VALUE = """
 {"sceneIds":[37217,64533],"sceneData":[
 {"roomId":26756,"name":"RGluaW5nIFZhbmVzIE9wZW4=","colorId":0,"iconId":0,"id":37217,"order":1},
 {"roomId":12372,"name":"TWFzdGVyIE9wZW4=","colorId":9,"iconId":0,"id":64533,"order":7}]}
+"""
+
+SCENE_VALUE = """
+{"scene":{"roomId":46688,"name":"VGVzdA==","colorId":7,"iconId":0,"id":43436,"order":0}}
 """
 
 
@@ -70,11 +80,14 @@ class FakePowerViewHub:
                 web.post('/post_status_200', self.post_status_200),
                 web.post('/post_status_201', self.post_status_201),
                 web.get('/api/rooms', self.get_rooms),
+                web.get('/api/rooms/1234', self.get_room),
                 web.post('/api/rooms', self.new_room),
                 web.delete('/api/rooms/{room_id}', self.delete_room),
                 web.get('/api/scenes', self.handle_scene),
+                web.get('/api/scenes/43436',self.get_scene),
                 web.post('/api/scenes', self.create_scene),
                 web.get('/api/shades', self.get_shades),
+                web.get('/api/shades/11155',self.get_shade),
                 web.put('/api/shades/{shade_id}', self.add_shade_to_room),
 
             ])
@@ -125,6 +138,12 @@ class FakePowerViewHub:
             body=ROOMS_VALUE,
             headers={'content-type': 'application/json'})
 
+    async def get_room(self, request):
+        return web.Response(
+            body=ROOM_VALUE,
+            headers={'content-type': 'application/json'}
+        )
+
     async def new_room(self, request):
         _js = await request.json()
         return web.json_response({
@@ -149,10 +168,22 @@ class FakePowerViewHub:
         else:
             return web.Response(status=404)
 
+    async def get_scene(self,request):
+        return web.Response(
+            body=SCENE_VALUE,
+            headers={'content-type': 'application/json'}
+        )
+
     async def get_shades(self, request):
         return web.Response(
             body=SHADES_VALUE,
             headers={'content-type': 'application/json'})
+
+    async def get_shade(self, request):
+        return web.Response(
+            body=SHADE_VALUE,
+            headers={'content-type': 'application/json'}
+        )
 
     async def add_shade_to_room(self, request):
         # todo: finish this.

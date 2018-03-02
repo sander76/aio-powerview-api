@@ -22,7 +22,8 @@ def get_base_path(ip_address, url):
     return 'http://{}'.format(join_path(ip_address, *urls))
 
 
-def join_path(base, *parts):
+def join_path(base, *parts:str):
+    """Creates urls from base path and additional parts."""
     _parts = '/'.join(parts)
     if base.endswith("/"):
         url = base + _parts

@@ -1,13 +1,12 @@
 """Scenes class managing all scene data."""
 
-import binascii
 import logging
 
 from aiopvapi.helpers.aiorequest import AioRequest
 from aiopvapi.helpers.api_base import ApiEntryPoint
 from aiopvapi.helpers.constants import ATTR_NAME, \
-    ATTR_NAME_UNICODE, ATTR_ROOM_ID, ATTR_ICON_ID, ATTR_COLOR_ID
-from aiopvapi.helpers.tools import base64_to_unicode, unicode_to_base64
+    ATTR_ROOM_ID, ATTR_ICON_ID, ATTR_COLOR_ID
+from aiopvapi.helpers.tools import unicode_to_base64
 from aiopvapi.resources.scene import Scene
 
 _LOGGER = logging.getLogger("__name__")
@@ -20,30 +19,42 @@ class Scenes(ApiEntryPoint):
     def __init__(self, request: AioRequest):
         super().__init__(request, self.api_path)
 
+    def _resource_factory(self, raw):
+        return Scene(raw, self.request)
+
     @staticmethod
-    def sanitize_resources(scenes: dict):
-        """Cleans up incoming scene data
+    def _loop_raw(raw):
+        for _raw in raw[ATTR_SCENE_DATA]:
+            yield _raw
 
-        :param scenes: The dict with scene data to be sanitized.
-        :returns: Cleaned up scene dict.
+    @staticmethod
+    def _get_to_actual_data(raw):
+        return raw.get('scene')
 
-        """
-        try:
-            for scene in scenes[ATTR_SCENE_DATA]:
-                try:
-                    scene[ATTR_NAME_UNICODE] = base64_to_unicode(
-                        scene[ATTR_NAME])
-                except binascii.Error:
-                    pass
-            return scenes
-        except (KeyError, TypeError):
-            _LOGGER.debug("no scene data available")
-            return None
+    # @staticmethod
+    # def sanitize_resources(scenes: dict):
+    #     """Cleans up incoming scene data
+    #
+    #     :param scenes: The dict with scene data to be sanitized.
+    #     :returns: Cleaned up scene dict.
+    #
+    #     """
+    #     try:
+    #         for scene in scenes[ATTR_SCENE_DATA]:
+    #             try:
+    #                 scene[ATTR_NAME_UNICODE] = base64_to_unicode(
+    #                     scene[ATTR_NAME])
+    #             except binascii.Error:
+    #                 pass
+    #         return scenes
+    #     except (KeyError, TypeError):
+    #         _LOGGER.debug("no scene data available")
+    #         return None
 
-    def _factory(self, raw):
-        return [
-            Scene(_raw, self.request) for _raw in raw[ATTR_SCENE_DATA]
-        ]
+    # def _factory(self, raw):
+    #     return [
+    #         Scene(_raw, self.request) for _raw in raw[ATTR_SCENE_DATA]
+    #     ]
 
     async def create_scene(self, room_id, name,
                            color_id=0, icon_id=0):

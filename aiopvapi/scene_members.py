@@ -5,9 +5,11 @@ import logging
 from aiopvapi.helpers.api_base import ApiEntryPoint
 from aiopvapi.helpers.constants import ATTR_SCENE_ID, \
     ATTR_SHADE_ID, ATTR_POSITION_DATA
-from aiopvapi.resources.scene_member import ATTR_SCENE_MEMBER
+from aiopvapi.resources.scene_member import ATTR_SCENE_MEMBER, SceneMember
 
 _LOGGER = logging.getLogger("__name__")
+
+SCENE_MEMBER_DATA = 'sceneMemberData'
 
 
 class SceneMembers(ApiEntryPoint):
@@ -30,3 +32,20 @@ class SceneMembers(ApiEntryPoint):
             }
         }
         return await self.request.post(self._base_path, data=data)
+
+    def _resource_factory(self, raw):
+        return SceneMember(raw, self.request)
+
+    @staticmethod
+    def _loop_raw(raw):
+        for _raw in raw[SCENE_MEMBER_DATA]:
+            yield _raw
+
+    @staticmethod
+    def _get_to_actual_data(raw):
+        return raw.get('scenemember')
+
+    # def _factory(self, raw):
+    #     return [
+    #         SceneMember(_raw, self.request) for _raw in raw[SCENE_MEMBER_DATA]
+    #     ]

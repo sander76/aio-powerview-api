@@ -4,8 +4,8 @@ import logging
 
 from aiopvapi.helpers.api_base import ApiEntryPoint
 from aiopvapi.helpers.constants import ATTR_NAME, ATTR_COLOR_ID, \
-    ATTR_ICON_ID, ATTR_NAME_UNICODE, ATTR_ROOM
-from aiopvapi.helpers.tools import base64_to_unicode, unicode_to_base64
+    ATTR_ICON_ID, ATTR_ROOM
+from aiopvapi.helpers.tools import unicode_to_base64
 from aiopvapi.resources.room import Room
 
 _LOGGER = logging.getLogger("__name__")
@@ -19,20 +19,20 @@ class Rooms(ApiEntryPoint):
     def __init__(self, request):
         super().__init__(request, self.api_path)
 
-    @staticmethod
-    def sanitize_resources(resource):
-        """Cleans up incoming room data
-
-        :param resource: The dict with scene data to be sanitized.
-        :return: Cleaned up room dict.
-        """
-        try:
-            for room in resource[ATTR_ROOM_DATA]:
-                room[ATTR_NAME_UNICODE] = base64_to_unicode(room[ATTR_NAME])
-            return resource
-        except (KeyError, TypeError):
-            _LOGGER.debug("no room data available")
-            return None
+    # @staticmethod
+    # def sanitize_resources(resource):
+    #     """Cleans up incoming room data
+    #
+    #     :param resource: The dict with scene data to be sanitized.
+    #     :return: Cleaned up room dict.
+    #     """
+    #     try:
+    #         for room in resource[ATTR_ROOM_DATA]:
+    #             room[ATTR_NAME_UNICODE] = base64_to_unicode(room[ATTR_NAME])
+    #         return resource
+    #     except (KeyError, TypeError):
+    #         _LOGGER.debug("no room data available")
+    #         return None
 
     async def create_room(self, name, color_id=0, icon_id=0):
         name = unicode_to_base64(name)
@@ -45,7 +45,14 @@ class Rooms(ApiEntryPoint):
         }
         return await self.request.post(self._base_path, data=data)
 
-    def _factory(self, raw):
-        return [
-            Room(_raw, self.request) for _raw in raw[ATTR_ROOM_DATA]
-        ]
+    def _resource_factory(self, raw):
+        return Room(raw, self.request)
+
+    @staticmethod
+    def _loop_raw(raw):
+        for _raw in raw[ATTR_ROOM_DATA]:
+            yield _raw
+
+    @staticmethod
+    def _get_to_actual_data(raw):
+        return raw.get('room')

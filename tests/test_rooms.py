@@ -1,3 +1,4 @@
+from aiopvapi.resources.room import Room
 from aiopvapi.rooms import Rooms
 
 from tests.fake_server import TestFakeServer
@@ -34,6 +35,18 @@ class TestRooms(TestFakeServer):
     #             self.rooms.get_resources())
     #
     #
+
+    def test_get_instance(self):
+        async def go():
+            await self.start_fake_server()
+            rooms = Rooms(self.request)
+            response = await rooms.get_instance(1234)
+            return response
+
+        resp = self.loop.run_until_complete(go())
+        self.assertIsInstance(resp, Room)
+        self.assertEqual(resp.name, 'Living room')
+
     def test_create_room_201(self):
         """Tests create new room."""
 
@@ -47,8 +60,6 @@ class TestRooms(TestFakeServer):
         resp = self.loop.run_until_complete(go())
         self.assertEqual(resp['id'], 1)
         self.assertEqual(resp['name'], 'TmV3IHJvb20=')
-
-
 
     # def test_create_room_202(self):
     #     """Tests create new room with wrong status code."""

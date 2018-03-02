@@ -1,11 +1,6 @@
-import unittest
 from unittest.mock import Mock
 
-import aiohttp
-import asyncio
-
-from aiopvapi.helpers.aiorequest import PvApiResponseStatusError, AioRequest
-from aiopvapi.helpers.api_base import ApiResource
+from aiopvapi.helpers.api_base import ApiResource, ApiEntryPoint
 from tests.fake_server import TestFakeServer, FAKE_BASE_URL
 
 
@@ -85,3 +80,36 @@ class TestApiResource(TestFakeServer):
     #                   headers={'content-type': 'application/json'})
     #     with self.assertRaises(PvApiResponseStatusError):
     #         self.loop.run_until_complete(self.resource.delete())
+
+
+test_data1 = {
+    'sceneMemberIds': [60113, 27759, 63292, 18627, 59345, 32461, 63181, 45145,
+                       64087], 'sceneMemberData': [
+        {'id': 60113, 'sceneId': 64040, 'shadeId': 18390,
+         'positions': {'position1': 65535, 'posKind1': 1}},
+        {'id': 27759, 'sceneId': 34037, 'shadeId': 11155,
+         'positions': {'position1': 7563, 'posKind1': 1, 'position2': 16157,
+                       'posKind2': 2}},
+        {'id': 63292, 'sceneId': 53808, 'shadeId': 11155,
+         'positions': {'position1': 0, 'posKind1': 1, 'position2': 0,
+                       'posKind2': 2}}, {
+            'positions': {'posKind2': 2, 'position2': 42144, 'posKind1': 1,
+                          'position1': 23390}, 'id': 18627, 'sceneId': 43436,
+            'shadeId': 11155, 'type': 0},
+        {'id': 59345, 'sceneId': 39635, 'shadeId': 11155,
+         'positions': {'position1': 45598, 'posKind1': 1, 'position2': 0,
+                       'posKind2': 2}},
+        {'id': 32461, 'sceneId': 34037, 'shadeId': 18390,
+         'positions': {'position1': 65535, 'posKind1': 1}},
+        {'positions': {'posKind1': 1, 'position1': 58134}, 'id': 63181,
+         'sceneId': 43436, 'shadeId': 18390, 'type': 0},
+        {'id': 45145, 'sceneId': 64040, 'shadeId': 11155,
+         'positions': {'position1': 8404, 'posKind1': 1, 'position2': 42209,
+                       'posKind2': 2}},
+        {'id': 64087, 'sceneId': 49867, 'shadeId': 18390,
+         'positions': {'posKind1': 1, 'position1': 0}, 'type': 0}]}
+
+
+def test_clean_names():
+    api = ApiEntryPoint(None, 'abc')
+    clean = api._sanitize_resources(test_data1)

@@ -10,18 +10,21 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class PvApiError(Exception):
+    """General Api error. Means we have a problem communication with
+    the PowerView hub."""
     pass
 
 
 class PvApiResponseStatusError(PvApiError):
-    pass
+    """Wrong http response error."""
 
 
 class PvApiConnectionError(PvApiError):
-    pass
+    """Problem connecting to PowerView hub."""
 
 
 async def check_response(response, valid_response_codes):
+    """Check the response for correctness."""
     if response.status == 204:
         return True
     if response.status in valid_response_codes:
@@ -32,6 +35,7 @@ async def check_response(response, valid_response_codes):
 
 
 class AioRequest:
+    """Request class managing hub connection."""
     def __init__(self, hub_ip, loop=None, websession=None, timeout=15):
         self.hub_ip = hub_ip
         self._timeout = timeout
@@ -45,6 +49,13 @@ class AioRequest:
             self.websession = aiohttp.ClientSession(loop=self.loop)
 
     async def get(self, url: str, params: str = None) -> dict:
+        """
+        Get a resource.
+
+        :param url:
+        :param params:
+        :return:
+        """
         _LOGGER.debug("Sending a get request")
         response = None
         try:
@@ -96,6 +107,15 @@ class AioRequest:
                 await response.release()
 
     async def delete(self, url: str, params: str = None):
+        """
+        Delete a resource.
+
+        :param url: Endpoint
+        :param params: parameters
+        :return: Response body
+
+        :raises PvApiError when something is wrong.
+        """
         response = None
         try:
             with async_timeout.timeout(self._timeout, loop=self.loop):

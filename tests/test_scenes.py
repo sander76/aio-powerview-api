@@ -1,3 +1,4 @@
+from aiopvapi.resources.scene import Scene
 from aiopvapi.scenes import Scenes
 from tests.fake_server import TestFakeServer
 
@@ -45,6 +46,17 @@ class TestScenes(TestFakeServer):
         self.assertEqual({"scene": {"roomId": 12372, "name": "TmV3IHNjZW5l",
                                     "colorId": 1, "iconId": 2}},
                          resp)
+
+    def test_get_instance(self):
+        async def go():
+            await self.start_fake_server()
+            scenes = Scenes(self.request)
+            response = await scenes.get_instance(43436)
+            return response
+
+        resp = self.loop.run_until_complete(go())
+        self.assertIsInstance(resp, Scene)
+        self.assertEqual(resp.name, 'Test')
 
     # def test_create_scene_202(self, mocked):
     #     """Tests create new scene with wrong status code."""

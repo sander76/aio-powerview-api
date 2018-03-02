@@ -12,13 +12,13 @@ class SceneMember(ApiResource):
             raw_data = raw_data.get(ATTR_SCENE_MEMBER)
         super().__init__(request, self.api_path, raw_data)
 
-    # @property
-    # def roomId(self):
-    #     return self._raw_data.get(SCENE_ROOM_ID)
+    @property
+    def scene_id(self):
+        return self._raw_data.get(ATTR_SCENE_ID)
 
-    # @property
-    # def sceneId(self):
-    #     return self._
+    @property
+    def shade_id(self):
+        return self._raw_data.get(ATTR_SHADE_ID)
 
     async def delete(self):
         """Deletes a scene from a shade"""

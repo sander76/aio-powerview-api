@@ -107,8 +107,14 @@ class BaseShade(ApiResource):
 
         self._raw_data = raw_data[ATTR_SHADE]
 
-    async def get_current_position(self) -> dict:
-        """Returns the current position object"""
+    async def get_current_position(self, refresh=True) -> dict:
+        """Return the current shade position.
+
+        :param refresh: If True it queries the hub for the latest info.
+        :return: Dictionary with position data.
+        """
+        if refresh:
+            await self.refresh()
         position = self._raw_data.get(ATTR_POSITION_DATA)
         return position
 
