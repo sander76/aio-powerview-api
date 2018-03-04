@@ -3,6 +3,7 @@ AioPvApi
 
 A python asyncio API for PowerView blinds.
 Written for Home-Assistant
+Adding features as I go...
 
 Have a look at the examples folder for some guidance how to use it.
 
