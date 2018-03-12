@@ -11,8 +11,6 @@ from aiopvapi.shades import Shades
 class ResourceNotFoundException(Exception):
     """Exception raised when a resource is not found."""
 
-    pass
-
 
 class PowerViewUtil:
     """A PowerView helper class for basic hub operations."""
@@ -74,7 +72,7 @@ class PowerViewUtil:
         raise ResourceNotFoundException(
             'Room not found. Id: {}'.format(room_id))
 
-    async def get_shade(self, shade_id,from_cache=True) -> BaseShade:
+    async def get_shade(self, shade_id, from_cache=True) -> BaseShade:
         """Get a shade instance based on shade id."""
         if not from_cache:
             await self.get_shades()
@@ -98,19 +96,31 @@ class PowerViewUtil:
         _shade = await self.get_shade(shade_id)
         await _shade.close()
 
-    async def activate_scene(self, scene_id):
-        """Activates a scene."""
+    async def activate_scene(self, scene_id:int):
+        """Activate a scene
+
+        :param scene_id: Scene id.
+        :return:
+        """
+
         _scene = await self.get_scene(scene_id)
         await _scene.activate()
 
+    async def delete_scene(self,scene_id:int):
+        """Delete a scene
+
+        :param scene_id:
+        :return:
+        """
+        _scene = await self.get_scene(scene_id,from_cache=False)
+        return await _scene.delete()
+
     async def add_shade_to_scene(self, shade_id, scene_id, position=None):
         """Add a shade to a scene."""
-        if position:
-            _position = position
-        else:
+        if position is None:
             _shade = await self.get_shade(shade_id)
-            _position = await _shade.get_current_position()
+            position = await _shade.get_current_position()
 
         await (SceneMembers(self.request)).create_scene_member(
-            _position, scene_id, shade_id
+            position, scene_id, shade_id
         )

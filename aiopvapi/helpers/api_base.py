@@ -25,7 +25,9 @@ class ApiResource(ApiBase):
         if raw_data:
             self._id = raw_data.get(ATTR_ID)
         self._raw_data = raw_data
+
         self._resource_path = join_path(self._base_path, str(self._id))
+        _LOGGER.debug("Initializing resource. resource path %s",self._resource_path)
 
     async def delete(self):
         """Deletes a resource."""
