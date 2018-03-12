@@ -137,7 +137,7 @@ class ShadeTdbu(BaseShade):
         ATTR_POSKIND1: 1,
         ATTR_POSKIND2: 2
     }
-    allowed_positions: (
+    allowed_positions = (
         {ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 2},
          ATTR_COMMAND: ATTR_MOVE},
     )

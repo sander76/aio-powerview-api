@@ -7,7 +7,7 @@ def readme():
         return f.read()
 
 
-VERSION = "1.6.4"
+VERSION = "1.6.5"
 
 setup(
     name='aiopvapi',
