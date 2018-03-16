@@ -27,7 +27,8 @@ class ApiResource(ApiBase):
         self._raw_data = raw_data
 
         self._resource_path = join_path(self._base_path, str(self._id))
-        _LOGGER.debug("Initializing resource. resource path %s",self._resource_path)
+        _LOGGER.debug("Initializing resource. resource path %s",
+                      self._resource_path)
 
     async def delete(self):
         """Deletes a resource."""
@@ -77,12 +78,12 @@ class ApiEntryPoint(ApiBase):
         if _name:
             resource[ATTR_NAME_UNICODE] = base64_to_unicode(_name)
 
-    async def get_resources(self) -> dict:
+    async def get_resources(self, **kwargs) -> dict:
         """Get a list of resources.
 
         :raises PvApiError when an error occurs.
         """
-        resources = await self.request.get(self._base_path)
+        resources = await self.request.get(self._base_path,**kwargs)
         self._sanitize_resources(resources)
         return resources
 
@@ -91,15 +92,15 @@ class ApiEntryPoint(ApiBase):
 
         :raises PvApiError when a hub connection occurs."""
         resource = await self.request.get(
-            join_path(self._base_path,str(resource_id)))
+            join_path(self._base_path, str(resource_id)))
         self._sanitize_resource(self._get_to_actual_data(resource))
         return resource
 
-    async def get_instances(self) -> List[ApiResource]:
+    async def get_instances(self, **kwargs) -> List[ApiResource]:
         """Returns a list of resource instances.
 
         :raises PvApiError when a hub problem occurs."""
-        raw_resources = await self.get_resources()
+        raw_resources = await self.get_resources(**kwargs)
         _instances = [self._resource_factory(_raw) for _raw in
                       self._loop_raw(raw_resources)]
         return _instances

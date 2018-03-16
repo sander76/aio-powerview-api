@@ -31,11 +31,12 @@ async def check_response(response, valid_response_codes):
         _js = await response.json()
         return _js
     else:
-        raise PvApiResponseStatusError
+        raise PvApiResponseStatusError(response.status)
 
 
 class AioRequest:
     """Request class managing hub connection."""
+
     def __init__(self, hub_ip, loop=None, websession=None, timeout=15):
         self.hub_ip = hub_ip
         self._timeout = timeout
@@ -106,7 +107,7 @@ class AioRequest:
             if response is not None:
                 await response.release()
 
-    async def delete(self, url: str, params: str = None):
+    async def delete(self, url: str, params: dict = None):
         """
         Delete a resource.
 
@@ -119,7 +120,7 @@ class AioRequest:
         response = None
         try:
             with async_timeout.timeout(self._timeout, loop=self.loop):
-                response = await self.websession.delete(url)
+                response = await self.websession.delete(url, params=params)
             return await check_response(response, [200, 204])
         except (asyncio.TimeoutError, aiohttp.ClientError) as error:
             _LOGGER.error('Failed to communicate with PowerView hub: %s',

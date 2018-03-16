@@ -96,7 +96,7 @@ class PowerViewUtil:
         _shade = await self.get_shade(shade_id)
         await _shade.close()
 
-    async def activate_scene(self, scene_id:int):
+    async def activate_scene(self, scene_id: int):
         """Activate a scene
 
         :param scene_id: Scene id.
@@ -106,13 +106,13 @@ class PowerViewUtil:
         _scene = await self.get_scene(scene_id)
         await _scene.activate()
 
-    async def delete_scene(self,scene_id:int):
+    async def delete_scene(self, scene_id: int):
         """Delete a scene
 
         :param scene_id:
         :return:
         """
-        _scene = await self.get_scene(scene_id,from_cache=False)
+        _scene = await self.get_scene(scene_id, from_cache=False)
         return await _scene.delete()
 
     async def add_shade_to_scene(self, shade_id, scene_id, position=None):
@@ -124,3 +124,8 @@ class PowerViewUtil:
         await (SceneMembers(self.request)).create_scene_member(
             position, scene_id, shade_id
         )
+
+    async def remove_shade_from_scene(self, shade_id, scene_id):
+        """Remove a shade from a scene"""
+        await self._scene_members_entry_point.delete_shade_from_scene(
+            shade_id, scene_id)

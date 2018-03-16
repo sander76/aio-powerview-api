@@ -45,7 +45,18 @@ class SceneMembers(ApiEntryPoint):
     def _get_to_actual_data(raw):
         return raw.get('scenemember')
 
-    # def _factory(self, raw):
-    #     return [
-    #         SceneMember(_raw, self.request) for _raw in raw[SCENE_MEMBER_DATA]
-    #     ]
+    async def get_scene_members(self, scene_id):
+        """Return all scene members for a particular Scene ID."""
+
+        return await self.get_instances(sceneId=scene_id)
+
+    async def delete_shade_from_scene(self, shade_id, scene_id):
+        """Delete a shade from a scene."""
+        await self.request.delete(
+            self._base_path, params={ATTR_SCENE_ID: scene_id,
+                                     ATTR_SHADE_ID: shade_id})
+
+        # def _factory(self, raw):
+        #     return [
+        #         SceneMember(_raw, self.request) for _raw in raw[SCENE_MEMBER_DATA]
+        #     ]

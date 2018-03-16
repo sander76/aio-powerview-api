@@ -5,6 +5,8 @@ from aiopvapi.helpers.constants import ATTR_SCENE_MEMBER, \
 
 
 class SceneMember(ApiResource):
+    """Shades belonging to a scene."""
+
     api_path = 'api/scenemembers'
 
     def __init__(self, raw_data: dict, request: AioRequest):

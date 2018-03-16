@@ -18,6 +18,6 @@ class ExampleRooms:
     async def get_rooms(self):
         self.rooms = await self._shades_entry_point.get_instances()
 
-    async def get_room(self,room_id):
+    async def get_room(self, room_id):
         room = await self._shades_entry_point.get_instance(room_id)
         return room
