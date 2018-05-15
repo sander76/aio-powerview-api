@@ -52,7 +52,7 @@ class SceneMembers(ApiEntryPoint):
 
     async def delete_shade_from_scene(self, shade_id, scene_id):
         """Delete a shade from a scene."""
-        await self.request.delete(
+        return await self.request.delete(
             self._base_path, params={ATTR_SCENE_ID: scene_id,
                                      ATTR_SHADE_ID: shade_id})
 

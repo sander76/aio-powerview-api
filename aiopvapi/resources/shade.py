@@ -95,6 +95,10 @@ class BaseShade(ApiResource):
         await self.request.put(self._resource_path,
                                {"shade": {"motion": "jog"}})
 
+    async def stop(self):
+        await self.request.put(self._resource_path,
+                               {"shade": {"motion": "stop"}})
+
     async def add_shade_to_room(self, room_id):
         data = self._create_shade_data(room_id=room_id)
         return await self.request.put(self._resource_path, data)

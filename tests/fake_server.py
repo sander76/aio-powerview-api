@@ -84,11 +84,12 @@ class FakePowerViewHub:
                 web.post('/api/rooms', self.new_room),
                 web.delete('/api/rooms/{room_id}', self.delete_room),
                 web.get('/api/scenes', self.handle_scene),
-                web.get('/api/scenes/43436',self.get_scene),
+                web.get('/api/scenes/43436', self.get_scene),
                 web.post('/api/scenes', self.create_scene),
                 web.get('/api/shades', self.get_shades),
-                web.get('/api/shades/11155',self.get_shade),
+                web.get('/api/shades/11155', self.get_shade),
                 web.put('/api/shades/{shade_id}', self.add_shade_to_room),
+                web.delete('/api/sceneMembers', self.remove_shade_from_scene),
 
             ])
         self.runner = None
@@ -168,7 +169,7 @@ class FakePowerViewHub:
         else:
             return web.Response(status=404)
 
-    async def get_scene(self,request):
+    async def get_scene(self, request):
         return web.Response(
             body=SCENE_VALUE,
             headers={'content-type': 'application/json'}
@@ -195,6 +196,11 @@ class FakePowerViewHub:
     async def create_scene(self, request):
         _js = await request.json()
         return web.json_response(_js)
+
+    async def remove_shade_from_scene(self, request):
+        shade_id = request.query.get['shadeId']
+        scene_id = request.query.get['sceneId']
+        return web.json_response({'scene_id': scene_id, 'shade_id': shade_id})
 
 
 async def main(loop):

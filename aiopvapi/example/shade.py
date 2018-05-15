@@ -15,9 +15,5 @@ class ExampleShade:
             self.shades.append(
                 factory(shade, self.request))
 
-    async def get_shade(self, shade_id) -> BaseShade:
-        await self.get_shades()
-        for _shade in self.shades:
-            if _shade.id == shade_id:
-                return _shade
-        raise PvApiError("Shade not found")
+    async def get_shade(self, shade_id):
+        return await self._shades_entry_point.get_instance(shade_id)
