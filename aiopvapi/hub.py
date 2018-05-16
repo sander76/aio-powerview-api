@@ -21,9 +21,9 @@ class UserData(ApiBase):
         """Convert raw incoming to class attributes."""
         self._raw = raw
         self.hub_name = self._parse('userData', 'hubName',
-                                     converter=base64_to_unicode)
+                                    converter=base64_to_unicode)
         self.ip = self._parse('userData', 'ip')
-        self.ssid = self._parse('userData,''ssid')
+        self.ssid = self._parse('userData', 'ssid')
 
     def _parse(self, *keys, converter=None):
         try:
@@ -39,6 +39,7 @@ class UserData(ApiBase):
 
     async def update_user_data(self):
         _raw = await self.request.get(self._base_path)
+        LOGGER.debug("Raw user data: {}".format(_raw))
         self.parse(_raw)
 
 
@@ -70,6 +71,14 @@ class Hub(ApiBase):
     @property
     def radio_version(self):
         return self._radio_version
+
+    @property
+    def name(self):
+        return self.user_data.hub_name
+
+    @property
+    def ip(self):
+        return self.user_data.ip
 
     async def query_firmware(self):
         """Query the firware versions."""
