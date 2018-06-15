@@ -92,10 +92,12 @@ class BaseShade(ApiResource):
         return await self._move(data)
 
     async def jog(self):
+        """Jog the shade."""
         await self.request.put(self._resource_path,
                                {"shade": {"motion": "jog"}})
 
     async def stop(self):
+        """Stop the shade."""
         await self.request.put(self._resource_path,
                                {"shade": {"motion": "stop"}})
 

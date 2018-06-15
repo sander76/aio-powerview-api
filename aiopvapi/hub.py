@@ -44,6 +44,8 @@ class UserData(ApiBase):
 
 
 class Version:
+    """PowerView versioning scheme class."""
+
     def __init__(self, build, revision, sub_revision, name=None):
         self._build = build
         self._revision = revision
@@ -53,6 +55,9 @@ class Version:
     def __repr__(self):
         return ("BUILD: {} REVISION: {} SUB_REVISION: {}".format(
             self._build, self._revision, self._sub_revision))
+
+    def __eq__(self, other):
+        return str(self) == str(other)
 
 
 class Hub(ApiBase):
@@ -81,7 +86,7 @@ class Hub(ApiBase):
         return self.user_data.ip
 
     async def query_firmware(self):
-        """Query the firware versions."""
+        """Query the firmware versions."""
 
         _version = await self.request.get(
             join_path(self._base_path, "/fwversion"))
