@@ -10,13 +10,13 @@ from aiopvapi.resources import shade
 
 LOGGER = logging.getLogger("__name__")
 
-ATTR_SHADE_DATA = 'shadeData'
+ATTR_SHADE_DATA = "shadeData"
 
 
 class Shades(ApiEntryPoint):
     """Shades entry point"""
 
-    api_path = 'api/shades'
+    api_path = "api/shades"
 
     def __init__(self, request: AioRequest):
         super().__init__(request, self.api_path)
@@ -48,7 +48,7 @@ class Shades(ApiEntryPoint):
 
     @staticmethod
     def _get_to_actual_data(raw):
-        return raw.get('shade')
+        return raw.get("shade")
 
     # async def get_shade(self, shade_id: int):
     #     _url = '{}/{}'.format(self.api_path, shade_id)

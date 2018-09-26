@@ -8,12 +8,12 @@ from aiopvapi.helpers.tools import base64_to_unicode
 
 LOGGER = logging.getLogger("__name__")
 
-ATTR_HUB_NAME = 'hubName'
-ATTR_HUB_NAME_UNICODE = 'hubNameUnicode'
+ATTR_HUB_NAME = "hubName"
+ATTR_HUB_NAME_UNICODE = "hubNameUnicode"
 
 
 class UserData(ApiEntryPoint):
-    api_path = 'api/userdata'
+    api_path = "api/userdata"
 
     def __init__(self, request: AioRequest):
         super().__init__(request, self.api_path)
@@ -27,7 +27,8 @@ class UserData(ApiEntryPoint):
         """
         try:
             resource[ATTR_HUB_NAME_UNICODE] = base64_to_unicode(
-                resource[ATTR_HUB_NAME])
+                resource[ATTR_HUB_NAME]
+            )
             return resource
         except (KeyError, TypeError):
             LOGGER.debug("no data available")

@@ -76,6 +76,8 @@ class AioRequest:
         response = None
         try:
             with async_timeout.timeout(self._timeout, loop=self.loop):
+                _LOGGER.info('url: %s', url)
+                _LOGGER.info('data: %s', data)
                 response = await self.websession.post(url, json=data)
                 return await check_response(response, [200, 201])
         except (asyncio.TimeoutError, aiohttp.ClientError) as error:
@@ -97,6 +99,8 @@ class AioRequest:
         response = None
         try:
             with async_timeout.timeout(self._timeout, loop=self.loop):
+                _LOGGER.info('url: %s', url)
+                _LOGGER.info('data: %s', data)
                 response = await self.websession.put(url, json=data)
             return await check_response(response, [200, 204])
         except (asyncio.TimeoutError, aiohttp.ClientError) as error:

@@ -3,17 +3,28 @@ from collections import namedtuple
 
 from aiopvapi.helpers.aiorequest import AioRequest
 from aiopvapi.helpers.api_base import ApiResource
-from aiopvapi.helpers.constants import ATTR_POSITION_DATA, \
-    ATTR_SHADE, ATTR_TYPE, ATTR_ID, ATTR_ROOM_ID, ATTR_POSKIND1, \
-    ATTR_POSITION1, ATTR_POSITION2, ATTR_POSKIND2, ATTR_POSITION, \
-    ATTR_COMMAND, ATTR_MOVE, ATTR_TILT
+from aiopvapi.helpers.constants import (
+    ATTR_POSITION_DATA,
+    ATTR_SHADE,
+    ATTR_TYPE,
+    ATTR_ID,
+    ATTR_ROOM_ID,
+    ATTR_POSKIND1,
+    ATTR_POSITION1,
+    ATTR_POSITION2,
+    ATTR_POSKIND2,
+    ATTR_POSITION,
+    ATTR_COMMAND,
+    ATTR_MOVE,
+    ATTR_TILT,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
 MAX_POSITION = 65535
 MIN_POSITION = 0
 
-shade_type = namedtuple('shade_type', ['shade_type', 'description'])
+shade_type = namedtuple("shade_type", ["shade_type", "description"])
 
 
 def factory(raw_data, request):
@@ -50,20 +61,15 @@ def factory(raw_data, request):
 
 
 class BaseShade(ApiResource):
-    api_path = 'api/shades'
+    api_path = "api/shades"
     shade_types = (shade_type(0, "undefined type"),)
-    open_position = {
-        ATTR_POSITION1: MAX_POSITION,
-        ATTR_POSKIND1: 1
-    }
-    close_position = {
-        ATTR_POSITION1: MIN_POSITION,
-        ATTR_POSKIND1: 1
-    }
+    open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
+    close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
     allowed_positions = None
 
-    def __init__(self, raw_data: dict, shade_type: shade_type,
-                 request: AioRequest):
+    def __init__(
+        self, raw_data: dict, shade_type: shade_type, request: AioRequest
+    ):
         self.shade_type = shade_type
         super().__init__(request, self.api_path, raw_data)
 
@@ -77,29 +83,30 @@ class BaseShade(ApiResource):
         return base
 
     async def _move(self, position_data):
-        result = await self.request.put(self._resource_path,
-                                        data=position_data)
+        result = await self.request.put(
+            self._resource_path, data=position_data
+        )
         return result
 
     async def close(self):
-        data = self._create_shade_data(
-            position_data=self.close_position)
+        data = self._create_shade_data(position_data=self.close_position)
         return await self._move(data)
 
     async def open(self):
-        data = self._create_shade_data(
-            position_data=self.open_position)
+        data = self._create_shade_data(position_data=self.open_position)
         return await self._move(data)
 
     async def jog(self):
         """Jog the shade."""
-        await self.request.put(self._resource_path,
-                               {"shade": {"motion": "jog"}})
+        await self.request.put(
+            self._resource_path, {"shade": {"motion": "jog"}}
+        )
 
     async def stop(self):
         """Stop the shade."""
-        await self.request.put(self._resource_path,
-                               {"shade": {"motion": "stop"}})
+        await self.request.put(
+            self._resource_path, {"shade": {"motion": "stop"}}
+        )
 
     async def add_shade_to_room(self, room_id):
         data = self._create_shade_data(room_id=room_id)
@@ -108,8 +115,9 @@ class BaseShade(ApiResource):
     async def refresh(self):
         """Query the hub and the actual shade to get the most recent shade
         data. Including current shade position."""
-        raw_data = await self.request.get(self._resource_path,
-                                          {'refresh': 'true'})
+        raw_data = await self.request.get(
+            self._resource_path, {"refresh": "true"}
+        )
 
         self._raw_data = raw_data[ATTR_SHADE]
 
@@ -127,25 +135,28 @@ class BaseShade(ApiResource):
 
 class ShadeTdbu(BaseShade):
     shade_types = (
-        shade_type(8, 'Duette, top down bottom up'),
-        shade_type(47, 'Pleated, top down bottom up')
-        ,)
+        shade_type(8, "Duette, top down bottom up"),
+        shade_type(47, "Pleated, top down bottom up"),
+    )
 
     open_position = {
         ATTR_POSITION1: MAX_POSITION,
         ATTR_POSITION2: MIN_POSITION,
         ATTR_POSKIND1: 1,
-        ATTR_POSKIND2: 2}
+        ATTR_POSKIND2: 2,
+    }
 
     close_position = {
         ATTR_POSITION1: MIN_POSITION,
         ATTR_POSITION2: MIN_POSITION,
         ATTR_POSKIND1: 1,
-        ATTR_POSKIND2: 2
+        ATTR_POSKIND2: 2,
     }
     allowed_positions = (
-        {ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 2},
-         ATTR_COMMAND: ATTR_MOVE},
+        {
+            ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 2},
+            ATTR_COMMAND: ATTR_MOVE,
+        },
     )
 
 
@@ -153,54 +164,36 @@ class ShadeBottomUp(BaseShade):
     shade_types = (
         shade_type(42, "M25T Roller blind"),
         shade_type(6, "Duette"),
-        shade_type(49, 'AC roller'),
+        shade_type(49, "AC roller"),
         shade_type(69, "Curtain track, Left stack"),
-        shade_type(70, 'Curtain track,Right stack'),
-        shade_type(71, 'Curtain track, Split stack'),
-
+        shade_type(70, "Curtain track,Right stack"),
+        shade_type(71, "Curtain track, Split stack"),
     )
 
-    open_position = {
-        ATTR_POSITION1: MAX_POSITION,
-        ATTR_POSKIND1: 1
-    }
-    close_position = {
-        ATTR_POSITION1: MIN_POSITION,
-        ATTR_POSKIND1: 1
-    }
+    open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
+    close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
     allowed_positions = (
-        {ATTR_POSITION: {ATTR_POSKIND1: 1},
-         ATTR_COMMAND: ATTR_MOVE},)
+        {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
+    )
 
 
 class ShadeBottomUpTilt(BaseShade):
-    shade_types = (
-        shade_type(44, "Twist"),
-        shade_type(23, 'Silhouette')
-    )
+    shade_types = (shade_type(44, "Twist"), shade_type(23, "Silhouette"))
 
-    open_position = {
-        ATTR_POSITION1: MAX_POSITION,
-        ATTR_POSKIND1: 1
-    }
-    close_position = {
-        ATTR_POSITION1: MIN_POSITION,
-        ATTR_POSKIND1: 1
-    }
+    open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
+    close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
     allowed_positions = (
-        {ATTR_POSITION: {ATTR_POSKIND1: 1},
-         ATTR_COMMAND: ATTR_MOVE},
-        {ATTR_POSITION: {ATTR_POSKIND1: 3},
-         ATTR_COMMAND: ATTR_TILT}
+        {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
+        {ATTR_POSITION: {ATTR_POSKIND1: 3}, ATTR_COMMAND: ATTR_TILT},
     )
 
 
 class ShadeBottomUpTiltAnywhere(BaseShade):
     shade_types = (
         shade_type(62, "Venetian, tilt anywhere"),
-        shade_type(54, 'Vertical blind, Left stack'),
-        shade_type(55, 'Vertical blind, Right stack'),
-        shade_type(56, 'Vertical blind, Split stack')
+        shade_type(54, "Vertical blind, Left stack"),
+        shade_type(55, "Vertical blind, Right stack"),
+        shade_type(56, "Vertical blind, Split stack"),
     )
 
     open_position = {
@@ -213,56 +206,25 @@ class ShadeBottomUpTiltAnywhere(BaseShade):
         ATTR_POSKIND1: 1,
         ATTR_POSITION1: MIN_POSITION,
         ATTR_POSKIND2: 3,
-        ATTR_POSITION2: MIN_POSITION
+        ATTR_POSITION2: MIN_POSITION,
     }
     allowed_positions = (
-        {ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 3},
-         ATTR_COMMAND: ATTR_MOVE},)
+        {
+            ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 3},
+            ATTR_COMMAND: ATTR_MOVE,
+        },
+    )
 
-# class Shade(ApiResource):
-#     api_path = 'api/shades'
-#
-#     def __init__(self, raw_data: dict, request: AioRequest):
-#         if ATTR_SHADE in raw_data:
-#             raw_data = raw_data.get(ATTR_SHADE)
-#         super().__init__(request, self.api_path,
-#                          raw_data)
-#         self._shade_position = Position(raw_data.get(ATTR_TYPE))
+    async def tilt_close(self):
+        """Tilt vanes to close position"""
+        data = self._create_shade_data(
+            position_data={ATTR_POSKIND2: 3, ATTR_POSITION2: MIN_POSITION}
+        )
+        return await self._move(data)
 
-# async def refresh(self):
-#     """Get raw data from the hub and update the shade instance"""
-#     raw_data = await self.request.get(self._resource_path,
-#                                       {'refresh': 'true'})
-#     if raw_data:
-#         self._raw_data = raw_data[ATTR_SHADE]
-#         if ATTR_POSITION_DATA in raw_data[ATTR_SHADE]:
-#             self._shade_position.refresh(
-#                 raw_data[ATTR_SHADE][ATTR_POSITION_DATA])
-
-# async def move_to(self, position1=None, position2=None):
-#     """Moves the shade to a specific position.
-#
-#     Next to move to there are method for move_tilt_to and
-#     tilt_to
-#     """
-#     data = self._create_shade_data(self._shade_position.get_move_data(
-#         position1, position2))
-#     return await self._move(data)
-#
-# def get_move_data(self, position1, position2):
-#     """Return a dict with move data."""
-#     return self._shade_position.get_move_data(position1, position2)
-
-# async def close(self):
-#     data = self._create_shade_data(
-#         position_data=self._shade_position.close_data)
-#     return await self._move(data)
-#
-# async def open(self):
-#     data = self._create_shade_data(
-#         position_data=self._shade_position.open_data)
-#     return await self._move(data)
-#
-# async def jog(self):
-#     await self.request.put(self._resource_path,
-#                            {"shade": {"motion": "jog"}})
+    async def tilt_open(self):
+        """Tilt vanes to close position."""
+        data = self._create_shade_data(
+            position_data={ATTR_POSKIND2: 3, ATTR_POSITION2: MAX_POSITION}
+        )
+        return await self._move(data)

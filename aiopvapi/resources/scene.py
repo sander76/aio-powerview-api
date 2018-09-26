@@ -1,11 +1,10 @@
 from aiopvapi.helpers.aiorequest import AioRequest
 from aiopvapi.helpers.api_base import ApiResource
-from aiopvapi.helpers.constants import ATTR_SCENE, ATTR_ROOM_ID, \
-    ATTR_SCENE_ID
+from aiopvapi.helpers.constants import ATTR_SCENE, ATTR_ROOM_ID, ATTR_SCENE_ID
 
 
 class Scene(ApiResource):
-    api_path = 'api/scenes'
+    api_path = "api/scenes"
 
     def __init__(self, raw_data: dict, request: AioRequest):
         if ATTR_SCENE in raw_data:
@@ -19,6 +18,7 @@ class Scene(ApiResource):
 
     async def activate(self):
         """Activate this scene."""
-        _val = await self.request.get(self._base_path,
-                                      params={ATTR_SCENE_ID: self._id})
+        _val = await self.request.get(
+            self._base_path, params={ATTR_SCENE_ID: self._id}
+        )
         return _val

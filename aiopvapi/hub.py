@@ -8,7 +8,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class UserData(ApiBase):
-    api_path = 'api/userdata'
+    api_path = "api/userdata"
 
     def __init__(self, request):
         super().__init__(request, self.api_path)
@@ -20,10 +20,11 @@ class UserData(ApiBase):
     def parse(self, raw):
         """Convert raw incoming to class attributes."""
         self._raw = raw
-        self.hub_name = self._parse('userData', 'hubName',
-                                    converter=base64_to_unicode)
-        self.ip = self._parse('userData', 'ip')
-        self.ssid = self._parse('userData', 'ssid')
+        self.hub_name = self._parse(
+            "userData", "hubName", converter=base64_to_unicode
+        )
+        self.ip = self._parse("userData", "ip")
+        self.ssid = self._parse("userData", "ssid")
 
     def _parse(self, *keys, converter=None):
         try:
@@ -53,15 +54,16 @@ class Version:
         self._name = name
 
     def __repr__(self):
-        return ("BUILD: {} REVISION: {} SUB_REVISION: {}".format(
-            self._build, self._revision, self._sub_revision))
+        return "BUILD: {} REVISION: {} SUB_REVISION: {}".format(
+            self._build, self._revision, self._sub_revision
+        )
 
     def __eq__(self, other):
         return str(self) == str(other)
 
 
 class Hub(ApiBase):
-    api_path = 'api'
+    api_path = "api"
 
     def __init__(self, request):
         super().__init__(request, self.api_path)
@@ -89,22 +91,23 @@ class Hub(ApiBase):
         """Query the firmware versions."""
 
         _version = await self.request.get(
-            join_path(self._base_path, "/fwversion"))
-        _fw = _version.get('firmware')
+            join_path(self._base_path, "/fwversion")
+        )
+        _fw = _version.get("firmware")
         if _fw:
-            _main = _fw.get('mainProcessor')
+            _main = _fw.get("mainProcessor")
             if _main:
                 self._main_processor_version = self._make_version(_main)
-            _radio = _fw.get('radio')
+            _radio = _fw.get("radio")
             if _radio:
                 self._radio_version = self._make_version(_radio)
 
     def _make_version(self, data: dict):
         version = Version(
-            data['build'],
-            data['revision'],
-            data['subRevision'],
-            data.get('name')
+            data["build"],
+            data["revision"],
+            data["subRevision"],
+            data.get("name"),
         )
         return version
 

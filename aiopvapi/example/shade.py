@@ -1,5 +1,5 @@
-from aiopvapi.helpers.aiorequest import AioRequest, PvApiError
-from aiopvapi.resources.shade import factory, BaseShade
+from aiopvapi.helpers.aiorequest import AioRequest
+from aiopvapi.resources.shade import factory
 from aiopvapi.shades import Shades, ATTR_SHADE_DATA
 
 

@@ -8,7 +8,7 @@ from aiopvapi.helpers.constants import ATTR_ROOM
 
 
 class Room(ApiResource):
-    api_path = 'api/rooms'
+    api_path = "api/rooms"
 
     def __init__(self, raw_data: dict, request: AioRequest):
         if ATTR_ROOM in raw_data:
