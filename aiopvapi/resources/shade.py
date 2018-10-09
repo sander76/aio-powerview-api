@@ -70,9 +70,7 @@ class BaseShade(ApiResource):
     can_move = True
     can_tilt = False
 
-    def __init__(
-        self, raw_data: dict, shade_type: shade_type, request: AioRequest
-    ):
+    def __init__(self, raw_data: dict, shade_type: shade_type, request: AioRequest):
         self.shade_type = shade_type
         super().__init__(request, self.api_path, raw_data)
 
@@ -86,9 +84,7 @@ class BaseShade(ApiResource):
         return base
 
     async def _move(self, position_data):
-        result = await self.request.put(
-            self._resource_path, data=position_data
-        )
+        result = await self.request.put(self._resource_path, data=position_data)
         return result
 
     async def move(self, position_data):
@@ -105,15 +101,11 @@ class BaseShade(ApiResource):
 
     async def jog(self):
         """Jog the shade."""
-        await self.request.put(
-            self._resource_path, {"shade": {"motion": "jog"}}
-        )
+        await self.request.put(self._resource_path, {"shade": {"motion": "jog"}})
 
     async def stop(self):
         """Stop the shade."""
-        await self.request.put(
-            self._resource_path, {"shade": {"motion": "stop"}}
-        )
+        await self.request.put(self._resource_path, {"shade": {"motion": "stop"}})
 
     async def add_shade_to_room(self, room_id):
         data = self._create_shade_data(room_id=room_id)
@@ -122,9 +114,7 @@ class BaseShade(ApiResource):
     async def refresh(self):
         """Query the hub and the actual shade to get the most recent shade
         data. Including current shade position."""
-        raw_data = await self.request.get(
-            self._resource_path, {"refresh": "true"}
-        )
+        raw_data = await self.request.get(self._resource_path, {"refresh": "true"})
 
         self._raw_data = raw_data[ATTR_SHADE]
 
@@ -160,10 +150,7 @@ class ShadeTdbu(BaseShade):
         ATTR_POSKIND2: 2,
     }
     allowed_positions = (
-        {
-            ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 2},
-            ATTR_COMMAND: ATTR_MOVE,
-        },
+        {ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 2}, ATTR_COMMAND: ATTR_MOVE},
     )
 
 
@@ -181,9 +168,7 @@ class ShadeBottomUp(BaseShade):
 
     open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
     close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
-    allowed_positions = (
-        {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
-    )
+    allowed_positions = ({ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},)
 
 
 class ShadeBottomUpTilt(BaseShade):
@@ -202,15 +187,11 @@ class ShadeBottomUpTilt(BaseShade):
 
     async def tilt_close(self):
         """Tilt vanes to close position"""
-        return await self.move(
-            {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
-        )
+        return await self.move({ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION})
 
     async def tilt_open(self):
         """Tilt vanes to close position."""
-        return await self.move(
-            {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_POSITION}
-        )
+        return await self.move({ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_POSITION})
 
 
 class ShadeBottomUpTiltAnywhere(BaseShade):
@@ -236,10 +217,7 @@ class ShadeBottomUpTiltAnywhere(BaseShade):
         ATTR_POSITION2: MIN_POSITION,
     }
     allowed_positions = (
-        {
-            ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 3},
-            ATTR_COMMAND: ATTR_MOVE,
-        },
+        {ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 3}, ATTR_COMMAND: ATTR_MOVE},
         {ATTR_POSITION: {ATTR_POSKIND1: 3}, ATTR_COMMAND: ATTR_TILT},
     )
 
@@ -247,12 +225,8 @@ class ShadeBottomUpTiltAnywhere(BaseShade):
 
     async def tilt_close(self):
         """Tilt vanes to close position"""
-        return await self.move(
-            {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
-        )
+        return await self.move({ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION})
 
     async def tilt_open(self):
         """Tilt vanes to close position."""
-        return await self.move(
-            {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_POSITION}
-        )
+        return await self.move({ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_POSITION})

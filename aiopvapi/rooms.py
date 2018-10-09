@@ -3,12 +3,7 @@
 import logging
 
 from aiopvapi.helpers.api_base import ApiEntryPoint
-from aiopvapi.helpers.constants import (
-    ATTR_NAME,
-    ATTR_COLOR_ID,
-    ATTR_ICON_ID,
-    ATTR_ROOM,
-)
+from aiopvapi.helpers.constants import ATTR_NAME, ATTR_COLOR_ID, ATTR_ICON_ID, ATTR_ROOM
 from aiopvapi.helpers.tools import unicode_to_base64
 from aiopvapi.resources.room import Room
 
@@ -26,11 +21,7 @@ class Rooms(ApiEntryPoint):
     async def create_room(self, name, color_id=0, icon_id=0):
         name = unicode_to_base64(name)
         data = {
-            ATTR_ROOM: {
-                ATTR_NAME: name,
-                ATTR_COLOR_ID: color_id,
-                ATTR_ICON_ID: icon_id,
-            }
+            ATTR_ROOM: {ATTR_NAME: name, ATTR_COLOR_ID: color_id, ATTR_ICON_ID: icon_id}
         }
         return await self.request.post(self._base_path, data=data)
 

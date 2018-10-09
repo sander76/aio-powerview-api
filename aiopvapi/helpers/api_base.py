@@ -27,8 +27,7 @@ class ApiResource(ApiBase):
         self._raw_data = raw_data
 
         self._resource_path = join_path(self._base_path, str(self._id))
-        _LOGGER.debug("Initializing resource. resource path %s",
-                      self._resource_path)
+        _LOGGER.debug("Initializing resource. resource path %s", self._resource_path)
 
     async def delete(self):
         """Deletes a resource."""
@@ -43,8 +42,9 @@ class ApiResource(ApiBase):
     def name(self):
         """Name of the resource. If conversion to unicode somehow
         didn't go well value is returned in base64 encoding."""
-        return self._raw_data.get(ATTR_NAME_UNICODE) or \
-               self._raw_data.get(ATTR_NAME) or ''
+        return (
+            self._raw_data.get(ATTR_NAME_UNICODE) or self._raw_data.get(ATTR_NAME) or ""
+        )
 
     @property
     def raw_data(self):
@@ -83,7 +83,7 @@ class ApiEntryPoint(ApiBase):
 
         :raises PvApiError when an error occurs.
         """
-        resources = await self.request.get(self._base_path,**kwargs)
+        resources = await self.request.get(self._base_path, **kwargs)
         self._sanitize_resources(resources)
         return resources
 
@@ -91,8 +91,7 @@ class ApiEntryPoint(ApiBase):
         """Get a single resource.
 
         :raises PvApiError when a hub connection occurs."""
-        resource = await self.request.get(
-            join_path(self._base_path, str(resource_id)))
+        resource = await self.request.get(join_path(self._base_path, str(resource_id)))
         self._sanitize_resource(self._get_to_actual_data(resource))
         return resource
 
@@ -101,8 +100,9 @@ class ApiEntryPoint(ApiBase):
 
         :raises PvApiError when a hub problem occurs."""
         raw_resources = await self.get_resources(**kwargs)
-        _instances = [self._resource_factory(_raw) for _raw in
-                      self._loop_raw(raw_resources)]
+        _instances = [
+            self._resource_factory(_raw) for _raw in self._loop_raw(raw_resources)
+        ]
         return _instances
 
     async def get_instance(self, resource_id) -> ApiResource:

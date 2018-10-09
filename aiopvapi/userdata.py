@@ -26,9 +26,7 @@ class UserData(ApiEntryPoint):
         :returns: Cleaned up dict.
         """
         try:
-            resource[ATTR_HUB_NAME_UNICODE] = base64_to_unicode(
-                resource[ATTR_HUB_NAME]
-            )
+            resource[ATTR_HUB_NAME_UNICODE] = base64_to_unicode(resource[ATTR_HUB_NAME])
             return resource
         except (KeyError, TypeError):
             LOGGER.debug("no data available")

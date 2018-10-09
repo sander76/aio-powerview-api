@@ -34,8 +34,7 @@ class PowerViewUtil:
 
         :raises PvApiError when something is wrong with the hub.
         """
-        _raw = await self._scenes_entry_point.create_scene(
-            room_id, scene_name)
+        _raw = await self._scenes_entry_point.create_scene(room_id, scene_name)
         result = Scene(_raw, self.request)
         self.scenes.append(result)
         return result
@@ -55,8 +54,7 @@ class PowerViewUtil:
         for _scene in self.scenes:
             if _scene.id == scene_id:
                 return _scene
-        raise ResourceNotFoundException(
-            'Scene not found scene_id: {}'.format(scene_id))
+        raise ResourceNotFoundException("Scene not found scene_id: {}".format(scene_id))
 
     async def get_room(self, room_id, from_cache=True) -> Room:
         """Get a scene resource instance.
@@ -69,8 +67,7 @@ class PowerViewUtil:
         for _room in self.rooms:
             if _room.id == room_id:
                 return _room
-        raise ResourceNotFoundException(
-            'Room not found. Id: {}'.format(room_id))
+        raise ResourceNotFoundException("Room not found. Id: {}".format(room_id))
 
     async def get_shade(self, shade_id, from_cache=True) -> BaseShade:
         """Get a shade instance based on shade id."""
@@ -79,8 +76,7 @@ class PowerViewUtil:
         for _shade in self.shades:
             if _shade.id == shade_id:
                 return _shade
-        raise ResourceNotFoundException(
-            "Shade not found. Id: {}".format(shade_id))
+        raise ResourceNotFoundException("Shade not found. Id: {}".format(shade_id))
 
     async def get_rooms(self):
         """Query the hub for a list of room instances."""
@@ -128,4 +124,5 @@ class PowerViewUtil:
     async def remove_shade_from_scene(self, shade_id, scene_id):
         """Remove a shade from a scene"""
         await self._scene_members_entry_point.delete_shade_from_scene(
-            shade_id, scene_id)
+            shade_id, scene_id
+        )

@@ -12,6 +12,7 @@ _LOGGER = logging.getLogger(__name__)
 class PvApiError(Exception):
     """General Api error. Means we have a problem communication with
     the PowerView hub."""
+
     pass
 
 
@@ -60,13 +61,12 @@ class AioRequest:
         _LOGGER.debug("Sending a get request")
         response = None
         try:
-            _LOGGER.debug('Sending GET request to: %s' % url)
+            _LOGGER.debug("Sending GET request to: %s" % url)
             with async_timeout.timeout(self._timeout, loop=self.loop):
                 response = await self.websession.get(url, params=params)
                 return await check_response(response, [200, 204])
         except (asyncio.TimeoutError, aiohttp.ClientError) as error:
-            _LOGGER.error('Failed to communicate with PowerView hub: %s',
-                          error)
+            _LOGGER.error("Failed to communicate with PowerView hub: %s", error)
             raise PvApiConnectionError
         finally:
             if response is not None:
@@ -76,13 +76,12 @@ class AioRequest:
         response = None
         try:
             with async_timeout.timeout(self._timeout, loop=self.loop):
-                _LOGGER.info('url: %s', url)
-                _LOGGER.info('data: %s', data)
+                _LOGGER.info("url: %s", url)
+                _LOGGER.info("data: %s", data)
                 response = await self.websession.post(url, json=data)
                 return await check_response(response, [200, 201])
         except (asyncio.TimeoutError, aiohttp.ClientError) as error:
-            _LOGGER.error('Failed to communicate with PowerView hub: %s',
-                          error)
+            _LOGGER.error("Failed to communicate with PowerView hub: %s", error)
             raise PvApiConnectionError
         finally:
             if response is not None:
@@ -99,13 +98,12 @@ class AioRequest:
         response = None
         try:
             with async_timeout.timeout(self._timeout, loop=self.loop):
-                _LOGGER.info('url: %s', url)
-                _LOGGER.info('data: %s', data)
+                _LOGGER.info("url: %s", url)
+                _LOGGER.info("data: %s", data)
                 response = await self.websession.put(url, json=data)
             return await check_response(response, [200, 204])
         except (asyncio.TimeoutError, aiohttp.ClientError) as error:
-            _LOGGER.error('Failed to communicate with PowerView hub: %s',
-                          error)
+            _LOGGER.error("Failed to communicate with PowerView hub: %s", error)
             raise PvApiConnectionError
         finally:
             if response is not None:
@@ -127,8 +125,7 @@ class AioRequest:
                 response = await self.websession.delete(url, params=params)
             return await check_response(response, [200, 204])
         except (asyncio.TimeoutError, aiohttp.ClientError) as error:
-            _LOGGER.error('Failed to communicate with PowerView hub: %s',
-                          error)
+            _LOGGER.error("Failed to communicate with PowerView hub: %s", error)
             raise PvApiConnectionError
         finally:
             if response is not None:

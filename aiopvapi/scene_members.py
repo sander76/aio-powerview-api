@@ -3,11 +3,7 @@
 import logging
 
 from aiopvapi.helpers.api_base import ApiEntryPoint
-from aiopvapi.helpers.constants import (
-    ATTR_SCENE_ID,
-    ATTR_SHADE_ID,
-    ATTR_POSITION_DATA,
-)
+from aiopvapi.helpers.constants import ATTR_SCENE_ID, ATTR_SHADE_ID, ATTR_POSITION_DATA
 from aiopvapi.resources.scene_member import ATTR_SCENE_MEMBER, SceneMember
 
 _LOGGER = logging.getLogger("__name__")
@@ -56,6 +52,5 @@ class SceneMembers(ApiEntryPoint):
     async def delete_shade_from_scene(self, shade_id, scene_id):
         """Delete a shade from a scene."""
         return await self.request.delete(
-            self._base_path,
-            params={ATTR_SCENE_ID: scene_id, ATTR_SHADE_ID: shade_id},
+            self._base_path, params={ATTR_SCENE_ID: scene_id, ATTR_SHADE_ID: shade_id}
         )

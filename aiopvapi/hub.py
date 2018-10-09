@@ -20,9 +20,7 @@ class UserData(ApiBase):
     def parse(self, raw):
         """Convert raw incoming to class attributes."""
         self._raw = raw
-        self.hub_name = self._parse(
-            "userData", "hubName", converter=base64_to_unicode
-        )
+        self.hub_name = self._parse("userData", "hubName", converter=base64_to_unicode)
         self.ip = self._parse("userData", "ip")
         self.ssid = self._parse("userData", "ssid")
 
@@ -90,9 +88,7 @@ class Hub(ApiBase):
     async def query_firmware(self):
         """Query the firmware versions."""
 
-        _version = await self.request.get(
-            join_path(self._base_path, "/fwversion")
-        )
+        _version = await self.request.get(join_path(self._base_path, "/fwversion"))
         _fw = _version.get("firmware")
         if _fw:
             _main = _fw.get("mainProcessor")
@@ -104,10 +100,7 @@ class Hub(ApiBase):
 
     def _make_version(self, data: dict):
         version = Version(
-            data["build"],
-            data["revision"],
-            data["subRevision"],
-            data.get("name"),
+            data["build"], data["revision"], data["subRevision"], data.get("name")
         )
         return version
 
