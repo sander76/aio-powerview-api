@@ -67,6 +67,9 @@ class BaseShade(ApiResource):
     close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
     allowed_positions = None
 
+    can_move = True
+    can_tilt = False
+
     def __init__(
         self, raw_data: dict, shade_type: shade_type, request: AioRequest
     ):
@@ -87,6 +90,10 @@ class BaseShade(ApiResource):
             self._resource_path, data=position_data
         )
         return result
+
+    async def move(self, position_data):
+        data = self._create_shade_data(position_data=position_data)
+        return await self._move(data)
 
     async def close(self):
         data = self._create_shade_data(position_data=self.close_position)
@@ -161,6 +168,8 @@ class ShadeTdbu(BaseShade):
 
 
 class ShadeBottomUp(BaseShade):
+    """A simple open/close shade."""
+
     shade_types = (
         shade_type(42, "M25T Roller blind"),
         shade_type(6, "Duette"),
@@ -178,6 +187,8 @@ class ShadeBottomUp(BaseShade):
 
 
 class ShadeBottomUpTilt(BaseShade):
+    """A shade with move and tilt at bottom capabilities."""
+
     shade_types = (shade_type(44, "Twist"), shade_type(23, "Silhouette"))
 
     open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
@@ -187,8 +198,24 @@ class ShadeBottomUpTilt(BaseShade):
         {ATTR_POSITION: {ATTR_POSKIND1: 3}, ATTR_COMMAND: ATTR_TILT},
     )
 
+    can_tilt = True
+
+    async def tilt_close(self):
+        """Tilt vanes to close position"""
+        return await self.move(
+            {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
+        )
+
+    async def tilt_open(self):
+        """Tilt vanes to close position."""
+        return await self.move(
+            {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_POSITION}
+        )
+
 
 class ShadeBottomUpTiltAnywhere(BaseShade):
+    """A shade with move and tilt anywhere capabilities."""
+
     shade_types = (
         shade_type(62, "Venetian, tilt anywhere"),
         shade_type(54, "Vertical blind, Left stack"),
@@ -213,18 +240,19 @@ class ShadeBottomUpTiltAnywhere(BaseShade):
             ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 3},
             ATTR_COMMAND: ATTR_MOVE,
         },
+        {ATTR_POSITION: {ATTR_POSKIND1: 3}, ATTR_COMMAND: ATTR_TILT},
     )
+
+    can_tilt = True
 
     async def tilt_close(self):
         """Tilt vanes to close position"""
-        data = self._create_shade_data(
-            position_data={ATTR_POSKIND2: 3, ATTR_POSITION2: MIN_POSITION}
+        return await self.move(
+            {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
         )
-        return await self._move(data)
 
     async def tilt_open(self):
         """Tilt vanes to close position."""
-        data = self._create_shade_data(
-            position_data={ATTR_POSKIND2: 3, ATTR_POSITION2: MAX_POSITION}
+        return await self.move(
+            {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_POSITION}
         )
-        return await self._move(data)
