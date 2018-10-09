@@ -12,9 +12,9 @@ from shutil import rmtree
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-NAME = "aiopvapi"
+NAME = 'aiopvapi'
 DESCRIPTION = "Powerview blinds API wrapper"
-URL = "https://github.com/sander76/aio-powerview-api"
+URL = "https://github.com/sander76/aio-powerviewpip in-api"
 EMAIL = None
 AUTHOR = "Sander Teunissen"
 REQUIRES_PYTHON = ">=3.5.0"
