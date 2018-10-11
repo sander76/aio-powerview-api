@@ -7,6 +7,10 @@ AioPvApi
 .. image:: https://travis-ci.org/sander76/aio-powerview-api.svg?branch=master
     :target: https://travis-ci.org/sander76/aio-powerview-api
 
+.. image:: https://coveralls.io/repos/github/sander76/aio-powerview-api/badge.svg
+    :target: https://coveralls.io/github/sander76/aio-powerview-api
+
+
 A python asyncio API for PowerView blinds.
 Written for Home-Assistant. Adding features as I go...
 
