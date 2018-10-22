@@ -14,7 +14,7 @@ from setuptools import find_packages, setup, Command
 # Package meta-data.
 NAME = "aiopvapi"
 DESCRIPTION = "Powerview blinds API wrapper"
-URL = "https://github.com/sander76/aio-powerviewpip in-api"
+URL = "https://github.com/sander76/aio-powerview-api"
 EMAIL = None
 AUTHOR = "Sander Teunissen"
 REQUIRES_PYTHON = ">=3.5.0"

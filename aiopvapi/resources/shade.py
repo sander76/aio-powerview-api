@@ -57,6 +57,10 @@ def factory(raw_data, request):
     if _shade:
         return _shade
 
+    _shade = find_type(Silhouette)
+    if _shade:
+        return _shade
+
     return BaseShade(raw_data, BaseShade.shade_types[0], request)
 
 
@@ -174,7 +178,7 @@ class ShadeBottomUp(BaseShade):
 class ShadeBottomUpTilt(BaseShade):
     """A shade with move and tilt at bottom capabilities."""
 
-    shade_types = (shade_type(44, "Twist"), shade_type(23, "Silhouette"))
+    shade_types = (shade_type(44, "Twist"),)
 
     open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
     close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
@@ -192,6 +196,16 @@ class ShadeBottomUpTilt(BaseShade):
     async def tilt_open(self):
         """Tilt vanes to close position."""
         return await self.move({ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_POSITION})
+
+
+class Silhouette(ShadeBottomUpTilt):
+    shade_types = (shade_type(23, "Silhouette"),)
+
+    async def tilt_close(self):
+        return await self.move({ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION})
+
+    async def tilt_open(self):
+        return await self.move({ATTR_POSKIND1: 3, ATTR_POSITION1: 32767})
 
 
 class ShadeBottomUpTiltAnywhere(BaseShade):
