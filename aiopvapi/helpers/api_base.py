@@ -22,12 +22,15 @@ class ApiResource(ApiBase):
 
     def __init__(self, request, api_endpoint, raw_data=None):
         super().__init__(request, api_endpoint)
+        self._id = "unknown"
         if raw_data:
             self._id = raw_data.get(ATTR_ID)
         self._raw_data = raw_data
 
         self._resource_path = join_path(self._base_path, str(self._id))
-        _LOGGER.debug("Initializing resource. resource path %s", self._resource_path)
+        _LOGGER.debug(
+            "Initializing resource. resource path %s", self._resource_path
+        )
 
     async def delete(self):
         """Deletes a resource."""
@@ -43,7 +46,9 @@ class ApiResource(ApiBase):
         """Name of the resource. If conversion to unicode somehow
         didn't go well value is returned in base64 encoding."""
         return (
-            self._raw_data.get(ATTR_NAME_UNICODE) or self._raw_data.get(ATTR_NAME) or ""
+            self._raw_data.get(ATTR_NAME_UNICODE)
+            or self._raw_data.get(ATTR_NAME)
+            or ""
         )
 
     @property
@@ -91,7 +96,9 @@ class ApiEntryPoint(ApiBase):
         """Get a single resource.
 
         :raises PvApiError when a hub connection occurs."""
-        resource = await self.request.get(join_path(self._base_path, str(resource_id)))
+        resource = await self.request.get(
+            join_path(self._base_path, str(resource_id))
+        )
         self._sanitize_resource(self._get_to_actual_data(resource))
         return resource
 
@@ -101,7 +108,8 @@ class ApiEntryPoint(ApiBase):
         :raises PvApiError when a hub problem occurs."""
         raw_resources = await self.get_resources(**kwargs)
         _instances = [
-            self._resource_factory(_raw) for _raw in self._loop_raw(raw_resources)
+            self._resource_factory(_raw)
+            for _raw in self._loop_raw(raw_resources)
         ]
         return _instances
 

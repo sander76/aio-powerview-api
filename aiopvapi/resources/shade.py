@@ -109,7 +109,15 @@ class BaseShade(ApiResource):
 
     async def stop(self):
         """Stop the shade."""
-        await self.request.put(self._resource_path, {"shade": {"motion": "stop"}})
+        return await self.request.put(self._resource_path, {"shade": {"motion": "stop"}})
+
+    async def tilt_close(self):
+        """Tilt vanes to close position"""
+        _LOGGER.error("Tilt not supported.")
+
+    async def tilt_open(self):
+        """Tilt vanes to close position."""
+        _LOGGER.error("Tilt not supported.")
 
     async def add_shade_to_room(self, room_id):
         data = self._create_shade_data(room_id=room_id)
@@ -135,6 +143,8 @@ class BaseShade(ApiResource):
 
 
 class ShadeTdbu(BaseShade):
+    can_tilt = True
+
     shade_types = (
         shade_type(8, "Duette, top down bottom up"),
         shade_type(47, "Pleated, top down bottom up"),
