@@ -21,7 +21,7 @@ REQUIRES_PYTHON = ">=3.5.0"
 VERSION = None
 
 # What packages are required for this module to be executed?
-REQUIRED = ["async_timeout", "aiohttp>=3,<4"]
+REQUIRED = ["async_timeout", "aiohttp>=3.7.4,<4"]
 
 # What packages are optional?
 EXTRAS = {
