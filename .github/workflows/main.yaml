@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: pip install nox
-      - run: nox
+      - run: nox --session tests-${{ matrix.python-version }}
         env:
           PYTHONDEVMODE: 1
       - uses: codecov/codecov-action@v1

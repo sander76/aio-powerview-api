@@ -4,3 +4,4 @@ pytest
 nox
 pytest-cov
 python-coveralls
+wheel
