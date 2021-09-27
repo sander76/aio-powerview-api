@@ -1,5 +1,3 @@
 """Aio PowerView api version."""
 
-VERSION = (1, 6, 14)
-
-__version__ = ".".join(map(str, VERSION))
+__version__ = "1.6.15"

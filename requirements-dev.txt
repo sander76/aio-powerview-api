@@ -1,3 +1,6 @@
 twine
 pre-commit
 pytest
+nox
+pytest-cov
+python-coveralls
