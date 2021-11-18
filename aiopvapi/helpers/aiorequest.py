@@ -26,7 +26,7 @@ class PvApiConnectionError(PvApiError):
 
 async def check_response(response, valid_response_codes):
     """Check the response for correctness."""
-    if response.status == 204:
+    if response.status in [204, 423]:
         return True
     if response.status in valid_response_codes:
         _js = await response.json()
