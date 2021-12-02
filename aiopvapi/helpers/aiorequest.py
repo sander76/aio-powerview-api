@@ -48,7 +48,7 @@ class AioRequest:
         if websession:
             self.websession = websession
         else:
-            self.websession = aiohttp.ClientSession(loop=self.loop)
+            self.websession = aiohttp.ClientSession()
 
     async def get(self, url: str, params: str = None) -> dict:
         """
@@ -62,7 +62,7 @@ class AioRequest:
         response = None
         try:
             _LOGGER.debug("Sending GET request to: %s" % url)
-            with async_timeout.timeout(self._timeout, loop=self.loop):
+            with async_timeout.timeout(self._timeout):
                 response = await self.websession.get(url, params=params)
                 return await check_response(response, [200, 204])
         except (asyncio.TimeoutError, aiohttp.ClientError) as error:
@@ -75,7 +75,7 @@ class AioRequest:
     async def post(self, url: str, data: dict = None):
         response = None
         try:
-            with async_timeout.timeout(self._timeout, loop=self.loop):
+            with async_timeout.timeout(self._timeout):
                 _LOGGER.debug("url: %s", url)
                 _LOGGER.debug("data: %s", data)
                 response = await self.websession.post(url, json=data)
@@ -97,7 +97,7 @@ class AioRequest:
         """
         response = None
         try:
-            with async_timeout.timeout(self._timeout, loop=self.loop):
+            with async_timeout.timeout(self._timeout):
                 _LOGGER.debug("url: %s", url)
                 _LOGGER.debug("data: %s", data)
                 response = await self.websession.put(url, json=data)
@@ -121,7 +121,7 @@ class AioRequest:
         """
         response = None
         try:
-            with async_timeout.timeout(self._timeout, loop=self.loop):
+            with async_timeout.timeout(self._timeout):
                 response = await self.websession.delete(url, params=params)
             return await check_response(response, [200, 204])
         except (asyncio.TimeoutError, aiohttp.ClientError) as error:
