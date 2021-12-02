@@ -24,9 +24,7 @@ VERSION = None
 REQUIRED = ["async_timeout", "aiohttp>=3.7.4,<4"]
 
 # What packages are optional?
-EXTRAS = {
-    # 'fancy feature': ['django'],
-}
+EXTRAS = {}
 
 
 # The rest you shouldn't have to touch too much :)
