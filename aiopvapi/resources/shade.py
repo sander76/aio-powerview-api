@@ -107,6 +107,10 @@ class BaseShade(ApiResource):
         """Jog the shade."""
         await self.request.put(self._resource_path, {"shade": {"motion": "jog"}})
 
+    async def calibrate(self):
+        """Calibrate the shade."""
+        await self.request.put(self._resource_path, {"shade": {"motion": "calibrate"}})
+
     async def stop(self):
         """Stop the shade."""
         return await self.request.put(self._resource_path, {"shade": {"motion": "stop"}})
@@ -127,6 +131,12 @@ class BaseShade(ApiResource):
         """Query the hub and the actual shade to get the most recent shade
         data. Including current shade position."""
         raw_data = await self.request.get(self._resource_path, {"refresh": "true"})
+
+        self._raw_data = raw_data[ATTR_SHADE]
+
+    async def refreshBattery(self):
+        """Query the hub and request the most recent battery state."""
+        raw_data = await self.request.get(self._resource_path, {"updateBatteryLevel": "true"})
 
         self._raw_data = raw_data[ATTR_SHADE]
 
