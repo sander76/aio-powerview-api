@@ -14,7 +14,7 @@ Links
 Changelog
 ---------
 
-## v1.6.17
+## v1.6.18
 
 - Add endpoints and handle 423 response
 - Remove loop as argument
