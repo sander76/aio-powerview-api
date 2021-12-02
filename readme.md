@@ -22,7 +22,7 @@ Have a look at the examples folder for some guidance how to use it.
 ### 1.6.15
 
 - Constrain aiohttp package versions.
-## v1.6.18
+## v1.6.19
 
 - Add endpoints and handle 423 response
 - Remove loop as argument
