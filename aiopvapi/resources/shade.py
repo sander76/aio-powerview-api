@@ -25,6 +25,7 @@ from aiopvapi.helpers.constants import (
 _LOGGER = logging.getLogger(__name__)
 
 shade_type = namedtuple("shade_type", ["shade_type", "description"])
+capability = namedtuple("type", "functionality", "description")
 
 
 def factory(raw_data, request):
