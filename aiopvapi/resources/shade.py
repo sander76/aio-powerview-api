@@ -319,22 +319,25 @@ class ShadeTiltOnly(BaseShade):
         {ATTR_POSITION: {ATTR_POSKIND1: 3}, ATTR_COMMAND: ATTR_TILT},
     )
 
-    can_tilt = True
 
-    async def tilt_close(self):
-        """Tilt vanes to close position"""
-        return await self.move({ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION})
+class ShadeTopDown(BaseShade):
+    """A simple top/down shade."""
+    shade_types = (
+        shade_type(7, "Top Down"),
+    )
 
-    async def tilt_open(self):
-        """Tilt vanes to close position."""
-        return await self.move({ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_POSITION})
+    capabilities = capability(6, "Primary + PrimaryInverted", "Top Down")
+
+    invert_primary = True
+
+    open_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
+    close_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
+
+    allowed_positions = (
+        {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
+    )
 
 
-class Silhouette(ShadeBottomUpTilt):
-    shade_types = (shade_type(23, "Silhouette"),)
-
-    async def tilt_close(self):
-        return await self.move({ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION})
 
     async def tilt_open(self):
         return await self.move({ATTR_POSKIND1: 3, ATTR_POSITION1: 32767})
