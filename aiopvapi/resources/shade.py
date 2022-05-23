@@ -338,13 +338,35 @@ class ShadeTopDown(BaseShade):
     )
 
 
+class ShadeTdbu(BaseShade):
+    """A shade with top down bottom up capabilities."""
+    shade_types = (
+        shade_type(8, "Duette Top Down Bottom Up"),
+        shade_type(9, "Duette DuoLite Top Down Bottom Up"),
+        shade_type(47, "Pleated Top Down Bottom Up"),
+    )
 
-    async def tilt_open(self):
-        return await self.move({ATTR_POSKIND1: 3, ATTR_POSITION1: 32767})
+    capabilities = capability(
+        7, "Primary + Secondary + TopDown", "Top Down Bottom Up")
 
+    open_position = {
+        ATTR_POSITION1: MAX_POSITION,
+        ATTR_POSITION2: MIN_POSITION,
+        ATTR_POSKIND1: 1,
+        ATTR_POSKIND2: 2,
+    }
 
-class ShadeBottomUpTiltAnywhere(BaseShade):
-    """A shade with move and tilt anywhere capabilities."""
+    close_position = {
+        ATTR_POSITION1: MIN_POSITION,
+        ATTR_POSITION2: MIN_POSITION,
+        ATTR_POSKIND1: 1,
+        ATTR_POSKIND2: 2,
+    }
+
+    allowed_positions = (
+        {ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 2}, ATTR_COMMAND: ATTR_MOVE},
+    )
+
 
     shade_types = (
         shade_type(62, "Venetian, tilt anywhere"),
