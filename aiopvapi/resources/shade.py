@@ -394,14 +394,32 @@ class ShadeDuolite(BaseShade):
     )
 
 
+class ShadeDuoliteLift(BaseShade):
+    """Representation of a DuoLite Lift shade."""
+    shade_types = (
+        shade_type(38, "Silhouette Duolite"),
     )
 
     can_tilt = True
 
-    async def tilt_close(self):
-        """Tilt vanes to close position"""
-        return await self.move({ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION})
+    capabilities = capability(
+        9, "Primary + TiltAnywhere + BlackoutShade", "Duolite Lift Tilt 90°")
 
-    async def tilt_open(self):
-        """Tilt vanes to close position."""
-        return await self.move({ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_POSITION})
+    open_position = {
+        ATTR_POSITION1: MAX_POSITION,
+        ATTR_POSKIND1: 1,
+    }
+
+    close_position = {
+        ATTR_POSITION1: MIN_POSITION,
+        ATTR_POSKIND1: 2,
+    }
+
+    open_position_tilt = {ATTR_POSKIND2: 3, ATTR_POSITION2: MIN_POSITION}
+    close_position_tilt = {ATTR_POSKIND2: 3, ATTR_POSITION2: MAX_POSITION}
+
+    allowed_positions = (
+        {ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 3}, ATTR_COMMAND: ATTR_MOVE},
+        {ATTR_POSITION: {ATTR_POSKIND1: 2, ATTR_POSKIND2: 3}, ATTR_COMMAND: ATTR_MOVE},
+        {ATTR_POSITION: {ATTR_POSKIND2: 3}, ATTR_COMMAND: ATTR_TILT},
+    )
