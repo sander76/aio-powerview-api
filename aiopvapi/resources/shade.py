@@ -17,12 +17,12 @@ from aiopvapi.helpers.constants import (
     ATTR_COMMAND,
     ATTR_MOVE,
     ATTR_TILT,
+    MAX_POSITION,
+    MIN_POSITION,
+    MAX_VANE,
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-MAX_POSITION = 65535
-MIN_POSITION = 0
 
 shade_type = namedtuple("shade_type", ["shade_type", "description"])
 
