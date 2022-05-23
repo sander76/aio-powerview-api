@@ -130,7 +130,16 @@ class BaseShade(ApiResource):
     async def close(self):
         return await self.move(position_data=self.close_position)
 
-    def position_limit(self, value, min, max):
+    def position_limit(self, value, poskind):
+        if(poskind == POSKIND_PRIMARY):
+            min = self.primary_min
+            max = self.primary_max
+        if(poskind == POSKIND_SECONDARY):
+            min = self.secondary_min
+            max = self.secondary_max
+        if(poskind == POSKIND_VANE):
+            min = self.vane_min
+            max = self.vane_max
         if min <= value <= max:
             return value
         if value < min:
@@ -140,31 +149,11 @@ class BaseShade(ApiResource):
 
     def clamp(self, position_data):
         if (position1 := position_data.get(ATTR_POSITION1)) is not None:
-            if position_data[ATTR_POSKIND1] == POSKIND_PRIMARY:
-                position_data[ATTR_POSITION1] = self.position_limit(
-                    position1, self.primary_min, self.primary_max
-                )
-            if position_data[ATTR_POSKIND1] == POSKIND_SECONDARY:
-                position_data[ATTR_POSITION1] = self.position_limit(
-                    position1, self.secondary_min, self.secondary_max
-                )
-            if position_data[ATTR_POSKIND1] == POSKIND_VANE:
-                position_data[ATTR_POSITION1] = self.position_limit(
-                    position1, self.vane_min, self.vane_max
-                )
+            position_data[ATTR_POSITION1] = self.position_limit(
+                position1, position_data[ATTR_POSKIND1])
         if (position2 := position_data.get(ATTR_POSITION2)) is not None:
-            if position_data[ATTR_POSKIND2] == POSKIND_PRIMARY:
-                position_data[ATTR_POSITION2] = self.position_limit(
-                    position2, self.primary_min, self.primary_max
-                )
-            if position_data[ATTR_POSKIND2] == POSKIND_SECONDARY:
-                position_data[ATTR_POSITION2] = self.position_limit(
-                    position2, self.secondary_min, self.secondary_max
-                )
-            if position_data[ATTR_POSKIND2] == POSKIND_VANE:
-                position_data[ATTR_POSITION2] = self.position_limit(
-                    position2, self.vane_min, self.vane_max
-                )
+            position_data[ATTR_POSITION2] = self.position_limit(
+                position2, position_data[ATTR_POSKIND2])
         return position_data
 
     async def jog(self):
