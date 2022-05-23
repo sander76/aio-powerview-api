@@ -69,7 +69,9 @@ class BaseShade(ApiResource):
     shade_types = (shade_type(0, "undefined type"),)
     open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
     close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
-    allowed_positions = None
+    open_position_tilt = {}
+    close_position_tilt = {}
+    allowed_positions = ()
 
     can_move = True
     can_tilt = False
@@ -92,16 +94,24 @@ class BaseShade(ApiResource):
         return result
 
     async def move(self, position_data):
+        if self.can_move is False:
+            _LOGGER.error("Move not supported.")
+            return
         data = self._create_shade_data(position_data=position_data)
         return await self._move(data)
 
-    async def close(self):
-        data = self._create_shade_data(position_data=self.close_position)
+    async def tilt(self, position_data):
+        if self.can_tilt is False:
+            _LOGGER.error("Tilt not supported.")
+            return
+        data = self._create_shade_data(position_data=position_data)
         return await self._move(data)
 
     async def open(self):
-        data = self._create_shade_data(position_data=self.open_position)
-        return await self._move(data)
+        return await self.move(position_data=self.open_position)
+
+    async def close(self):
+        return await self.move(position_data=self.close_position)
 
     async def jog(self):
         """Jog the shade."""
@@ -115,13 +125,13 @@ class BaseShade(ApiResource):
         """Stop the shade."""
         return await self.request.put(self._resource_path, {"shade": {"motion": "stop"}})
 
-    async def tilt_close(self):
-        """Tilt vanes to close position"""
-        _LOGGER.error("Tilt not supported.")
-
     async def tilt_open(self):
         """Tilt vanes to close position."""
-        _LOGGER.error("Tilt not supported.")
+        return await self.tilt(position_data=self.open_position_tilt)
+
+    async def tilt_close(self):
+        """Tilt vanes to close position"""
+        return await self.tilt(position_data=self.close_position_tilt)
 
     async def add_shade_to_room(self, room_id):
         data = self._create_shade_data(room_id=room_id)
