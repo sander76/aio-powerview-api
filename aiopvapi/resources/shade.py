@@ -287,8 +287,16 @@ class ShadeVerticalTiltInvert(ShadeBottomUpTilt):
     close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_POSITION}
 
 
-    open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
-    close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
+class ShadeVerticalTiltAnywhere(ShadeBottomUpTiltAnywhere):
+    """A shade with move and tilt anywhere capabilities."""
+    # currently no known shades
+    # assuming same capability as type 2 but vertical
+    shade_types = (
+    )
+
+    capabilities = capability(
+        4, "Primary + TiltAnywhere + Tilt180", "Vertical Tilt 180°")
+
     allowed_positions = (
         {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
         {ATTR_POSITION: {ATTR_POSKIND1: 3}, ATTR_COMMAND: ATTR_TILT},
