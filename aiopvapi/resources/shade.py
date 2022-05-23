@@ -369,28 +369,31 @@ class ShadeTdbu(BaseShade):
     )
 
 
+class ShadeDuolite(BaseShade):
+    """Representation of a DuoLite shade."""
     shade_types = (
-        shade_type(62, "Venetian, tilt anywhere"),
-        shade_type(54, "Vertical blind, Left stack"),
-        shade_type(55, "Vertical blind, Right stack"),
-        shade_type(56, "Vertical blind, Split stack"),
+        shade_type(65, "Vignette Duolite"),
+        shade_type(79, "Duolite Lift"),
     )
 
+    capabilities = capability(8, "Primary + BlackoutShade", "Duolite Lift")
+
     open_position = {
-        ATTR_POSKIND1: 1,
         ATTR_POSITION1: MAX_POSITION,
-        ATTR_POSKIND2: 3,
-        ATTR_POSITION2: MAX_POSITION,
-    }
-    close_position = {
         ATTR_POSKIND1: 1,
-        ATTR_POSITION1: MIN_POSITION,
-        ATTR_POSKIND2: 3,
-        ATTR_POSITION2: MIN_POSITION,
     }
+
+    close_position = {
+        ATTR_POSITION1: MIN_POSITION,
+        ATTR_POSKIND1: 2,
+    }
+
     allowed_positions = (
-        {ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 3}, ATTR_COMMAND: ATTR_MOVE},
-        {ATTR_POSITION: {ATTR_POSKIND1: 3}, ATTR_COMMAND: ATTR_TILT},
+        {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
+        {ATTR_POSITION: {ATTR_POSKIND1: 2}, ATTR_COMMAND: ATTR_MOVE},
+    )
+
+
     )
 
     can_tilt = True
