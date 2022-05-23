@@ -206,10 +206,20 @@ class ShadeBottomUpTilt(BaseShade):
     )
 
 
+class Silhouette(ShadeBottomUpTilt):
+    """A shade with move and tilt at bottom capabilities with a smaller limit."""
     shade_types = (
-        shade_type(8, "Duette, top down bottom up"),
-        shade_type(47, "Pleated, top down bottom up"),
+        shade_type(18, "Silhouette"),
+        shade_type(23, "Silhouette"),
+        shade_type(43, "Facette"),
     )
+
+    capabilities = capability(
+        1, "Primary + TiltOnClosed + Tilt90", "Bottom Up Tilt 90°")
+
+    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_VANE}
+    close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
+
 
     open_position = {
         ATTR_POSITION1: MAX_POSITION,
