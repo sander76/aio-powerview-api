@@ -256,8 +256,19 @@ class ShadeBottomUpTiltAnywhere(BaseShade):
     )
 
 
-class ShadeBottomUp(BaseShade):
-    """A simple open/close shade."""
+class ShadeVerticalTilt(ShadeBottomUpTilt):
+    """A simple open/close vertical shade."""
+    # same ability as capability 1 but vertical
+    shade_types = (
+        shade_type(70, "Curtain Right Stack"),
+        shade_type(71, "Curtain Split Stack"),
+        shade_type(55, "Vertical Slats Right Stack"),
+        shade_type(56, "Vertical Slats Split Stack"),
+    )
+
+    capabilities = capability(
+        3, "Primary + TiltOnClosed + Tilt180", "Vertical")
+
 
     shade_types = (
         shade_type(42, "M25T Roller blind"),
