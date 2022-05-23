@@ -46,12 +46,20 @@ def factory(raw_data, request):
                 return shade(raw_data, tp, request)
         return None
 
-    classes = [ShadeBottomUp, ShadeBottomUpTilt, Silhouette,
-               ShadeBottomUpTiltAnywhere, ShadeVerticalTilt,
-               ShadeVerticalTiltInvert, ShadeVerticalTiltAnywhere,
-               ShadeTiltOnly, ShadeTopDown, ShadeTdbu,
-               ShadeDuolite, ShadeDuoliteLift,
-               ]
+    classes = [
+        ShadeBottomUp,
+        ShadeBottomUpTilt,
+        Silhouette,
+        ShadeBottomUpTiltAnywhere,
+        ShadeVerticalTilt,
+        ShadeVerticalTiltInvert,
+        ShadeVerticalTiltAnywhere,
+        ShadeTiltOnly,
+        ShadeTopDown,
+        ShadeTdbu,
+        ShadeDuolite,
+        ShadeDuoliteLift,
+    ]
 
     for cls in classes:
         _shade = find_type(cls)
@@ -134,23 +142,29 @@ class BaseShade(ApiResource):
         if (position1 := position_data.get(ATTR_POSITION1)) is not None:
             if position_data[ATTR_POSKIND1] == POSKIND_PRIMARY:
                 position_data[ATTR_POSITION1] = self.position_limit(
-                    position1, self.primary_min, self.primary_max)
+                    position1, self.primary_min, self.primary_max
+                )
             if position_data[ATTR_POSKIND1] == POSKIND_SECONDARY:
                 position_data[ATTR_POSITION1] = self.position_limit(
-                    position1, self.secondary_min, self.secondary_max)
+                    position1, self.secondary_min, self.secondary_max
+                )
             if position_data[ATTR_POSKIND1] == POSKIND_VANE:
                 position_data[ATTR_POSITION1] = self.position_limit(
-                    position1, self.vane_min, self.vane_max)
+                    position1, self.vane_min, self.vane_max
+                )
         if (position2 := position_data.get(ATTR_POSITION2)) is not None:
             if position_data[ATTR_POSKIND2] == POSKIND_PRIMARY:
                 position_data[ATTR_POSITION2] = self.position_limit(
-                    position2, self.primary_min, self.primary_max)
+                    position2, self.primary_min, self.primary_max
+                )
             if position_data[ATTR_POSKIND2] == POSKIND_SECONDARY:
                 position_data[ATTR_POSITION2] = self.position_limit(
-                    position2, self.secondary_min, self.secondary_max)
+                    position2, self.secondary_min, self.secondary_max
+                )
             if position_data[ATTR_POSKIND2] == POSKIND_VANE:
                 position_data[ATTR_POSITION2] = self.position_limit(
-                    position2, self.vane_min, self.vane_max)
+                    position2, self.vane_min, self.vane_max
+                )
         return position_data
 
     async def jog(self):
@@ -204,6 +218,7 @@ class BaseShade(ApiResource):
 
 class ShadeBottomUp(BaseShade):
     """A simple open/close shade."""
+
     shade_types = (
         shade_type(4, "Roman"),
         shade_type(5, "Bottom Up"),
@@ -224,12 +239,12 @@ class ShadeBottomUp(BaseShade):
 
 class ShadeBottomUpTilt(BaseShade):
     """A shade with move and tilt at bottom capabilities."""
-    shade_types = (
-        shade_type(44, "Twist"),
-    )
+
+    shade_types = (shade_type(44, "Twist"),)
 
     capabilities = capability(
-        0, "Primary + TiltOnClosed + Tilt180", "Bottom Up Tilt 180°")
+        0, "Primary + TiltOnClosed + Tilt180", "Bottom Up Tilt 180°"
+    )
 
     can_tilt = True
 
@@ -247,6 +262,7 @@ class ShadeBottomUpTilt(BaseShade):
 
 class Silhouette(ShadeBottomUpTilt):
     """A shade with move and tilt at bottom capabilities with a smaller limit."""
+
     shade_types = (
         shade_type(18, "Silhouette"),
         shade_type(23, "Silhouette"),
@@ -256,7 +272,8 @@ class Silhouette(ShadeBottomUpTilt):
     vane_max = MAX_VANE
 
     capabilities = capability(
-        1, "Primary + TiltOnClosed + Tilt90", "Bottom Up Tilt 90°")
+        1, "Primary + TiltOnClosed + Tilt90", "Bottom Up Tilt 90°"
+    )
 
     open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_VANE}
     close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
@@ -264,13 +281,15 @@ class Silhouette(ShadeBottomUpTilt):
 
 class ShadeBottomUpTiltAnywhere(BaseShade):
     """A shade with move and tilt anywhere capabilities."""
+
     shade_types = (
         shade_type(62, "Venetian, Tilt anywhere"),
         shade_type(51, "Venetian, Tilt anywhere"),
     )
 
     capabilities = capability(
-        2, "Primary + TiltAnywhere + Tilt180", "Bottom Up Tilt 180°")
+        2, "Primary + TiltAnywhere + Tilt180", "Bottom Up Tilt 180°"
+    )
 
     can_tilt = True
 
@@ -299,6 +318,7 @@ class ShadeBottomUpTiltAnywhere(BaseShade):
 
 class ShadeVerticalTilt(ShadeBottomUpTilt):
     """A simple open/close vertical shade."""
+
     # same ability as capability 1 but vertical
     shade_types = (
         shade_type(70, "Curtain Right Stack"),
@@ -313,6 +333,7 @@ class ShadeVerticalTilt(ShadeBottomUpTilt):
 
 class ShadeVerticalTiltInvert(ShadeBottomUpTilt):
     """A simple open/close vertical shade."""
+
     # inversion of left shade required
     shade_types = (
         shade_type(54, "Vertical Slats Left Stack"),
@@ -320,7 +341,8 @@ class ShadeVerticalTiltInvert(ShadeBottomUpTilt):
     )
 
     capabilities = capability(
-        3, "Primary + TiltOnClosed + Tilt180 + VaneInverted", "Vertical")
+        3, "Primary + TiltOnClosed + Tilt180 + VaneInverted", "Vertical"
+    )
 
     invert_vane = True
 
@@ -330,22 +352,27 @@ class ShadeVerticalTiltInvert(ShadeBottomUpTilt):
 
 class ShadeVerticalTiltAnywhere(ShadeBottomUpTiltAnywhere):
     """A shade with move and tilt anywhere capabilities."""
+
     # currently no known shades
     # assuming same capability as type 2 but vertical
     shade_types = (
     )
 
     capabilities = capability(
-        4, "Primary + TiltAnywhere + Tilt180", "Vertical Tilt 180°")
+        4, "Primary + TiltAnywhere + Tilt180", "Vertical Tilt 180°"
+    )
 
 
 class ShadeTiltOnly(BaseShade):
     """A shade with tilt anywhere capabilities only."""
+
     # currently no known shades
     shade_types = (
     )
 
-    capabilities = capability(5, "TiltAnywhere + Tilt180", "Tilt Only 180°")
+    capabilities = capability(
+        5, "TiltAnywhere + Tilt180", "Tilt Only 180°"
+    )
 
     can_move = False
     can_tilt = True
@@ -363,11 +390,14 @@ class ShadeTiltOnly(BaseShade):
 
 class ShadeTopDown(BaseShade):
     """A simple top/down shade."""
+
     shade_types = (
         shade_type(7, "Top Down"),
     )
 
-    capabilities = capability(6, "Primary + PrimaryInverted", "Top Down")
+    capabilities = capability(
+        6, "Primary + PrimaryInverted", "Top Down"
+    )
 
     primary_invert = True
 
@@ -381,6 +411,7 @@ class ShadeTopDown(BaseShade):
 
 class ShadeTdbu(BaseShade):
     """A shade with top down bottom up capabilities."""
+
     shade_types = (
         shade_type(8, "Duette Top Down Bottom Up"),
         shade_type(9, "Duette DuoLite Top Down Bottom Up"),
@@ -388,7 +419,8 @@ class ShadeTdbu(BaseShade):
     )
 
     capabilities = capability(
-        7, "Primary + Secondary + TopDown", "Top Down Bottom Up")
+        7, "Primary + Secondary + TopDown", "Top Down Bottom Up"
+    )
 
     open_position = {
         ATTR_POSITION1: MAX_POSITION,
@@ -411,12 +443,15 @@ class ShadeTdbu(BaseShade):
 
 class ShadeDuolite(BaseShade):
     """Representation of a DuoLite shade."""
+
     shade_types = (
         shade_type(65, "Vignette Duolite"),
         shade_type(79, "Duolite Lift"),
     )
 
-    capabilities = capability(8, "Primary + BlackoutShade", "Duolite Lift")
+    capabilities = capability(
+        8, "Primary + BlackoutShade", "Duolite Lift"
+    )
 
     open_position = {
         ATTR_POSITION1: MAX_POSITION,
@@ -436,6 +471,7 @@ class ShadeDuolite(BaseShade):
 
 class ShadeDuoliteLift(BaseShade):
     """Representation of a DuoLite Lift shade."""
+
     shade_types = (
         shade_type(38, "Silhouette Duolite"),
     )
@@ -445,7 +481,8 @@ class ShadeDuoliteLift(BaseShade):
     vane_max = MAX_VANE
 
     capabilities = capability(
-        9, "Primary + TiltAnywhere + BlackoutShade", "Duolite Lift Tilt 90°")
+        9, "Primary + TiltAnywhere + BlackoutShade", "Duolite Lift Tilt 90°"
+    )
 
     open_position = {
         ATTR_POSITION1: MAX_POSITION,
