@@ -163,7 +163,26 @@ class BaseShade(ApiResource):
         return position
 
 
-class ShadeTdbu(BaseShade):
+class ShadeBottomUp(BaseShade):
+    """A simple open/close shade."""
+    shade_types = (
+        shade_type(4, "Roman"),
+        shade_type(5, "Bottom Up"),
+        shade_type(6, "Duette"),
+        shade_type(42, "M25T Roller Blind"),
+        shade_type(49, "AC Roller"),
+    )
+
+    capabilities = capability(0, "Primary", "Bottom Up")
+
+    open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
+    close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
+
+    allowed_positions = (
+        {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
+    )
+
+
     can_tilt = True
 
     shade_types = (
