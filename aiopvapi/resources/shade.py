@@ -221,21 +221,38 @@ class Silhouette(ShadeBottomUpTilt):
     close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
 
 
+class ShadeBottomUpTiltAnywhere(BaseShade):
+    """A shade with move and tilt anywhere capabilities."""
+    shade_types = (
+        shade_type(62, "Venetian, Tilt anywhere"),
+        shade_type(51, "Venetian, Tilt anywhere"),
+    )
+
+    capabilities = capability(
+        2, "Primary + TiltAnywhere + Tilt180", "Bottom Up Tilt 180°")
+
+    can_tilt = True
+
     open_position = {
-        ATTR_POSITION1: MAX_POSITION,
-        ATTR_POSITION2: MIN_POSITION,
         ATTR_POSKIND1: 1,
-        ATTR_POSKIND2: 2,
+        ATTR_POSITION1: MAX_POSITION,
+        ATTR_POSKIND2: 3,
+        ATTR_POSITION2: MAX_POSITION,
     }
 
     close_position = {
-        ATTR_POSITION1: MIN_POSITION,
-        ATTR_POSITION2: MIN_POSITION,
         ATTR_POSKIND1: 1,
-        ATTR_POSKIND2: 2,
+        ATTR_POSITION1: MIN_POSITION,
+        ATTR_POSKIND2: 3,
+        ATTR_POSITION2: MIN_POSITION,
     }
+
+    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_POSITION}
+    close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
+
     allowed_positions = (
-        {ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 2}, ATTR_COMMAND: ATTR_MOVE},
+        {ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 3}, ATTR_COMMAND: ATTR_MOVE},
+        {ATTR_POSITION: {ATTR_POSKIND1: 3}, ATTR_COMMAND: ATTR_TILT},
     )
 
 
