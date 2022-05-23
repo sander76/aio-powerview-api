@@ -70,6 +70,17 @@ class BaseShade(ApiResource):
     can_move = True
     can_tilt = False
 
+    primary_min = MIN_POSITION
+    primary_max = MAX_POSITION
+    secondary_min = MIN_POSITION
+    secondary_max = MAX_POSITION
+    vane_min = MIN_POSITION
+    vane_max = MAX_POSITION
+
+    primary_invert = False
+    secondary_invert = False
+    vane_invert = False
+
     def __init__(self, raw_data: dict, shade_type: shade_type, request: AioRequest):
         self.shade_type = shade_type
         super().__init__(request, self.api_path, raw_data)
@@ -207,6 +218,8 @@ class Silhouette(ShadeBottomUpTilt):
         shade_type(43, "Facette"),
     )
 
+    vane_max = MAX_VANE
+
     capabilities = capability(
         1, "Primary + TiltOnClosed + Tilt90", "Bottom Up Tilt 90°")
 
@@ -321,7 +334,7 @@ class ShadeTopDown(BaseShade):
 
     capabilities = capability(6, "Primary + PrimaryInverted", "Top Down")
 
-    invert_primary = True
+    primary_invert = True
 
     open_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
     close_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
@@ -393,6 +406,8 @@ class ShadeDuoliteLift(BaseShade):
     )
 
     can_tilt = True
+
+    vane_max = MAX_VANE
 
     capabilities = capability(
         9, "Primary + TiltAnywhere + BlackoutShade", "Duolite Lift Tilt 90°")
