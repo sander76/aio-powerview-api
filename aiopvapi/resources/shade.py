@@ -270,24 +270,22 @@ class ShadeVerticalTilt(ShadeBottomUpTilt):
         3, "Primary + TiltOnClosed + Tilt180", "Vertical")
 
 
+class ShadeVerticalTiltInvert(ShadeBottomUpTilt):
+    """A simple open/close vertical shade."""
+    # inversion of left shade required
     shade_types = (
-        shade_type(42, "M25T Roller blind"),
-        shade_type(6, "Duette"),
-        shade_type(49, "AC roller"),
-        shade_type(69, "Curtain track, Left stack"),
-        shade_type(70, "Curtain track,Right stack"),
-        shade_type(71, "Curtain track, Split stack"),
+        shade_type(54, "Vertical Slats Left Stack"),
+        shade_type(69, "Curtain Left Stack"),
     )
 
-    open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
-    close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
-    allowed_positions = ({ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},)
+    capabilities = capability(
+        3, "Primary + TiltOnClosed + Tilt180 + VaneInverted", "Vertical")
 
+    invert_vane = True
 
-class ShadeBottomUpTilt(BaseShade):
-    """A shade with move and tilt at bottom capabilities."""
+    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
+    close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_POSITION}
 
-    shade_types = (shade_type(44, "Twist"),)
 
     open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
     close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
