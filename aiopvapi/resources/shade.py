@@ -42,25 +42,17 @@ def factory(raw_data, request):
                 return shade(raw_data, tp, request)
         return None
 
-    _shade = find_type(ShadeTdbu)
-    if _shade:
-        return _shade
+    classes = [ShadeBottomUp, ShadeBottomUpTilt, Silhouette,
+               ShadeBottomUpTiltAnywhere, ShadeVerticalTilt,
+               ShadeVerticalTiltInvert, ShadeVerticalTiltAnywhere,
+               ShadeTiltOnly, ShadeTopDown, ShadeTdbu,
+               ShadeDuolite, ShadeDuoliteLift,
+               ]
 
-    _shade = find_type(ShadeBottomUp)
-    if _shade:
-        return _shade
-
-    _shade = find_type(ShadeBottomUpTilt)
-    if _shade:
-        return _shade
-
-    _shade = find_type(ShadeBottomUpTiltAnywhere)
-    if _shade:
-        return _shade
-
-    _shade = find_type(Silhouette)
-    if _shade:
-        return _shade
+    for cls in classes:
+        _shade = find_type(cls)
+        if _shade:
+            return _shade
 
     return BaseShade(raw_data, BaseShade.shade_types[0], request)
 
