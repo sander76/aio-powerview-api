@@ -183,7 +183,28 @@ class ShadeBottomUp(BaseShade):
     )
 
 
+class ShadeBottomUpTilt(BaseShade):
+    """A shade with move and tilt at bottom capabilities."""
+    shade_types = (
+        shade_type(44, "Twist"),
+    )
+
+    capabilities = capability(
+        0, "Primary + TiltOnClosed + Tilt180", "Bottom Up Tilt 180°")
+
     can_tilt = True
+
+    open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
+    close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
+
+    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_POSITION}
+    close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
+
+    allowed_positions = (
+        {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
+        {ATTR_POSITION: {ATTR_POSKIND1: 3}, ATTR_COMMAND: ATTR_TILT},
+    )
+
 
     shade_types = (
         shade_type(8, "Duette, top down bottom up"),
