@@ -68,6 +68,7 @@ def factory(raw_data, request):
 class BaseShade(ApiResource):
     api_path = "api/shades"
     shade_types = (shade_type(0, "undefined type"),)
+    capabilities = capability("-1", "undefined", "undefined")
     open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
     close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
     open_position_tilt = {}
