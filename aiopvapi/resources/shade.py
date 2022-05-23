@@ -1,3 +1,4 @@
+from audioop import avg
 import logging
 from collections import namedtuple
 
@@ -20,6 +21,9 @@ from aiopvapi.helpers.constants import (
     MAX_POSITION,
     MIN_POSITION,
     MAX_VANE,
+    POSKIND_PRIMARY,
+    POSKIND_SECONDARY,
+    POSKIND_VANE,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -89,7 +93,7 @@ class BaseShade(ApiResource):
         """Create a shade data object to be sent to the hub"""
         base = {ATTR_SHADE: {ATTR_ID: self.id}}
         if position_data:
-            base[ATTR_SHADE][ATTR_POSITION_DATA] = position_data
+            base[ATTR_SHADE][ATTR_POSITION_DATA] = self.clamp(position_data)
         if room_id:
             base[ATTR_SHADE][ATTR_ROOM_ID] = room_id
         return base
@@ -117,6 +121,37 @@ class BaseShade(ApiResource):
 
     async def close(self):
         return await self.move(position_data=self.close_position)
+
+    def position_limit(self, value, min, max):
+        if min <= value <= max:
+            return value
+        if value < min:
+            return min
+        else:
+            return max
+
+    def clamp(self, position_data):
+        if (position1 := position_data.get(ATTR_POSITION1)) is not None:
+            if position_data[ATTR_POSKIND1] == POSKIND_PRIMARY:
+                position_data[ATTR_POSITION1] = self.position_limit(
+                    position1, self.primary_min, self.primary_max)
+            if position_data[ATTR_POSKIND1] == POSKIND_SECONDARY:
+                position_data[ATTR_POSITION1] = self.position_limit(
+                    position1, self.secondary_min, self.secondary_max)
+            if position_data[ATTR_POSKIND1] == POSKIND_VANE:
+                position_data[ATTR_POSITION1] = self.position_limit(
+                    position1, self.vane_min, self.vane_max)
+        if (position2 := position_data.get(ATTR_POSITION2)) is not None:
+            if position_data[ATTR_POSKIND2] == POSKIND_PRIMARY:
+                position_data[ATTR_POSITION2] = self.position_limit(
+                    position2, self.primary_min, self.primary_max)
+            if position_data[ATTR_POSKIND2] == POSKIND_SECONDARY:
+                position_data[ATTR_POSITION2] = self.position_limit(
+                    position2, self.secondary_min, self.secondary_max)
+            if position_data[ATTR_POSKIND2] == POSKIND_VANE:
+                position_data[ATTR_POSITION2] = self.position_limit(
+                    position2, self.vane_min, self.vane_max)
+        return position_data
 
     async def jog(self):
         """Jog the shade."""
