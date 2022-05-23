@@ -297,8 +297,25 @@ class ShadeVerticalTiltAnywhere(ShadeBottomUpTiltAnywhere):
     capabilities = capability(
         4, "Primary + TiltAnywhere + Tilt180", "Vertical Tilt 180°")
 
+
+class ShadeTiltOnly(BaseShade):
+    """A shade with tilt anywhere capabilities only."""
+    # currently no known shades
+    shade_types = (
+    )
+
+    capabilities = capability(5, "TiltAnywhere + Tilt180", "Tilt Only 180°")
+
+    can_move = False
+    can_tilt = True
+
+    open_position = {}
+    close_position = {}
+
+    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_POSITION}
+    close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
+
     allowed_positions = (
-        {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
         {ATTR_POSITION: {ATTR_POSKIND1: 3}, ATTR_COMMAND: ATTR_TILT},
     )
 
