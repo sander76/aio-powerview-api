@@ -151,11 +151,6 @@ class BaseShade(ApiResource):
         if (position2 := position_data.get(ATTR_POSITION2)) is not None:
             position_data[ATTR_POSITION2] = self.position_limit(
                 position2, position_data[ATTR_POSKIND2])
-        position_data = self.restrict(position_data)
-        return position_data
-
-    def restrict(self, position_data):
-        """Apply shade specific restrictions for impossible positions."""
         return position_data
 
     async def jog(self):
@@ -436,6 +431,16 @@ class ShadeTdbu(BaseShade):
         ATTR_POSKIND1: 1,
         ATTR_POSKIND2: 2,
     }
+
+    open_position_top = {
+        ATTR_POSITION1: MIN_POSITION,
+        ATTR_POSITION2: MAX_POSITION,
+        ATTR_POSKIND1: 1,
+        ATTR_POSKIND2: 2,
+    }
+
+    async def open_top(self):
+        return await self.move(position_data=self.open_position_top)
 
     allowed_positions = (
         {ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 2}, ATTR_COMMAND: ATTR_MOVE},
