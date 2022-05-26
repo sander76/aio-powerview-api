@@ -57,8 +57,8 @@ def factory(raw_data, request):
         ShadeTiltOnly,
         ShadeTopDown,
         ShadeTdbu,
-        ShadeDuolite,
-        ShadeDuoliteLift,
+        ShadeDualInterlocked,
+        ShadeDualInterlockedTilt,
     ]
 
     for cls in classes:
@@ -216,7 +216,9 @@ class ShadeBottomUp(BaseShade):
         shade_type(49, "AC Roller"),
     )
 
-    capabilities = capability(0, "Primary", "Bottom Up")
+    capabilities = capability(
+        0, "Primary", "Bottom Up"
+    )
 
     open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
     close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
@@ -430,8 +432,8 @@ class ShadeTdbu(BaseShade):
     )
 
 
-class ShadeDuolite(BaseShade):
-    """Representation of a DuoLite shade."""
+class ShadeDualInterlocked(BaseShade):
+    """Representation of a shade with a front sheer and rear blackout shade + tilt."""
 
     shade_types = (
         shade_type(65, "Vignette Duolite"),
@@ -439,7 +441,7 @@ class ShadeDuolite(BaseShade):
     )
 
     capabilities = capability(
-        8, "Primary + BlackoutShade", "Duolite Lift"
+        8, "Primary + BlackoutShade", "Dual Shade Interlocked"
     )
 
     open_position = {
@@ -447,10 +449,8 @@ class ShadeDuolite(BaseShade):
         ATTR_POSKIND1: 1,
     }
 
-    close_position = {
-        ATTR_POSITION1: MIN_POSITION,
-        ATTR_POSKIND1: 2,
-    }
+    open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
+    close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 2}
 
     allowed_positions = (
         {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
@@ -458,8 +458,8 @@ class ShadeDuolite(BaseShade):
     )
 
 
-class ShadeDuoliteLift(BaseShade):
-    """Representation of a DuoLite Lift shade."""
+class ShadeDualInterlockedTilt(BaseShade):
+    """Representation of a shade with a front sheer and rear blackout shade + tilt."""
 
     shade_types = (
         shade_type(38, "Silhouette Duolite"),
@@ -470,24 +470,17 @@ class ShadeDuoliteLift(BaseShade):
     vane_max = MAX_VANE
 
     capabilities = capability(
-        9, "Primary + TiltAnywhere + BlackoutShade", "Duolite Lift Tilt 90°"
+        9, "Primary + TiltAnywhere + BlackoutShade", "Dual Shade Interlocked Tilt 90°"
     )
 
-    open_position = {
-        ATTR_POSITION1: MAX_POSITION,
-        ATTR_POSKIND1: 1,
-    }
+    open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
+    close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 2}
 
-    close_position = {
-        ATTR_POSITION1: MIN_POSITION,
-        ATTR_POSKIND1: 2,
-    }
-
-    open_position_tilt = {ATTR_POSKIND2: 3, ATTR_POSITION2: MIN_POSITION}
-    close_position_tilt = {ATTR_POSKIND2: 3, ATTR_POSITION2: MAX_POSITION}
+    open_position_tilt = {ATTR_POSKIND2: 3, ATTR_POSITION2: MAX_VANE}
+    close_position_tilt = {ATTR_POSKIND2: 3, ATTR_POSITION2: MIN_POSITION}
 
     allowed_positions = (
-        {ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 3}, ATTR_COMMAND: ATTR_MOVE},
-        {ATTR_POSITION: {ATTR_POSKIND1: 2, ATTR_POSKIND2: 3}, ATTR_COMMAND: ATTR_MOVE},
-        {ATTR_POSITION: {ATTR_POSKIND2: 3}, ATTR_COMMAND: ATTR_TILT},
+        {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
+        {ATTR_POSITION: {ATTR_POSKIND1: 2}, ATTR_COMMAND: ATTR_MOVE},
+        {ATTR_POSITION: {ATTR_POSKIND1: 3}, ATTR_COMMAND: ATTR_TILT},
     )
