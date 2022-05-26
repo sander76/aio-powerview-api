@@ -20,7 +20,7 @@ from aiopvapi.helpers.constants import (
     ATTR_TILT,
     MAX_POSITION,
     MIN_POSITION,
-    MAX_VANE,
+    MAX_TILT_90,
     POSKIND_PRIMARY,
     POSKIND_SECONDARY,
     POSKIND_VANE,
@@ -134,10 +134,10 @@ class BaseShade(ApiResource):
         if(poskind == POSKIND_PRIMARY):
             min = self.primary_min
             max = self.primary_max
-        if(poskind == POSKIND_SECONDARY):
+        elif(poskind == POSKIND_SECONDARY):
             min = self.secondary_min
             max = self.secondary_max
-        if(poskind == POSKIND_VANE):
+        elif(poskind == POSKIND_VANE):
             min = self.vane_min
             max = self.vane_max
         if min <= value <= max:
@@ -148,12 +148,18 @@ class BaseShade(ApiResource):
             return max
 
     def clamp(self, position_data):
+        """Prevent impossible positions being sent."""
         if (position1 := position_data.get(ATTR_POSITION1)) is not None:
             position_data[ATTR_POSITION1] = self.position_limit(
                 position1, position_data[ATTR_POSKIND1])
         if (position2 := position_data.get(ATTR_POSITION2)) is not None:
             position_data[ATTR_POSITION2] = self.position_limit(
                 position2, position_data[ATTR_POSKIND2])
+        position_data = self.restrict(position_data)
+        return position_data
+
+    def restrict(self, position_data):
+        """Apply shade specific restrictions for impossible positions."""
         return position_data
 
     async def jog(self):
@@ -260,13 +266,13 @@ class Silhouette(ShadeBottomUpTilt):
         shade_type(43, "Facette"),
     )
 
-    vane_max = MAX_VANE
+    vane_max = MAX_TILT_90
 
     capabilities = capability(
         1, "Primary + TiltOnClosed + Tilt90", "Bottom Up Tilt 90°"
     )
 
-    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_VANE}
+    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_TILT_90}
     close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
 
 
@@ -441,7 +447,7 @@ class ShadeDualInterlocked(BaseShade):
     )
 
     capabilities = capability(
-        8, "Primary + BlackoutShade", "Dual Shade Interlocked"
+        8, "Primary + SecondaryInterlocked", "Dual Shade Interlocked"
     )
 
     open_position = {
@@ -470,13 +476,15 @@ class ShadeDualInterlockedTilt(BaseShade):
     vane_max = MAX_VANE
 
     capabilities = capability(
-        9, "Primary + TiltAnywhere + BlackoutShade", "Dual Shade Interlocked Tilt 90°"
+        9, "Primary + TiltOnRearClosed + SecondaryInterlocked", "Dual Shade Interlocked Tilt 90°"
     )
+
+    vane_max = MAX_TILT_90
 
     open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
     close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 2}
 
-    open_position_tilt = {ATTR_POSKIND2: 3, ATTR_POSITION2: MAX_VANE}
+    open_position_tilt = {ATTR_POSKIND2: 3, ATTR_POSITION2: MAX_TILT_90}
     close_position_tilt = {ATTR_POSKIND2: 3, ATTR_POSITION2: MIN_POSITION}
 
     allowed_positions = (
