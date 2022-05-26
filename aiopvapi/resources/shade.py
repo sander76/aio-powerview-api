@@ -287,8 +287,8 @@ class ShadeBottomUpTiltAnywhere(ShadeTiltBase):
     """A shade with move and tilt anywhere capabilities."""
 
     shade_types = (
-        shade_type(62, "Venetian, Tilt anywhere"),
-        shade_type(51, "Venetian, Tilt anywhere"),
+        shade_type(62, "Venetian, Tilt Anywhere"),
+        shade_type(51, "Venetian, Tilt Anywhere"),
     )
 
     capabilities = capability(
@@ -325,10 +325,10 @@ class ShadeVerticalTilt(ShadeBottomUpTilt):
 
     # same ability as capability 1 but vertical
     shade_types = (
-        shade_type(70, "Curtain Right Stack"),
-        shade_type(71, "Curtain Split Stack"),
-        shade_type(55, "Vertical Slats Right Stack"),
-        shade_type(56, "Vertical Slats Split Stack"),
+        shade_type(70, "Curtain, Right Stack"),
+        shade_type(71, "Curtain, Split Stack"),
+        shade_type(55, "Vertical Slats, Right Stack"),
+        shade_type(56, "Vertical Slats, Split Stack"),
     )
 
     capabilities = capability(
@@ -341,8 +341,8 @@ class ShadeVerticalTiltInvert(ShadeBottomUpTilt):
 
     # inversion of left shade required
     shade_types = (
-        shade_type(54, "Vertical Slats Left Stack"),
-        shade_type(69, "Curtain Left Stack"),
+        shade_type(54, "Vertical Slats, Left Stack"),
+        shade_type(69, "Curtain, Left Stack"),
     )
 
     capabilities = capability(
@@ -414,9 +414,9 @@ class ShadeTdbu(BaseShade):
     """A shade with top down bottom up capabilities."""
 
     shade_types = (
-        shade_type(8, "Duette Top Down Bottom Up"),
-        shade_type(9, "Duette DuoLite Top Down Bottom Up"),
-        shade_type(47, "Pleated Top Down Bottom Up"),
+        shade_type(8, "Duette, Top Down Bottom Up"),
+        shade_type(9, "Duette DuoLite, Top Down Bottom Up"),
+        shade_type(47, "Pleated, Top Down Bottom Up"),
     )
 
     capabilities = capability(
@@ -453,11 +453,6 @@ class ShadeDualInterlocked(BaseShade):
     capabilities = capability(
         8, "Primary + SecondaryInterlocked", "Dual Shade Interlocked"
     )
-
-    open_position = {
-        ATTR_POSITION1: MAX_POSITION,
-        ATTR_POSKIND1: 1,
-    }
 
     open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
     close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 2}
