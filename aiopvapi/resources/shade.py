@@ -86,8 +86,8 @@ class BaseShade(ApiResource):
     primary_max = MAX_POSITION
     secondary_min = MIN_POSITION
     secondary_max = MAX_POSITION
-    vane_min = MIN_POSITION
-    vane_max = MAX_POSITION
+    tilt_min = MIN_POSITION
+    tilt_max = MAX_POSITION
 
     def __init__(self, raw_data: dict, shade_type: shade_type, request: AioRequest):
         self.shade_type = shade_type
@@ -134,8 +134,8 @@ class BaseShade(ApiResource):
             min = self.secondary_min
             max = self.secondary_max
         elif(poskind == POSKIND_VANE):
-            min = self.vane_min
-            max = self.vane_max
+            min = self.tilt_min
+            max = self.tilt_max
         if min <= value <= max:
             return value
         if value < min:
@@ -166,11 +166,11 @@ class BaseShade(ApiResource):
         return await self.request.put(self._resource_path, {"shade": {"motion": "stop"}})
 
     async def tilt_open(self):
-        """Tilt vanes to close position."""
+        """Tilt to close position."""
         return await self.tilt(position_data=self.open_position_tilt)
 
     async def tilt_close(self):
-        """Tilt vanes to close position"""
+        """Tilt to close position"""
         return await self.tilt(position_data=self.close_position_tilt)
 
     async def add_shade_to_room(self, room_id):
@@ -272,7 +272,7 @@ class ShadeBottomUpTilt90(ShadeBottomUpTilt):
         1, "Primary + TiltOnClosed + Tilt90", "Bottom Up Tilt 90°"
     )
 
-    vane_max = MAX_TILT_90
+    tilt_max = MAX_TILT_90
 
     open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_TILT_90}
     close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
@@ -479,7 +479,7 @@ class ShadeDualInterlockedTilt(ShadeTiltBase):
         9, "Primary + TiltOnRearClosed + SecondaryInterlocked", "Dual Shade Interlocked Tilt 90°"
     )
 
-    vane_max = MAX_TILT_90
+    tilt_max = MAX_TILT_90
 
     open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
     close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 2}
