@@ -49,7 +49,7 @@ def factory(raw_data, request):
     classes = [
         ShadeBottomUp,
         ShadeBottomUpTilt,
-        Silhouette,
+        ShadeBottomUpTilt90,
         ShadeBottomUpTiltAnywhere,
         ShadeVerticalTilt,
         ShadeVerticalTiltInvert,
@@ -259,7 +259,7 @@ class ShadeBottomUpTilt(ShadeTiltBase):
     )
 
 
-class Silhouette(ShadeBottomUpTilt):
+class ShadeBottomUpTilt90(ShadeBottomUpTilt):
     """A shade with move and tilt at bottom capabilities with a smaller limit."""
 
     shade_types = (
