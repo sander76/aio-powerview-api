@@ -454,16 +454,6 @@ class ShadeTdbu(BaseShade):
         ATTR_POSKIND2: 2,
     }
 
-    open_position_top = {
-        ATTR_POSITION1: MIN_POSITION,
-        ATTR_POSITION2: MAX_POSITION,
-        ATTR_POSKIND1: 1,
-        ATTR_POSKIND2: 2,
-    }
-
-    async def open_top(self):
-        return await self.move(position_data=self.open_position_top)
-
     allowed_positions = (
         {ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 2}, ATTR_COMMAND: ATTR_MOVE},
     )
