@@ -364,7 +364,7 @@ class ShadeVerticalTiltInvert(ShadeBottomUpTilt):
 
     capabilities = (
         capability(
-            3, "Primary + TiltOnClosed + Tilt180 + VaneInverted", "Vertical"),
+            3, "Primary + TiltOnClosed + Tilt180 + TiltInverted", "Vertical"),
     )
 
     open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
