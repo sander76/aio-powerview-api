@@ -20,6 +20,7 @@ ATTR_OPEN_POSITION = "open_position"
 ATTR_CLOSE_POSITION = "close_position"
 ATTR_ALLOWED_POSITIONS = "allowed_positions"
 
+ATTR_CAPABILITIES = "capabilities"
 ATTR_POSITION_DATA = "positions"
 ATTR_SCENE = "scene"
 ATTR_SHADE = "shade"
