@@ -44,17 +44,14 @@ def factory(raw_data, request):
     def find_type(shade):
         for tp in shade.shade_types:
             if tp.shade_type == shade_type:
-                _LOGGER.debug("Match on type %s - %s", shade, raw_data)
                 return shade(raw_data, tp, request)
         return None
 
     shade_capability = raw_data.get(ATTR_CAPABILITIES)
 
     def find_capability(shade):
-        for cap in shade.capabilities:
-            if cap.type == shade_capability:
-                _LOGGER.debug("Match on capability %s - %s", shade, raw_data)
-                return shade(raw_data, cap, request)
+        if shade.capability.type == shade_capability:
+            return shade(raw_data, shade, request)
         return None
 
     classes = [
@@ -76,14 +73,16 @@ def factory(raw_data, request):
         # class check is more consise as we have tested positioning
         _shade = find_type(cls)
         if _shade:
+            _LOGGER.debug("Match on type    : %s - %s", _shade, raw_data)
             return _shade
         # fallback to a capability check - this should future proof new shades
         # type 0 that contain tilt would not be caught here
         _shade = find_capability(cls)
         if _shade:
+            _LOGGER.debug("Match capability : %s - %s", _shade, raw_data)
             return _shade
 
-    _LOGGER.debug("Shade unmatched %s - %s", BaseShade, raw_data)
+    _LOGGER.debug("Shade unmatched  : %s - %s", BaseShade, raw_data)
     return BaseShade(raw_data, BaseShade.shade_types[0], request)
 
 
