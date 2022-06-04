@@ -20,8 +20,8 @@ from aiopvapi.helpers.constants import (
     ATTR_MOVE,
     ATTR_TILT,
     MAX_POSITION,
+    MID_POSITION,
     MIN_POSITION,
-    MAX_TILT_90,
     POSKIND_PRIMARY,
     POSKIND_SECONDARY,
     POSKIND_VANE,
@@ -247,7 +247,9 @@ class ShadeTiltBase(BaseShade):
 
     can_tilt = True
 
-    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_POSITION}
+    # even for shades that can 180° tilt, this would just result in
+    # two closed positions. 90° will always be the open position
+    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MID_POSITION}
     close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
 
     allowed_positions = (
@@ -267,7 +269,7 @@ class ShadeBottomUpTilt(ShadeTiltBase):
     open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
     close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
 
-    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_POSITION}
+    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MID_POSITION}
     close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
 
     allowed_positions = (
@@ -287,9 +289,9 @@ class ShadeBottomUpTilt90(ShadeBottomUpTilt):
 
     capability = capability(1, "Primary + TiltOnClosed + Tilt90", "Bottom Up Tilt 90°")
 
-    tilt_max = MAX_TILT_90
+    tilt_max = MID_POSITION
 
-    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_TILT_90}
+    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MID_POSITION}
     close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
 
 
@@ -297,8 +299,8 @@ class ShadeBottomUpTiltAnywhere(ShadeTiltBase):
     """A shade with move and tilt anywhere capabilities."""
 
     shade_types = (
-        shade_type(62, "Venetian, Tilt Anywhere"),
         shade_type(51, "Venetian, Tilt Anywhere"),
+        shade_type(62, "Venetian, Tilt Anywhere"),
     )
 
     capability = capability(2, "Primary + TiltAnywhere + Tilt180", "Bottom Up Tilt 180°")
@@ -309,7 +311,7 @@ class ShadeBottomUpTiltAnywhere(ShadeTiltBase):
         ATTR_POSKIND1: 1,
         ATTR_POSITION1: MAX_POSITION,
         ATTR_POSKIND2: 3,
-        ATTR_POSITION2: MAX_POSITION,
+        ATTR_POSITION2: MID_POSITION,
     }
 
     close_position = {
@@ -319,7 +321,7 @@ class ShadeBottomUpTiltAnywhere(ShadeTiltBase):
         ATTR_POSITION2: MIN_POSITION,
     }
 
-    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_POSITION}
+    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MID_POSITION}
     close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
 
     allowed_positions = (
@@ -333,10 +335,10 @@ class ShadeVerticalTilt(ShadeBottomUpTilt):
 
     # same ability as capability 1 but vertical
     shade_types = (
-        shade_type(70, "Curtain, Right Stack"),
-        shade_type(71, "Curtain, Split Stack"),
         shade_type(55, "Vertical Slats, Right Stack"),
         shade_type(56, "Vertical Slats, Split Stack"),
+        shade_type(70, "Curtain, Right Stack"),
+        shade_type(71, "Curtain, Split Stack"),
     )
 
     capability = capability(3, "Primary + TiltOnClosed + Tilt180", "Vertical")
@@ -353,7 +355,7 @@ class ShadeVerticalTiltInvert(ShadeBottomUpTilt):
 
     capability = capability(3, "Primary + TiltOnClosed + Tilt180 + TiltInverted", "Vertical")
 
-    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
+    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MID_POSITION}
     close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_POSITION}
 
 
@@ -370,11 +372,8 @@ class ShadeVerticalTiltAnywhere(ShadeBottomUpTiltAnywhere):
 class ShadeTiltOnly(ShadeTiltBase):
     """A shade with tilt anywhere capabilities only."""
 
-    # currently no known shades
-    shade_types = ()
-
-    capabilities = (
-        capability(5, "TiltAnywhere + Tilt180", "Tilt Only 180°"),
+    shade_types = (
+        shade_type(66, "Palm Beach Shutters"),
     )
 
     capability = capability(5, "TiltAnywhere + Tilt180", "Tilt Only 180°")
@@ -385,7 +384,7 @@ class ShadeTiltOnly(ShadeTiltBase):
     open_position = {}
     close_position = {}
 
-    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MAX_POSITION}
+    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MID_POSITION}
     close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
 
     allowed_positions = (
@@ -468,12 +467,12 @@ class ShadeDualInterlockedTilt(ShadeTiltBase):
 
     capability = capability(9,"Primary + TiltOnRearClosed + SecondaryOverlapped","Dual Shade Tilt 90°")
 
-    tilt_max = MAX_TILT_90
+    tilt_max = MID_POSITION
 
     open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
     close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 2}
 
-    open_position_tilt = {ATTR_POSKIND2: 3, ATTR_POSITION2: MAX_TILT_90}
+    open_position_tilt = {ATTR_POSKIND2: 3, ATTR_POSITION2: MID_POSITION}
     close_position_tilt = {ATTR_POSKIND2: 3, ATTR_POSITION2: MIN_POSITION}
 
     allowed_positions = (
