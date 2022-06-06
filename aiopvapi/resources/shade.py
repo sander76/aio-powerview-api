@@ -145,16 +145,6 @@ class BaseShade(ApiResource):
         return result
 
     async def move(self, position_data):
-        if self.can_move is False:
-            _LOGGER.error("Move not supported.")
-            return
-        data = self._create_shade_data(position_data=position_data)
-        return await self._move(data)
-
-    async def tilt(self, position_data):
-        if self.can_tilt is False:
-            _LOGGER.error("Tilt not supported.")
-            return
         data = self._create_shade_data(position_data=position_data)
         return await self._move(data)
 
@@ -205,14 +195,6 @@ class BaseShade(ApiResource):
         """Stop the shade."""
         return await self.request.put(self._resource_path, {"shade": {"motion": "stop"}})
 
-    async def tilt_open(self):
-        """Tilt to close position."""
-        return await self.tilt(position_data=self.open_position_tilt)
-
-    async def tilt_close(self):
-        """Tilt to close position"""
-        return await self.tilt(position_data=self.close_position_tilt)
-
     async def add_shade_to_room(self, room_id):
         data = self._create_shade_data(room_id=room_id)
         return await self.request.put(self._resource_path, data)
@@ -240,6 +222,27 @@ class BaseShade(ApiResource):
             await self.refresh()
         position = self._raw_data.get(ATTR_POSITION_DATA)
         return position
+
+
+class BaseShadeTilt(BaseShade):
+    """A shade with move and tilt at bottom capabilities."""
+
+    # even for shades that can 180° tilt, this would just result in
+    # two closed positions. 90° will always be the open position
+    open_position_tilt = {ATTR_POSITION1: MID_POSITION, ATTR_POSKIND1: 3}
+    close_position_tilt = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 3}
+
+    async def tilt(self, position_data):
+        data = self._create_shade_data(position_data=position_data)
+        return await self._move(data)
+
+    async def tilt_open(self):
+        """Tilt to close position."""
+        return await self.tilt(position_data=self.open_position_tilt)
+
+    async def tilt_close(self):
+        """Tilt to close position"""
+        return await self.tilt(position_data=self.close_position_tilt)
 
 
 class ShadeBottomUp(BaseShade):
@@ -422,6 +425,10 @@ class ShadeTiltOnly(ShadeTiltBase):
     allowed_positions = (
         {ATTR_POSITION: {ATTR_POSKIND1: 3}, ATTR_COMMAND: ATTR_TILT},
     )
+
+    async def move(self):
+        _LOGGER.error("Move not supported.")
+        return
 
 
 class ShadeTopDown(BaseShade):
