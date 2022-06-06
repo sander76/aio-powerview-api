@@ -85,17 +85,16 @@ def factory(raw_data, request):
 
     classes = [
         ShadeBottomUp,
-        ShadeBottomUpTilt,
-        ShadeBottomUpTilt90,
+        ShadeBottomUpTiltOnClosed,
+        ShadeBottomUpTiltOnClosed90,
         ShadeBottomUpTiltAnywhere,
-        ShadeVerticalTilt,
-        ShadeVerticalTiltInvert,
         ShadeVerticalTiltAnywhere,
+        ShadeVertical,
         ShadeTiltOnly,
         ShadeTopDown,
-        ShadeTdbu,
-        ShadeDualInterlocked,
-        ShadeDualInterlockedTilt,
+        ShadeTopDownBottomUp,
+        ShadeDualOverlapped,
+        ShadeDualOverlappedTilt,
     ]
 
     for cls in classes:
@@ -246,9 +245,13 @@ class BaseShadeTilt(BaseShade):
 
 
 class ShadeBottomUp(BaseShade):
-    """A simple open/close shade."""
+    """Type 0 - Up Down Only.
+
+    A simple open/close shade.
+    """
 
     shade_types = (
+        shade_type(1, "Designer Roller"),
         shade_type(4, "Roman"),
         shade_type(5, "Bottom Up"),
         shade_type(6, "Duette"),
@@ -270,8 +273,13 @@ class ShadeBottomUp(BaseShade):
     )
 
 
-class ShadeTiltBase(BaseShade):
-    """A shade with move and tilt at bottom capabilities."""
+class ShadeBottomUpTiltOnClosed(BaseShadeTilt):
+    """Type 0 - Up Down tiltOnClosed 180°.
+
+    A shade with move and tilt at when closed capabilities.
+    These are believed to be an oversight by the HD Powerview team and the
+    only model without a distinct capability code.
+    """
 
     shade_types = (
         shade_type(44, "Twist"),
@@ -295,11 +303,14 @@ class ShadeTiltBase(BaseShade):
     )
 
 
-class ShadeBottomUpTilt90(ShadeBottomUpTilt):
-    """A shade with move and tilt at bottom capabilities with a smaller limit."""
+class ShadeBottomUpTiltOnClosed90(BaseShadeTilt):
+    """Type 1 - Up Down tiltOnClosed 90°.
+
+    A shade with move and tilt at bottom capabilities with only a 90° tilt.
+    """
 
     shade_types = (
-        shade_type(18, "Silhouette"),
+        shade_type(18, "Pirouette"),
         shade_type(23, "Silhouette"),
         shade_type(43, "Facette"),
     )
@@ -324,8 +335,11 @@ class ShadeBottomUpTilt90(ShadeBottomUpTilt):
     )
 
 
-class ShadeBottomUpTiltAnywhere(ShadeTiltBase):
-    """A shade with move and tilt anywhere capabilities."""
+class ShadeBottomUpTiltAnywhere(BaseShadeTilt):
+    """Type 2 - Up Down tiltAnywhere 180°.
+
+    A shade with move and tilt anywhere capabilities.
+    """
 
     shade_types = (
         shade_type(51, "Venetian, Tilt Anywhere"),
@@ -361,10 +375,13 @@ class ShadeBottomUpTiltAnywhere(ShadeTiltBase):
     )
 
 
-class ShadeVerticalTilt(ShadeBottomUpTilt):
-    """A simple open/close vertical shade."""
+class ShadeVerticalTiltAnywhere(ShadeBottomUpTiltAnywhere):
+    """Type 3 - Vertical tiltAnywhere 180°
 
-    # same capability as type 2 but vertical
+    A vertical shade with open/close and tilt anywhere
+    Same capabilities as type 2 but vertical.
+    """
+
     shade_types = (
         shade_type(54, "Vertical Slats, Left Stack"),
         shade_type(55, "Vertical Slats, Right Stack"),
@@ -375,14 +392,17 @@ class ShadeVerticalTilt(ShadeBottomUpTilt):
         3,
         ShadeCapabilities(primary=True, tiltAnywhere=True,
                           tilt180=True, vertical=True),
-        "Vertical"
+        "Vertical Tilt Anywhere"
     )
 
 
-class ShadeVerticalTiltInvert(ShadeBottomUpTilt):
-    """A vertical shade with open close."""
+class ShadeVertical(ShadeBottomUp):
+    """Type 4 - Vertical Open Close
 
-    # same capability as type 0 no tilt but vertical
+    A vertical shade with open/close only
+    Same capabilities as type 0 (no tilt) but vertical.
+    """
+
     shade_types = (
         shade_type(69, "Curtain, Left Stack"),
         shade_type(70, "Curtain, Right Stack"),
@@ -392,12 +412,15 @@ class ShadeVerticalTiltInvert(ShadeBottomUpTilt):
     capability = capability(
         4,
         ShadeCapabilities(primary=True, vertical=True),
-        "Vertical Open Close"
+        "Vertical"
     )
 
 
-class ShadeTiltOnly(ShadeTiltBase):
-    """A shade with tilt anywhere capabilities only."""
+class ShadeTiltOnly(BaseShadeTilt):
+    """Type 5 - Tilt Only 180°
+
+    A shade with tilt anywhere capabilities only.
+    """
 
     shade_types = (
         shade_type(66, "Palm Beach Shutters"),
@@ -425,7 +448,10 @@ class ShadeTiltOnly(ShadeTiltBase):
 
 
 class ShadeTopDown(BaseShade):
-    """A simple top/down shade."""
+    """Type 6 - Top Down Only
+
+    A shade with top down capabilities only.
+    """
 
     shade_types = (
         shade_type(7, "Top Down"),
@@ -445,8 +471,11 @@ class ShadeTopDown(BaseShade):
     )
 
 
-class ShadeTdbu(BaseShade):
-    """A shade with top down bottom up capabilities."""
+class ShadeTopDownBottomUp(BaseShade):
+    """Type 7 - Top Down Bottom Up
+
+    A shade with top down bottom up capabilities.
+    """
 
     shade_types = (
         shade_type(8, "Duette, Top Down Bottom Up"),
@@ -479,8 +508,11 @@ class ShadeTdbu(BaseShade):
     )
 
 
-class ShadeDualInterlocked(BaseShade):
-    """Representation of a shade with a front sheer and rear blackout shade + tilt."""
+class ShadeDualOverlapped(BaseShade):
+    """Type 8 - Dual Shade Overlapped
+
+    A shade with a front sheer and rear blackout shade.
+    """
 
     shade_types = (
         shade_type(65, "Vignette Duolite"),
@@ -491,7 +523,7 @@ class ShadeDualInterlocked(BaseShade):
         8,
         ShadeCapabilities(primary=True, secondary=True,
                           secondaryOverlapped=True),
-        "Dual Shade"
+        "Dual Shade Overlapped"
     )
 
     open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
@@ -503,8 +535,12 @@ class ShadeDualInterlocked(BaseShade):
     )
 
 
-class ShadeDualInterlockedTilt(ShadeTiltBase):
-    """Representation of a shade with a front sheer and rear blackout shade + tilt."""
+class ShadeDualOverlappedTilt(BaseShadeTilt):
+    """Type 8 - Dual Shade Overlapped with tiltOnClosed
+
+    A shade with a front sheer and rear blackout shade.
+    Tilt on these is unique in that it requires the rear shade open and front shade closed.
+    """
 
     shade_types = (
         shade_type(38, "Silhouette Duolite"),
@@ -514,8 +550,8 @@ class ShadeDualInterlockedTilt(ShadeTiltBase):
         9,
         ShadeCapabilities(primary=True, secondary=True,
                           secondaryOverlapped=True, tilt90=True,
-                          tiltOnSecondaryClosed=True),
-        "Dual Shade Tilt 90°"
+                          tiltOnClosed=True),
+        "Dual Shade Overlapped Tilt 90°"
     )
 
     shade_limits = ShadeLimits(tilt_max=MID_POSITION)
