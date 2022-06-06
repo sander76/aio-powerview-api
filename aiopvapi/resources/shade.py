@@ -273,15 +273,8 @@ class ShadeBottomUp(BaseShade):
 class ShadeTiltBase(BaseShade):
     """A shade with move and tilt at bottom capabilities."""
 
-    can_tilt = True
-
-    # even for shades that can 180° tilt, this would just result in
-    # two closed positions. 90° will always be the open position
-    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MID_POSITION}
-    close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
-
-    allowed_positions = (
-        {ATTR_POSITION: {ATTR_POSKIND1: 3}, ATTR_COMMAND: ATTR_TILT},
+    shade_types = (
+        shade_type(44, "Twist"),
     )
 
     capability = capability(
@@ -371,12 +364,11 @@ class ShadeBottomUpTiltAnywhere(ShadeTiltBase):
 class ShadeVerticalTilt(ShadeBottomUpTilt):
     """A simple open/close vertical shade."""
 
-    # same ability as capability 1 but vertical
+    # same capability as type 2 but vertical
     shade_types = (
+        shade_type(54, "Vertical Slats, Left Stack"),
         shade_type(55, "Vertical Slats, Right Stack"),
         shade_type(56, "Vertical Slats, Split Stack"),
-        shade_type(70, "Curtain, Right Stack"),
-        shade_type(71, "Curtain, Split Stack"),
     )
 
     capability = capability(
@@ -390,10 +382,11 @@ class ShadeVerticalTilt(ShadeBottomUpTilt):
 class ShadeVerticalTiltInvert(ShadeBottomUpTilt):
     """A vertical shade with open close."""
 
-    # assuming same capability as type 0 no tilt but vertical
+    # same capability as type 0 no tilt but vertical
     shade_types = (
-        shade_type(54, "Vertical Slats, Left Stack"),
         shade_type(69, "Curtain, Left Stack"),
+        shade_type(70, "Curtain, Right Stack"),
+        shade_type(71, "Curtain, Split Stack"),
     )
 
     capability = capability(
