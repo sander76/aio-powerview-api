@@ -46,6 +46,18 @@ class ShadeCapabilities:
     secondaryOverlapped: bool = False
     vertical: bool = False
 
+
+@dataclass
+class ShadeLimits:
+    """Represents the limits of a shade."""
+    primary_min: int = MIN_POSITION
+    primary_max: int = MAX_POSITION
+    secondary_min: int = MIN_POSITION
+    secondary_max: int = MAX_POSITION
+    tilt_min: int = MIN_POSITION
+    tilt_max: int = MAX_POSITION
+
+
 shade_type = namedtuple("shade_type", ["shade_type", "description"])
 capability = namedtuple("capability", ["type", "capabilities", "description"])
 
@@ -113,15 +125,7 @@ class BaseShade(ApiResource):
     close_position_tilt = {}
     allowed_positions = ()
 
-    can_move = True
-    can_tilt = False
-
-    primary_min = MIN_POSITION
-    primary_max = MAX_POSITION
-    secondary_min = MIN_POSITION
-    secondary_max = MAX_POSITION
-    tilt_min = MIN_POSITION
-    tilt_max = MAX_POSITION
+    shade_limits = ShadeLimits()
 
     def __init__(self, raw_data: dict, shade_type: shade_type, request: AioRequest):
         self.shade_type = shade_type
@@ -162,14 +166,14 @@ class BaseShade(ApiResource):
 
     def position_limit(self, value, poskind):
         if poskind == POSKIND_PRIMARY:
-            min = self.primary_min
-            max = self.primary_max
+            min = self.shade_limits.primary_min
+            max = self.shade_limits.primary_max
         elif poskind == POSKIND_SECONDARY:
-            min = self.secondary_min
-            max = self.secondary_max
+            min = self.shade_limits.secondary_min
+            max = self.shade_limits.secondary_max
         elif poskind == POSKIND_VANE:
-            min = self.tilt_min
-            max = self.tilt_max
+            min = self.shade_limits.tilt_min
+            max = self.shade_limits.tilt_max
         if min <= value <= max:
             return value
         if value < min:
@@ -310,7 +314,7 @@ class ShadeBottomUpTilt90(ShadeBottomUpTilt):
         "Bottom Up Tilt 90°"
     )
 
-    tilt_max = MID_POSITION
+    shade_limits = ShadeLimits(tilt_max=MID_POSITION)
 
     open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MID_POSITION}
     close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
@@ -506,7 +510,7 @@ class ShadeDualInterlockedTilt(ShadeTiltBase):
         "Dual Shade Tilt 90°"
     )
 
-    tilt_max = MID_POSITION
+    shade_limits = ShadeLimits(tilt_max=MID_POSITION)
 
     open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
     close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 2}
