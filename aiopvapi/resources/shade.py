@@ -290,8 +290,8 @@ class ShadeTiltBase(BaseShade):
     open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
     close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
 
-    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MID_POSITION}
-    close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
+    open_position_tilt = {ATTR_POSITION1: MID_POSITION, ATTR_POSKIND1: 3}
+    close_position_tilt = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 3}
 
     allowed_positions = (
         {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
@@ -316,8 +316,16 @@ class ShadeBottomUpTilt90(ShadeBottomUpTilt):
 
     shade_limits = ShadeLimits(tilt_max=MID_POSITION)
 
-    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MID_POSITION}
-    close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
+    open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
+    close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
+
+    open_position_tilt = {ATTR_POSITION1: MID_POSITION, ATTR_POSKIND1: 3}
+    close_position_tilt = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 3}
+
+    allowed_positions = (
+        {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
+        {ATTR_POSITION: {ATTR_POSKIND1: 3}, ATTR_COMMAND: ATTR_TILT},
+    )
 
 
 class ShadeBottomUpTiltAnywhere(ShadeTiltBase):
@@ -348,8 +356,8 @@ class ShadeBottomUpTiltAnywhere(ShadeTiltBase):
         ATTR_POSITION2: MIN_POSITION,
     }
 
-    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MID_POSITION}
-    close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
+    open_position_tilt = {ATTR_POSITION1: MID_POSITION, ATTR_POSKIND1: 3}
+    close_position_tilt = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 3}
 
     allowed_positions = (
         {ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 3}, ATTR_COMMAND: ATTR_MOVE},
@@ -408,8 +416,8 @@ class ShadeTiltOnly(ShadeTiltBase):
     open_position = {}
     close_position = {}
 
-    open_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MID_POSITION}
-    close_position_tilt = {ATTR_POSKIND1: 3, ATTR_POSITION1: MIN_POSITION}
+    open_position_tilt = {ATTR_POSITION1: MID_POSITION, ATTR_POSKIND1: 3}
+    close_position_tilt = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 3}
 
     allowed_positions = (
         {ATTR_POSITION: {ATTR_POSKIND1: 3}, ATTR_COMMAND: ATTR_TILT},
@@ -515,8 +523,8 @@ class ShadeDualInterlockedTilt(ShadeTiltBase):
     open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
     close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 2}
 
-    open_position_tilt = {ATTR_POSKIND2: 3, ATTR_POSITION2: MID_POSITION}
-    close_position_tilt = {ATTR_POSKIND2: 3, ATTR_POSITION2: MIN_POSITION}
+    open_position_tilt = {ATTR_POSITION2: MID_POSITION, ATTR_POSKIND1: 3}
+    close_position_tilt = {ATTR_POSITION2: MIN_POSITION, ATTR_POSKIND1: 3}
 
     allowed_positions = (
         {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
