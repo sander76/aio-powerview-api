@@ -1,3 +1,3 @@
 """Aio PowerView api version."""
 
-__version__ = "1.6.19"
+__version__ = "2.0.0"
