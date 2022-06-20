@@ -190,6 +190,10 @@ class BaseShade(ApiResource):
         """Calibrate the shade."""
         await self.request.put(self._resource_path, {"shade": {"motion": "calibrate"}})
 
+    async def favourite(self):
+        """Move the shade to the defined favourite position."""
+        await self.request.put(self._resource_path, {"shade": {"motion": "heart"}})
+
     async def stop(self):
         """Stop the shade."""
         return await self.request.put(self._resource_path, {"shade": {"motion": "stop"}})
