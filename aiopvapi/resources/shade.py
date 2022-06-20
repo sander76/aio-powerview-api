@@ -215,6 +215,13 @@ class BaseShade(ApiResource):
 
         self._raw_data = raw_data[ATTR_SHADE]
 
+    async def set_power_source(self, type):
+        """Update the hub with the type of power source."""
+        if type not in [1, 2, 3]:
+            _LOGGER.error("Unsupported Power Type. Accepted values are 1, 2 & 3")
+            return
+        await self.request.put(self._resource_path, data={"shade": {"batteryKind": type}})
+
     async def get_current_position(self, refresh=True) -> dict:
         """Return the current shade position.
 
