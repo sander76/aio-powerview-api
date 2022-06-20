@@ -209,7 +209,7 @@ class BaseShade(ApiResource):
 
         self._raw_data = raw_data[ATTR_SHADE]
 
-    async def refreshBattery(self):
+    async def refresh_battery(self):
         """Query the hub and request the most recent battery state."""
         raw_data = await self.request.get(self._resource_path, {"updateBatteryLevel": "true"})
 
