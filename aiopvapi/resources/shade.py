@@ -266,6 +266,7 @@ class ShadeBottomUp(BaseShade):
         shade_type(4, "Roman"),
         shade_type(5, "Bottom Up"),
         shade_type(6, "Duette"),
+        shade_type(31, "Vignette"),
         shade_type(42, "M25T Roller Blind"),
         shade_type(49, "AC Roller"),
     )
@@ -491,7 +492,8 @@ class ShadeTopDownBottomUp(BaseShade):
     shade_types = (
         shade_type(8, "Duette, Top Down Bottom Up"),
         shade_type(9, "Duette DuoLite, Top Down Bottom Up"),
-        shade_type(47, "Pleated, Top Down Bottom Up"),
+        shade_type(33, "Duette Architella, Top Down Bottom Up"),
+        shade_type(47, "Pleated, Top Down Bottom Up"), 
     )
 
     capability = capability(
