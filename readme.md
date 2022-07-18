@@ -22,12 +22,22 @@ Have a look at the examples folder for some guidance how to use it.
 ### 1.6.15
 
 - Constrain aiohttp package versions.
-## v1.6.19
+
+### v1.6.19
 
 - Add endpoints and handle 423 response
 - Remove loop as argument
 
+### v2.0.0
+
+- Add support for all known shade types
+- Fallback to shade recognition based on capability
+- Clamping to prevent MIN_POSITION or MAX_POSITION being exceeded
+- Code refactoring
+
 ## Links
------
+
+---
+
 - https://home-assistant.io/
 - https://www.hunterdouglas.com/operating-systems/powerview-motorization

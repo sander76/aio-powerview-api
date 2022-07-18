@@ -18,14 +18,9 @@ ATTR_TILT = "tilt"
 
 ATTR_OPEN_POSITION = "open_position"
 ATTR_CLOSE_POSITION = "close_position"
-
-# ATTR_POSITION1_OPEN = 'position1_open'
-# ATTR_POSITION1_CLOSE = 'position1_close'
-# ATTR_POSITION2_OPEN = 'position2_open'
-# ATTR_POSITION2_CLOSE = 'position2_close'
 ATTR_ALLOWED_POSITIONS = "allowed_positions"
 
-# MAX_POSITION = 65535
+ATTR_CAPABILITIES = "capabilities"
 ATTR_POSITION_DATA = "positions"
 ATTR_SCENE = "scene"
 ATTR_SHADE = "shade"
@@ -34,5 +29,14 @@ ATTR_SCENE_MEMBER = "sceneMember"
 ATTR_USER_DATA = "user"
 ATTR_TYPE = "type"
 ATTR_TYPES = "types"
-# MIN_POSITION = 0
 ATTR_ID = "id"
+
+MIN_POSITION = 0
+MID_POSITION = 32767
+MAX_POSITION = 65535
+
+POSKIND_NONE = 0
+POSKIND_PRIMARY = 1
+POSKIND_SECONDARY = 2
+POSKIND_VANE = 3
+POSKIND_ERROR = 4
