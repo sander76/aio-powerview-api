@@ -387,29 +387,8 @@ class ShadeBottomUpTiltAnywhere(BaseShadeTilt):
     )
 
 
-class ShadeVerticalTiltAnywhere(ShadeBottomUpTiltAnywhere):
-    """Type 3 - Vertical tiltAnywhere 180°
-
-    A vertical shade with open/close and tilt anywhere
-    Same capabilities as type 2 but vertical.
-    """
-
-    shade_types = (
-        shade_type(54, "Vertical Slats, Left Stack"),
-        shade_type(55, "Vertical Slats, Right Stack"),
-        shade_type(56, "Vertical Slats, Split Stack"),
-    )
-
-    capability = capability(
-        3,
-        ShadeCapabilities(primary=True, tiltAnywhere=True,
-                          tilt180=True, vertical=True),
-        "Vertical Tilt Anywhere"
-    )
-
-
 class ShadeVertical(ShadeBottomUp):
-    """Type 4 - Vertical Open Close
+    """Type 3 - Vertical Open Close
 
     A vertical shade with open/close only
     Same capabilities as type 0 (no tilt) but vertical.
@@ -422,9 +401,30 @@ class ShadeVertical(ShadeBottomUp):
     )
 
     capability = capability(
-        4,
+        3,
         ShadeCapabilities(primary=True, vertical=True),
         "Vertical"
+    )
+
+
+class ShadeVerticalTiltAnywhere(ShadeBottomUpTiltAnywhere):
+    """Type 4 - Vertical tiltAnywhere 180°
+
+    A vertical shade with open/close and tilt anywhere
+    Same capabilities as type 2 but vertical.
+    """
+
+    shade_types = (
+        shade_type(54, "Vertical Slats, Left Stack"),
+        shade_type(55, "Vertical Slats, Right Stack"),
+        shade_type(56, "Vertical Slats, Split Stack"),
+    )
+
+    capability = capability(
+        4,
+        ShadeCapabilities(primary=True, tiltAnywhere=True,
+                          tilt180=True, vertical=True),
+        "Vertical Tilt Anywhere"
     )
 
 
