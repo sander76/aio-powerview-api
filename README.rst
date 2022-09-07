@@ -25,3 +25,8 @@ Changelog
 - Fallback to shade recognition based on capability
 - Clamping to prevent MIN_POSITION or MAX_POSITION being exceeded
 - Code refactoring
+
+**v2.0.1**
+
+- Invert type 3 & 4 to match api documentation from hunter douglas
+- Add type 10

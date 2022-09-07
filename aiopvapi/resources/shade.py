@@ -94,7 +94,8 @@ def factory(raw_data, request):
         ShadeTopDown,
         ShadeTopDownBottomUp,
         ShadeDualOverlapped,
-        ShadeDualOverlappedTilt,
+        ShadeDualOverlappedTilt90,
+        ShadeDualOverlappedTilt180,
     ]
 
     for cls in classes:
@@ -387,29 +388,8 @@ class ShadeBottomUpTiltAnywhere(BaseShadeTilt):
     )
 
 
-class ShadeVerticalTiltAnywhere(ShadeBottomUpTiltAnywhere):
-    """Type 3 - Vertical tiltAnywhere 180°
-
-    A vertical shade with open/close and tilt anywhere
-    Same capabilities as type 2 but vertical.
-    """
-
-    shade_types = (
-        shade_type(54, "Vertical Slats, Left Stack"),
-        shade_type(55, "Vertical Slats, Right Stack"),
-        shade_type(56, "Vertical Slats, Split Stack"),
-    )
-
-    capability = capability(
-        3,
-        ShadeCapabilities(primary=True, tiltAnywhere=True,
-                          tilt180=True, vertical=True),
-        "Vertical Tilt Anywhere"
-    )
-
-
 class ShadeVertical(ShadeBottomUp):
-    """Type 4 - Vertical Open Close
+    """Type 3 - Vertical Open Close
 
     A vertical shade with open/close only
     Same capabilities as type 0 (no tilt) but vertical.
@@ -422,9 +402,30 @@ class ShadeVertical(ShadeBottomUp):
     )
 
     capability = capability(
-        4,
+        3,
         ShadeCapabilities(primary=True, vertical=True),
         "Vertical"
+    )
+
+
+class ShadeVerticalTiltAnywhere(ShadeBottomUpTiltAnywhere):
+    """Type 4 - Vertical tiltAnywhere 180°
+
+    A vertical shade with open/close and tilt anywhere
+    Same capabilities as type 2 but vertical.
+    """
+
+    shade_types = (
+        shade_type(54, "Vertical Slats, Left Stack"),
+        shade_type(55, "Vertical Slats, Right Stack"),
+        shade_type(56, "Vertical Slats, Split Stack"),
+    )
+
+    capability = capability(
+        4,
+        ShadeCapabilities(primary=True, tiltAnywhere=True,
+                          tilt180=True, vertical=True),
+        "Vertical Tilt Anywhere"
     )
 
 
@@ -548,8 +549,8 @@ class ShadeDualOverlapped(BaseShade):
     )
 
 
-class ShadeDualOverlappedTilt(BaseShadeTilt):
-    """Type 8 - Dual Shade Overlapped with tiltOnClosed
+class ShadeDualOverlappedTilt90(BaseShadeTilt):
+    """Type 9 - Dual Shade Overlapped with tiltOnClosed
 
     A shade with a front sheer and rear blackout shade.
     Tilt on these is unique in that it requires the rear shade open and front shade closed.
@@ -580,3 +581,25 @@ class ShadeDualOverlappedTilt(BaseShadeTilt):
         {ATTR_POSITION: {ATTR_POSKIND1: 2}, ATTR_COMMAND: ATTR_MOVE},
         {ATTR_POSITION: {ATTR_POSKIND1: 3}, ATTR_COMMAND: ATTR_TILT},
     )
+
+
+
+class ShadeDualOverlappedTilt180(ShadeDualOverlappedTilt90):
+    """Type 10 - Dual Shade Overlapped with tiltOnClosed
+
+    A shade with a front sheer and rear blackout shade.
+    Tilt on these is unique in that it requires the rear shade open and front shade closed.
+    """
+
+    shade_types = (
+    )
+
+    capability = capability(
+        10,
+        ShadeCapabilities(primary=True, secondary=True,
+                          secondaryOverlapped=True, tilt180=True,
+                          tiltOnClosed=True),
+        "Dual Shade Overlapped Tilt 180°"
+    )
+
+    shade_limits = ShadeLimits(tilt_max=MAX_POSITION)
