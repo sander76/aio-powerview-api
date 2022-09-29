@@ -34,6 +34,7 @@ _LOGGER = logging.getLogger(__name__)
 @dataclass
 class ShadeCapabilities:
     """Represents the capabilities available for shade."""
+
     primary: bool = False
     secondary: bool = False
     tilt90: bool = False
@@ -50,6 +51,7 @@ class ShadeCapabilities:
 @dataclass
 class ShadeLimits:
     """Represents the limits of a shade."""
+
     primary_min: int = MIN_POSITION
     primary_max: int = MAX_POSITION
     secondary_min: int = MIN_POSITION
@@ -65,6 +67,7 @@ capability = namedtuple("capability", ["type", "capabilities", "description"])
 def factory(raw_data, request):
     """Class factory to create different types of shades
     depending on shade type."""
+
     if ATTR_SHADE in raw_data:
         raw_data = raw_data.get(ATTR_SHADE)
 
@@ -276,8 +279,10 @@ class ShadeBottomUp(BaseShade):
 
     capability = capability(
         0,
-        ShadeCapabilities(primary=True),
-        "Bottom Up"
+        ShadeCapabilities(
+            primary=True,
+        ),
+        "Bottom Up",
     )
 
     open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
@@ -302,8 +307,12 @@ class ShadeBottomUpTiltOnClosed(BaseShadeTilt):
 
     capability = capability(
         0,
-        ShadeCapabilities(primary=True, tiltOnClosed=True, tilt180=True),
-        "Bottom Up Tilt 180°"
+        ShadeCapabilities(
+            primary=True,
+            tiltOnClosed=True,
+            tilt180=True,
+        ),
+        "Bottom Up Tilt 180°",
     )
 
     open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
@@ -332,8 +341,12 @@ class ShadeBottomUpTiltOnClosed90(BaseShadeTilt):
 
     capability = capability(
         1,
-        ShadeCapabilities(primary=True, tiltOnClosed=True, tilt90=True),
-        "Bottom Up Tilt 90°"
+        ShadeCapabilities(
+            primary=True,
+            tiltOnClosed=True,
+            tilt90=True,
+        ),
+        "Bottom Up Tilt 90°",
     )
 
     shade_limits = ShadeLimits(tilt_max=MID_POSITION)
@@ -363,8 +376,12 @@ class ShadeBottomUpTiltAnywhere(BaseShadeTilt):
 
     capability = capability(
         2,
-        ShadeCapabilities(primary=True, tiltAnywhere=True, tilt180=True),
-        "Bottom Up Tilt 180°"
+        ShadeCapabilities(
+            primary=True,
+            tiltAnywhere=True,
+            tilt180=True,
+        ),
+        "Bottom Up Tilt 180°",
     )
 
     open_position = {
@@ -405,8 +422,11 @@ class ShadeVertical(ShadeBottomUp):
 
     capability = capability(
         3,
-        ShadeCapabilities(primary=True, vertical=True),
-        "Vertical"
+        ShadeCapabilities(
+            primary=True,
+            vertical=True,
+        ),
+        "Vertical",
     )
 
 
@@ -425,9 +445,13 @@ class ShadeVerticalTiltAnywhere(ShadeBottomUpTiltAnywhere):
 
     capability = capability(
         4,
-        ShadeCapabilities(primary=True, tiltAnywhere=True,
-                          tilt180=True, vertical=True),
-        "Vertical Tilt Anywhere"
+        ShadeCapabilities(
+            primary=True,
+            tiltAnywhere=True,
+            tilt180=True,
+            vertical=True,
+        ),
+        "Vertical Tilt Anywhere",
     )
 
 
@@ -443,8 +467,11 @@ class ShadeTiltOnly(BaseShadeTilt):
 
     capability = capability(
         5,
-        ShadeCapabilities(tiltAnywhere=True, tilt180=True),
-        "Tilt Only 180°"
+        ShadeCapabilities(
+            tiltAnywhere=True,
+            tilt180=True,
+        ),
+        "Tilt Only 180°",
     )
 
     open_position = {}
@@ -474,8 +501,11 @@ class ShadeTopDown(BaseShade):
 
     capability = capability(
         6,
-        ShadeCapabilities(primary=True, primaryInverted=True),
-        "Top Down"
+        ShadeCapabilities(
+            primary=True,
+            primaryInverted=True,
+        ),
+        "Top Down",
     )
 
     open_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
@@ -496,13 +526,16 @@ class ShadeTopDownBottomUp(BaseShade):
         shade_type(8, "Duette, Top Down Bottom Up"),
         shade_type(9, "Duette DuoLite, Top Down Bottom Up"),
         shade_type(33, "Duette Architella, Top Down Bottom Up"),
-        shade_type(47, "Pleated, Top Down Bottom Up"), 
+        shade_type(47, "Pleated, Top Down Bottom Up"),
     )
 
     capability = capability(
         7,
-        ShadeCapabilities(primary=True, secondary=True),
-        "Top Down Bottom Up"
+        ShadeCapabilities(
+            primary=True,
+            secondary=True,
+        ),
+        "Top Down Bottom Up",
     )
 
     open_position = {
@@ -537,9 +570,12 @@ class ShadeDualOverlapped(BaseShade):
 
     capability = capability(
         8,
-        ShadeCapabilities(primary=True, secondary=True,
-                          secondaryOverlapped=True),
-        "Dual Shade Overlapped"
+        ShadeCapabilities(
+            primary=True,
+            secondary=True,
+            secondaryOverlapped=True,
+        ),
+        "Dual Shade Overlapped",
     )
 
     open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
@@ -564,10 +600,14 @@ class ShadeDualOverlappedTilt90(BaseShadeTilt):
 
     capability = capability(
         9,
-        ShadeCapabilities(primary=True, secondary=True,
-                          secondaryOverlapped=True, tilt90=True,
-                          tiltOnClosed=True),
-        "Dual Shade Overlapped Tilt 90°"
+        ShadeCapabilities(
+            primary=True,
+            secondary=True,
+            secondaryOverlapped=True,
+            tilt90=True,
+            tiltOnClosed=True,
+        ),
+        "Dual Shade Overlapped Tilt 90°",
     )
 
     shade_limits = ShadeLimits(tilt_max=MID_POSITION)
@@ -585,7 +625,6 @@ class ShadeDualOverlappedTilt90(BaseShadeTilt):
     )
 
 
-
 class ShadeDualOverlappedTilt180(ShadeDualOverlappedTilt90):
     """Type 10 - Dual Shade Overlapped with tiltOnClosed
 
@@ -598,10 +637,14 @@ class ShadeDualOverlappedTilt180(ShadeDualOverlappedTilt90):
 
     capability = capability(
         10,
-        ShadeCapabilities(primary=True, secondary=True,
-                          secondaryOverlapped=True, tilt180=True,
-                          tiltOnClosed=True),
-        "Dual Shade Overlapped Tilt 180°"
+        ShadeCapabilities(
+            primary=True,
+            secondary=True,
+            secondaryOverlapped=True,
+            tilt180=True,
+            tiltOnClosed=True,
+        ),
+        "Dual Shade Overlapped Tilt 180°",
     )
 
     shade_limits = ShadeLimits(tilt_max=MAX_POSITION)
