@@ -30,3 +30,7 @@ Changelog
 
 - Invert type 3 & 4 to match api documentation from hunter douglas
 - Add type 10
+
+**v2.0.2**
+
+- Bug Fix to handle shades with unexpected json responses
