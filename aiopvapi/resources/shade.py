@@ -104,6 +104,8 @@ def factory(raw_data, request):
         if _shade:
             _LOGGER.debug("Match type       : %s - %s", _shade, raw_data)
             return _shade
+
+    for cls in classes:
         # fallback to a capability check - this should future proof new shades
         # type 0 that contain tilt would not be caught here
         _shade = find_capability(cls)
