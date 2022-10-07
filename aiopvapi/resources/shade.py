@@ -415,6 +415,9 @@ class ShadeVertical(ShadeBottomUp):
     """
 
     shade_types = (
+        shade_type(26, "Skyline, Left Stack"),
+        shade_type(27, "Skyline, Right Stack"),
+        shade_type(28, "Skyline, Split Stack"),
         shade_type(69, "Curtain, Left Stack"),
         shade_type(70, "Curtain, Right Stack"),
         shade_type(71, "Curtain, Split Stack"),
