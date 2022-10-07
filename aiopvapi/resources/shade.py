@@ -196,8 +196,8 @@ class BaseShade(ApiResource):
         """Calibrate the shade."""
         await self.request.put(self._resource_path, {"shade": {"motion": "calibrate"}})
 
-    async def favourite(self):
-        """Move the shade to the defined favourite position."""
+    async def favorite(self):
+        """Move the shade to the defined favorite position."""
         await self.request.put(self._resource_path, {"shade": {"motion": "heart"}})
 
     async def stop(self):
@@ -418,9 +418,9 @@ class ShadeVertical(ShadeBottomUp):
     """
 
     shade_types = (
-        shade_type(26, "Skyline, Left Stack"),
-        shade_type(27, "Skyline, Right Stack"),
-        shade_type(28, "Skyline, Split Stack"),
+        shade_type(26, "Skyline Panel, Left Stack"),
+        shade_type(27, "Skyline Panel, Right Stack"),
+        shade_type(28, "Skyline Panel, Split Stack"),
         shade_type(69, "Curtain, Left Stack"),
         shade_type(70, "Curtain, Right Stack"),
         shade_type(71, "Curtain, Split Stack"),
