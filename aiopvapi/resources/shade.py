@@ -88,8 +88,8 @@ def factory(raw_data, request):
 
     classes = [
         ShadeBottomUp,
-        ShadeBottomUpTiltOnClosed,
         ShadeBottomUpTiltOnClosed90,
+        ShadeBottomUpTiltOnClosed180, #to ensure capability match order here is important
         ShadeBottomUpTiltAnywhere,
         ShadeVerticalTiltAnywhere,
         ShadeVertical,
@@ -293,7 +293,7 @@ class ShadeBottomUp(BaseShade):
     )
 
 
-class ShadeBottomUpTiltOnClosed(BaseShadeTilt):
+class ShadeBottomUpTiltOnClosed180(BaseShadeTilt):
     """Type 0 - Up Down tiltOnClosed 180°.
 
     A shade with move and tilt at when closed capabilities.
