@@ -305,8 +305,11 @@ class ShadeBottomUpTiltOnClosed180(BaseShadeTilt):
         shade_type(44, "Twist"),
     )
 
+    # via json these have capability 0
+    # overriding to 1 to trick HA into providing tilt functionality
+    # only difference is these have 180 tilt
     capability = capability(
-        1, #via json these have capability 0, setting 1 to trick HA into providing tilt functionality
+        1,
         ShadeCapabilities(
             primary=True,
             tiltOnClosed=True,
