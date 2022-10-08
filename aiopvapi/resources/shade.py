@@ -88,8 +88,8 @@ def factory(raw_data, request):
 
     classes = [
         ShadeBottomUp,
-        ShadeBottomUpTiltOnClosed,
         ShadeBottomUpTiltOnClosed90,
+        ShadeBottomUpTiltOnClosed180, #to ensure capability match order here is important
         ShadeBottomUpTiltAnywhere,
         ShadeVerticalTiltAnywhere,
         ShadeVertical,
@@ -196,8 +196,8 @@ class BaseShade(ApiResource):
         """Calibrate the shade."""
         await self.request.put(self._resource_path, {"shade": {"motion": "calibrate"}})
 
-    async def favourite(self):
-        """Move the shade to the defined favourite position."""
+    async def favorite(self):
+        """Move the shade to the defined favorite position."""
         await self.request.put(self._resource_path, {"shade": {"motion": "heart"}})
 
     async def stop(self):
@@ -293,7 +293,7 @@ class ShadeBottomUp(BaseShade):
     )
 
 
-class ShadeBottomUpTiltOnClosed(BaseShadeTilt):
+class ShadeBottomUpTiltOnClosed180(BaseShadeTilt):
     """Type 0 - Up Down tiltOnClosed 180°.
 
     A shade with move and tilt at when closed capabilities.
@@ -305,8 +305,11 @@ class ShadeBottomUpTiltOnClosed(BaseShadeTilt):
         shade_type(44, "Twist"),
     )
 
+    # via json these have capability 0
+    # overriding to 1 to trick HA into providing tilt functionality
+    # only difference is these have 180 tilt
     capability = capability(
-        0,
+        1,
         ShadeCapabilities(
             primary=True,
             tiltOnClosed=True,
@@ -415,6 +418,9 @@ class ShadeVertical(ShadeBottomUp):
     """
 
     shade_types = (
+        shade_type(26, "Skyline Panel, Left Stack"),
+        shade_type(27, "Skyline Panel, Right Stack"),
+        shade_type(28, "Skyline Panel, Split Stack"),
         shade_type(69, "Curtain, Left Stack"),
         shade_type(70, "Curtain, Right Stack"),
         shade_type(71, "Curtain, Split Stack"),
