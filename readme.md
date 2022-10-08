@@ -44,6 +44,12 @@ Have a look at the examples folder for some guidance how to use it.
 
 - Bug Fix to handle shades with unexpected json responses
 
+### v2.0.3
+
+- Add Type 26, 27 & 28 - Skyline Panels
+- Force capability 1 for Type 44 - Twist
+- Align class name standard
+
 ## Links
 
 ---
