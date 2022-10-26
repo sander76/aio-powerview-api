@@ -272,6 +272,7 @@ class ShadeBottomUp(BaseShade):
         shade_type(4, "Roman"),
         shade_type(5, "Bottom Up"),
         shade_type(6, "Duette"),
+        shade_type(10, "Duette and Applause SkyLift"),
         shade_type(31, "Vignette"),
         shade_type(42, "M25T Roller Blind"),
         shade_type(49, "AC Roller"),
