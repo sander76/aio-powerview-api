@@ -66,8 +66,9 @@ class AioRequest:
                 response = await self.websession.get(url, params=params)
                 return await check_response(response, [200, 204])
         except (asyncio.TimeoutError, aiohttp.ClientError) as error:
-            _LOGGER.error("Failed to communicate with PowerView hub: %s", error)
-            raise PvApiConnectionError
+            raise PvApiConnectionError(
+                f"Failed to communicate with PowerView hub: {error}"
+            )
         finally:
             if response is not None:
                 await response.release()
@@ -81,8 +82,9 @@ class AioRequest:
                 response = await self.websession.post(url, json=data)
                 return await check_response(response, [200, 201])
         except (asyncio.TimeoutError, aiohttp.ClientError) as error:
-            _LOGGER.error("Failed to communicate with PowerView hub: %s", error)
-            raise PvApiConnectionError
+            raise PvApiConnectionError(
+                f"Failed to communicate with PowerView hub: {error}"
+            )
         finally:
             if response is not None:
                 await response.release()
@@ -103,8 +105,9 @@ class AioRequest:
                 response = await self.websession.put(url, json=data)
             return await check_response(response, [200, 204])
         except (asyncio.TimeoutError, aiohttp.ClientError) as error:
-            _LOGGER.error("Failed to communicate with PowerView hub: %s", error)
-            raise PvApiConnectionError
+            raise PvApiConnectionError(
+                f"Failed to communicate with PowerView hub: {error}"
+            )
         finally:
             if response is not None:
                 await response.release()
@@ -125,8 +128,9 @@ class AioRequest:
                 response = await self.websession.delete(url, params=params)
             return await check_response(response, [200, 204])
         except (asyncio.TimeoutError, aiohttp.ClientError) as error:
-            _LOGGER.error("Failed to communicate with PowerView hub: %s", error)
-            raise PvApiConnectionError
+            raise PvApiConnectionError(
+                f"Failed to communicate with PowerView hub: {error}"
+            )
         finally:
             if response is not None:
                 await response.release()

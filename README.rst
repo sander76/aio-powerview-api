@@ -40,3 +40,9 @@ Changelog
 - Add Type 26, 27 & 28 - Skyline Panels
 - Force capability 1 for Type 44 - Twist
 - Align class name standard
+
+**v2.0.4**
+
+- Add Type 10 - SkyLift
+- Handle calls to update shade position during maintenance
+- Raise error directly on hub calls instead of logger

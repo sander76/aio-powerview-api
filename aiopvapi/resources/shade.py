@@ -212,14 +212,18 @@ class BaseShade(ApiResource):
         """Query the hub and the actual shade to get the most recent shade
         data. Including current shade position."""
         raw_data = await self.request.get(self._resource_path, {"refresh": "true"})
-
-        self._raw_data = raw_data[ATTR_SHADE]
+        if isinstance(raw_data, bool):
+            _LOGGER.debug("No data available, hub undergoing maintenance. Please try again")
+            return
+        self._raw_data = raw_data.get(ATTR_SHADE)
 
     async def refresh_battery(self):
         """Query the hub and request the most recent battery state."""
         raw_data = await self.request.get(self._resource_path, {"updateBatteryLevel": "true"})
-
-        self._raw_data = raw_data[ATTR_SHADE]
+        if isinstance(raw_data, bool):
+            _LOGGER.debug("No data available, hub undergoing maintenance. Please try again")
+            return
+        self._raw_data = raw_data.get(ATTR_SHADE)
 
     async def set_power_source(self, type):
         """Update the hub with the type of power source."""
@@ -272,6 +276,7 @@ class ShadeBottomUp(BaseShade):
         shade_type(4, "Roman"),
         shade_type(5, "Bottom Up"),
         shade_type(6, "Duette"),
+        shade_type(10, "Duette and Applause SkyLift"),
         shade_type(31, "Vignette"),
         shade_type(42, "M25T Roller Blind"),
         shade_type(49, "AC Roller"),
