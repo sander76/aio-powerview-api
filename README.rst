@@ -46,3 +46,8 @@ Changelog
 - Add Type 10 - SkyLift
 - Handle calls to update shade position during maintenance
 - Raise error directly on hub calls instead of logger
+
+**v3.0.0**
+
+- Major overhaul to incorporate gateway version 3 API.  Version detection is supported and both should be serviced by this update.
+- UserData object is deprecated as it is no longer supported in the Version 3 API.

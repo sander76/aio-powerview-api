@@ -13,7 +13,7 @@ ATTR_HUB_NAME_UNICODE = "hubNameUnicode"
 
 
 class UserData(ApiEntryPoint):
-    api_path = "api/userdata"
+    api_path = "gateway"
 
     def __init__(self, request: AioRequest):
         super().__init__(request, self.api_path)

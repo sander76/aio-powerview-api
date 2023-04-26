@@ -6,6 +6,9 @@ import logging
 import aiohttp
 import async_timeout
 
+from aiopvapi.helpers.constants import FWVERSION
+from aiopvapi.helpers.tools import join_path, get_base_path
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -38,7 +41,7 @@ async def check_response(response, valid_response_codes):
 class AioRequest:
     """Request class managing hub connection."""
 
-    def __init__(self, hub_ip, loop=None, websession=None, timeout=15):
+    def __init__(self, hub_ip, loop=None, websession=None, timeout=15, api_version=0):
         self.hub_ip = hub_ip
         self._timeout = timeout
         if loop:
@@ -49,6 +52,7 @@ class AioRequest:
             self.websession = websession
         else:
             self.websession = aiohttp.ClientSession()
+        self.api_version = api_version
 
     async def get(self, url: str, params: str = None) -> dict:
         """
@@ -89,7 +93,7 @@ class AioRequest:
             if response is not None:
                 await response.release()
 
-    async def put(self, url: str, data: dict = None):
+    async def put(self, url: str, data: dict = None, params=None):
         """
         Do a put request.
 
@@ -101,8 +105,9 @@ class AioRequest:
         try:
             with async_timeout.timeout(self._timeout):
                 _LOGGER.debug("url: %s", url)
+                _LOGGER.debug("param: %s", params)
                 _LOGGER.debug("data: %s", data)
-                response = await self.websession.put(url, json=data)
+                response = await self.websession.put(url, json=data, params=params)
             return await check_response(response, [200, 204])
         except (asyncio.TimeoutError, aiohttp.ClientError) as error:
             raise PvApiConnectionError(
@@ -134,3 +139,25 @@ class AioRequest:
         finally:
             if response is not None:
                 await response.release()
+
+    async def set_api_version(self):
+        """
+        Set the API generation based on what the gateway responds to.
+        """
+        _LOGGER.debug("Trying gen 2...")
+        try:
+            await self.get(get_base_path(self.hub_ip, join_path("api", FWVERSION)))
+            self.api_version = 2
+            return
+        except Exception:  # pylint: disable=broad-except
+            _LOGGER.debug("Gen 2 Failed...")
+            pass
+
+        _LOGGER.debug("Trying gen 3...")
+        try:
+            await self.get(get_base_path(self.hub_ip, join_path("gateway", "info")))
+            self.api_version = 3
+            return
+        except Exception:  # pylint: disable=broad-except
+            pass
+        _LOGGER.error("Failed to discover gateway version.")

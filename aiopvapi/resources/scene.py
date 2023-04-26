@@ -4,7 +4,7 @@ from aiopvapi.helpers.constants import ATTR_SCENE, ATTR_ROOM_ID, ATTR_SCENE_ID
 
 
 class Scene(ApiResource):
-    api_path = "api/scenes"
+    api_path = "scenes"
 
     def __init__(self, raw_data: dict, request: AioRequest):
         if ATTR_SCENE in raw_data:

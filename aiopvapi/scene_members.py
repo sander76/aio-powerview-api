@@ -3,6 +3,7 @@
 import logging
 
 from aiopvapi.helpers.api_base import ApiEntryPoint
+from aiopvapi.helpers.aiorequest import AioRequest
 from aiopvapi.helpers.constants import ATTR_SCENE_ID, ATTR_SHADE_ID, ATTR_POSITION_DATA
 from aiopvapi.resources.scene_member import ATTR_SCENE_MEMBER, SceneMember
 
@@ -15,9 +16,9 @@ class SceneMembers(ApiEntryPoint):
     """A scene member is a device, like a shade, being a member
     of a specific scene."""
 
-    api_path = "api/scenemembers"
+    api_path = "scenemembers"
 
-    def __init__(self, request):
+    def __init__(self, request: AioRequest):
         super().__init__(request, self.api_path)
 
     async def create_scene_member(self, shade_position, scene_id, shade_id):
@@ -35,13 +36,17 @@ class SceneMembers(ApiEntryPoint):
     def _resource_factory(self, raw):
         return SceneMember(raw, self.request)
 
-    @staticmethod
-    def _loop_raw(raw):
-        for _raw in raw[SCENE_MEMBER_DATA]:
+    def _loop_raw(self, raw):
+        data = raw
+        if self.request.api_version < 3:
+            data = raw[SCENE_MEMBER_DATA]
+
+        for _raw in data:
             yield _raw
 
-    @staticmethod
-    def _get_to_actual_data(raw):
+    def _get_to_actual_data(self, raw):
+        if self.request.api_version >= 3:
+            return raw
         return raw.get("scenemember")
 
     async def get_scene_members(self, scene_id):

@@ -4,7 +4,7 @@ from aiopvapi.helpers.constants import ATTR_USER_DATA
 
 
 class UserData(ApiResource):
-    api_path = "api/userdata"
+    api_path = "userdata"
 
     def __init__(self, raw_data: dict, request: AioRequest):
         if ATTR_USER_DATA in raw_data:

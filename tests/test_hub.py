@@ -1,16 +1,18 @@
-import asyncio
 from unittest.mock import MagicMock
+import json
 
 import pytest
 
 from aiopvapi.helpers.aiorequest import AioRequest
 from aiopvapi.hub import Version, Hub
 from tests.test_scene_members import AsyncMock
+from tests.fake_server import TestFakeServer, FAKE_BASE_URL, USER_DATA_VALUE
 
 
 @pytest.fixture
 def fake_aiorequest():
-    request = AioRequest('127.0.0.1', websession=MagicMock())
+    request = AioRequest("127.0.0.1", websession=MagicMock())
+    request.api_version = 2
     request.get = AsyncMock()
     request.put = AsyncMock()
     return request
@@ -30,19 +32,53 @@ def test_version():
 
     assert not version1 == version3
 
-    version1 = Version('abc', 'def', 'ghi')
-    version2 = Version('abc', 'def', 'ghi')
+    version1 = Version("abc", "def", "ghi")
+    version2 = Version("abc", "def", "ghi")
     assert version1 == version2
 
 
-def test_hub(fake_aiorequest):
-    hub = Hub(fake_aiorequest)
-    assert hub._base_path == 'http://127.0.0.1/api'
-    loop = asyncio.get_event_loop()
+class TestHub_v2(TestFakeServer):
+    def test_hub_init(self):
+        async def go():
+            await self.start_fake_server()
+            hub = Hub(self.request)
+            await hub.query_firmware()
+            return hub
 
-    fake_aiorequest.get = AsyncMock(return_value={})
+        hub = self.loop.run_until_complete(go())
 
-    loop.run_until_complete(hub.query_firmware())
+        assert hub._base_path == "http://" + FAKE_BASE_URL + "/api"
 
-    hub.request.get.mock.assert_called_once_with(
-        'http://127.0.0.1/api/fwversion')
+        # self.request.get.mock.assert_called_once_with(FAKE_BASE_URL + "/userdata")
+        data = json.loads(USER_DATA_VALUE)
+
+        assert hub.main_processor_info == data["userData"]["firmware"]["mainProcessor"]
+        assert hub.main_processor_version == "BUILD: 395 REVISION: 2 SUB_REVISION: 0"
+        assert hub.radio_version == "BUILD: 1307 REVISION: 2 SUB_REVISION: 0"
+        assert hub.ssid == "cisco789"
+        assert hub.name == "Hubby"
+
+
+class TestHub_v3(TestFakeServer):
+    def __init__(self, methodName: str = "runTest") -> None:
+        super().__init__(methodName)
+        self.api_version = 3
+
+    def test_hub_init(self):
+        async def go():
+            await self.start_fake_server(api_version=3)
+            hub = Hub(self.request)
+            await hub.query_firmware()
+            return hub
+
+        hub = self.loop.run_until_complete(go())
+
+        assert hub._base_path == "http://" + FAKE_BASE_URL + "/gateway"
+
+        # self.request.get.mock.assert_called_once_with(FAKE_BASE_URL + "/userdata")
+        data = json.loads(USER_DATA_VALUE)
+
+        assert hub.main_processor_info == data["userData"]["firmware"]["mainProcessor"]
+        assert hub.main_processor_version == "BUILD: 395 REVISION: 2 SUB_REVISION: 0"
+        assert hub.radio_version == ["BUILD: 1307 REVISION: 2 SUB_REVISION: 0"]
+        assert hub.ssid == "cisco789"

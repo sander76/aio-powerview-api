@@ -18,7 +18,7 @@ ATTR_SCENE_DATA = "sceneData"
 
 
 class Scenes(ApiEntryPoint):
-    api_path = "api/scenes"
+    api_path = "scenes"
 
     def __init__(self, request: AioRequest):
         super().__init__(request, self.api_path)
@@ -26,13 +26,17 @@ class Scenes(ApiEntryPoint):
     def _resource_factory(self, raw):
         return Scene(raw, self.request)
 
-    @staticmethod
-    def _loop_raw(raw):
-        for _raw in raw[ATTR_SCENE_DATA]:
+    def _loop_raw(self, raw):
+        data = raw
+        if self.request.api_version < 3:
+            data = raw[ATTR_SCENE_DATA]
+
+        for _raw in data:
             yield _raw
 
-    @staticmethod
-    def _get_to_actual_data(raw):
+    def _get_to_actual_data(self, raw):
+        if self.request.api_version >= 3:
+            return raw
         return raw.get("scene")
 
     async def create_scene(self, room_id, name, color_id=0, icon_id=0):

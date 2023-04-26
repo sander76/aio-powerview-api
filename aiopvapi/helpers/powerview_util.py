@@ -117,7 +117,7 @@ class PowerViewUtil:
             _shade = await self.get_shade(shade_id)
             position = await _shade.get_current_position()
 
-        await (SceneMembers(self.request)).create_scene_member(
+        await SceneMembers(self.request).create_scene_member(
             position, scene_id, shade_id
         )
 

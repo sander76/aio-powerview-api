@@ -1,4 +1,5 @@
 import base64
+import logging
 
 from aiopvapi.helpers.constants import ATTR_ID
 
@@ -39,3 +40,17 @@ def get_raw_id(id_):
     This can serve as the minimal raw input for ie scene instantiation
     and allows for simple activation of that scene."""
     return {ATTR_ID: id_}
+
+
+def initial_api_str(api_version: int) -> str:
+    """
+    Returns the initial api call path based on the api version.
+
+    :param api_version: integer of API version
+    :returns: String of API path
+    """
+    if api_version >= 3:
+        initial = "home"
+    else:
+        initial = "api"
+    return initial

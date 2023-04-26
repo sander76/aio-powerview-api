@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 from aiopvapi.helpers.aiorequest import AioRequest
 from aiopvapi.helpers.api_base import ApiResource
+from aiopvapi.helpers.tools import join_path
 from aiopvapi.helpers.constants import (
     ATTR_CAPABILITIES,
     ATTR_POSITION_DATA,
@@ -16,13 +17,18 @@ from aiopvapi.helpers.constants import (
     ATTR_POSITION1,
     ATTR_POSITION2,
     ATTR_POSKIND2,
+    ATTR_PRIMARY,
+    ATTR_SECONDARY,
     ATTR_POSITION,
     ATTR_COMMAND,
     ATTR_MOVE,
     ATTR_TILT,
+    ATTR_BATTERY_KIND,
+    ATTR_POWER_TYPE,
     MAX_POSITION,
     MID_POSITION,
     MIN_POSITION,
+    MAX_POSITION_V2,
     POSKIND_PRIMARY,
     POSKIND_SECONDARY,
     POSKIND_VANE,
@@ -89,7 +95,7 @@ def factory(raw_data, request):
     classes = [
         ShadeBottomUp,
         ShadeBottomUpTiltOnClosed90,
-        ShadeBottomUpTiltOnClosed180, #to ensure capability match order here is important
+        ShadeBottomUpTiltOnClosed180,  # to ensure capability match order here is important
         ShadeBottomUpTiltAnywhere,
         ShadeVerticalTiltAnywhere,
         ShadeVertical,
@@ -121,35 +127,91 @@ def factory(raw_data, request):
 
 
 class BaseShade(ApiResource):
-    api_path = "api/shades"
+    api_path = "shades"
     shade_types = (shade_type(0, "undefined type"),)
     capability = capability("-1", ShadeCapabilities(primary=True), "undefined")
-    open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
-    close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
-    open_position_tilt = {}
-    close_position_tilt = {}
+    _open_position = {ATTR_PRIMARY: MAX_POSITION}
+    _close_position = {ATTR_PRIMARY: MIN_POSITION}
+    _open_position_tilt = {}
+    _close_position_tilt = {}
     allowed_positions = ()
 
     shade_limits = ShadeLimits()
 
     def __init__(self, raw_data: dict, shade_type: shade_type, request: AioRequest):
         self.shade_type = shade_type
-        super().__init__(request, self.api_path, raw_data)
+
+        super().__init__(request, self.api_path, raw_data=raw_data)
+
+    @property
+    def open_position(self):
+        return self.convert_to_v2(self._open_position)
+
+    @property
+    def close_position(self):
+        return self.convert_to_v2(self._close_position)
+
+    @property
+    def open_position_tilt(self):
+        return self.convert_to_v2(self._open_position_tilt)
+
+    @property
+    def close_position_tilt(self):
+        return self.convert_to_v2(self._close_position_tilt)
+
+    def convert_to_v2(self, attrs: dict):
+        if self.request.api_version >= 3:
+            return attrs
+
+        result = {}
+        # Start with position 1
+        position = ATTR_POSITION1
+        kind = ATTR_POSKIND1
+        for key, val in attrs.items():
+            val = int(val * MAX_POSITION_V2)
+            if key == ATTR_PRIMARY:
+                result[position] = val
+                result[kind] = 1
+            elif key == ATTR_SECONDARY:
+                # Secondary is always in position 2
+                result[ATTR_POSITION2] = val
+                result[ATTR_POSKIND2] = 2
+            elif key == ATTR_TILT:
+                result[position] = val
+                result[kind] = 3
+            else:
+                result[key] = val
+            # Advance positions for next iteration
+            position = ATTR_POSITION2
+            kind = ATTR_POSKIND2
+        return result
 
     def _create_shade_data(self, position_data=None, room_id=None):
         """Create a shade data object to be sent to the hub"""
+        if self.request.api_version >= 3:
+            return {"positions": self.clamp_v3(position_data)}
+
         base = {ATTR_SHADE: {ATTR_ID: self.id}}
         if position_data:
-            base[ATTR_SHADE][ATTR_POSITION_DATA] = self.clamp(position_data)
+            base[ATTR_SHADE][ATTR_POSITION_DATA] = self.clamp_v2(position_data)
         if room_id:
             base[ATTR_SHADE][ATTR_ROOM_ID] = room_id
         return base
 
     async def _move(self, position_data):
-        result = await self.request.put(self._resource_path, data=position_data)
+        params = {}
+        base_path = self._resource_path
+        if self.request.api_version >= 3:
+            # IDs are required in request params for gen 3.
+            params = {"ids": self.id}
+            base_path = self._base_path
+        result = await self.request.put(
+            f"{base_path}/positions", data=position_data, params=params
+        )
         return result
 
     async def move(self, position_data):
+        _LOGGER.debug("Shade %s move to: %s", self.name, position_data)
         data = self._create_shade_data(position_data=position_data)
         return await self._move(data)
 
@@ -176,7 +238,7 @@ class BaseShade(ApiResource):
         else:
             return max
 
-    def clamp(self, position_data):
+    def clamp_v2(self, position_data):
         """Prevent impossible positions being sent."""
         if (position1 := position_data.get(ATTR_POSITION1)) is not None:
             position_data[ATTR_POSITION1] = self.position_limit(
@@ -188,21 +250,41 @@ class BaseShade(ApiResource):
             )
         return position_data
 
+    def clamp_v3(self, position_data):
+        """Prevent impossible positions being sent."""
+        for key, val in position_data.items():
+            position_data[key] = self.position_limit(val, POSKIND_PRIMARY)
+        return position_data
+
+    async def _motion(self, motion):
+        if self.request.api_version >= 3:
+            path = self._resource_path + "/motion"
+            cmd = {"motion": motion}
+        else:
+            path = self._resource_path
+            cmd = {"shade": {"motion": motion}}
+        await self.request.put(path, cmd)
+
     async def jog(self):
         """Jog the shade."""
-        await self.request.put(self._resource_path, {"shade": {"motion": "jog"}})
+        await self._motion("jog")
 
     async def calibrate(self):
         """Calibrate the shade."""
-        await self.request.put(self._resource_path, {"shade": {"motion": "calibrate"}})
+        await self._motion("calibrate")
 
     async def favorite(self):
         """Move the shade to the defined favorite position."""
-        await self.request.put(self._resource_path, {"shade": {"motion": "heart"}})
+        await self._motion("heart")
 
     async def stop(self):
         """Stop the shade."""
-        return await self.request.put(self._resource_path, {"shade": {"motion": "stop"}})
+        if self.request.api_version >= 3:
+            await self.request.put(
+                join_path(self._base_path, "stop"), params={"ids": self.id}
+            )
+        else:
+            await self._motion("stop")
 
     async def add_shade_to_room(self, room_id):
         data = self._create_shade_data(room_id=room_id)
@@ -213,24 +295,38 @@ class BaseShade(ApiResource):
         data. Including current shade position."""
         raw_data = await self.request.get(self._resource_path, {"refresh": "true"})
         if isinstance(raw_data, bool):
-            _LOGGER.debug("No data available, hub undergoing maintenance. Please try again")
+            _LOGGER.debug(
+                "No data available, hub undergoing maintenance. Please try again"
+            )
             return
-        self._raw_data = raw_data.get(ATTR_SHADE)
+        # Gen <= 2 API has raw data under shade key.  Gen >= 3 API this is flattened.
+        self._raw_data = raw_data.get(ATTR_SHADE, raw_data)
 
     async def refresh_battery(self):
         """Query the hub and request the most recent battery state."""
-        raw_data = await self.request.get(self._resource_path, {"updateBatteryLevel": "true"})
+        raw_data = await self.request.get(
+            self._resource_path, {"updateBatteryLevel": "true"}
+        )
         if isinstance(raw_data, bool):
-            _LOGGER.debug("No data available, hub undergoing maintenance. Please try again")
+            _LOGGER.debug(
+                "No data available, hub undergoing maintenance. Please try again"
+            )
             return
-        self._raw_data = raw_data.get(ATTR_SHADE)
+        self._raw_data = raw_data.get(ATTR_SHADE, raw_data)
+
+    def get_power_source(self):
+        """Get from the hub the type of power source."""
+        attr = ATTR_POWER_TYPE if self.request.api_version >= 3 else ATTR_BATTERY_KIND
+        return self.raw_data.get(attr)
 
     async def set_power_source(self, type):
         """Update the hub with the type of power source."""
         if type not in [1, 2, 3]:
             _LOGGER.error("Unsupported Power Type. Accepted values are 1, 2 & 3")
             return
-        await self.request.put(self._resource_path, data={"shade": {"batteryKind": type}})
+        await self.request.put(
+            self._resource_path, data={"shade": {"batteryKind": type}}
+        )
 
     async def get_current_position(self, refresh=True) -> dict:
         """Return the current shade position.
@@ -249,8 +345,8 @@ class BaseShadeTilt(BaseShade):
 
     # even for shades that can 180° tilt, this would just result in
     # two closed positions. 90° will always be the open position
-    open_position_tilt = {ATTR_POSITION1: MID_POSITION, ATTR_POSKIND1: 3}
-    close_position_tilt = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 3}
+    _open_position_tilt = {ATTR_TILT: MID_POSITION}
+    _close_position_tilt = {ATTR_TILT: MIN_POSITION}
 
     async def tilt(self, position_data):
         data = self._create_shade_data(position_data=position_data)
@@ -278,8 +374,10 @@ class ShadeBottomUp(BaseShade):
         shade_type(6, "Duette"),
         shade_type(10, "Duette and Applause SkyLift"),
         shade_type(31, "Vignette"),
+        shade_type(32, "Vignette"),
         shade_type(42, "M25T Roller Blind"),
         shade_type(49, "AC Roller"),
+        shade_type(84, "Vignette"),
     )
 
     capability = capability(
@@ -290,12 +388,10 @@ class ShadeBottomUp(BaseShade):
         "Bottom Up",
     )
 
-    open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
-    close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
+    _open_position = {ATTR_PRIMARY: MAX_POSITION}
+    _close_position = {ATTR_PRIMARY: MIN_POSITION}
 
-    allowed_positions = (
-        {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
-    )
+    allowed_positions = ({ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},)
 
 
 class ShadeBottomUpTiltOnClosed180(BaseShadeTilt):
@@ -306,9 +402,7 @@ class ShadeBottomUpTiltOnClosed180(BaseShadeTilt):
     only model without a distinct capability code.
     """
 
-    shade_types = (
-        shade_type(44, "Twist"),
-    )
+    shade_types = (shade_type(44, "Twist"),)
 
     # via json these have capability 0
     # overriding to 1 to trick HA into providing tilt functionality
@@ -323,11 +417,11 @@ class ShadeBottomUpTiltOnClosed180(BaseShadeTilt):
         "Bottom Up Tilt 180°",
     )
 
-    open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
-    close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
+    _open_position = {ATTR_PRIMARY: MAX_POSITION}
+    _close_position = {ATTR_PRIMARY: MIN_POSITION}
 
-    open_position_tilt = {ATTR_POSITION1: MID_POSITION, ATTR_POSKIND1: 3}
-    close_position_tilt = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 3}
+    _open_position_tilt = {ATTR_TILT: MID_POSITION}
+    _close_position_tilt = {ATTR_TILT: MIN_POSITION}
 
     allowed_positions = (
         {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
@@ -359,11 +453,11 @@ class ShadeBottomUpTiltOnClosed90(BaseShadeTilt):
 
     shade_limits = ShadeLimits(tilt_max=MID_POSITION)
 
-    open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
-    close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
+    _open_position = {ATTR_PRIMARY: MAX_POSITION}
+    _close_position = {ATTR_PRIMARY: MIN_POSITION}
 
-    open_position_tilt = {ATTR_POSITION1: MID_POSITION, ATTR_POSKIND1: 3}
-    close_position_tilt = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 3}
+    _open_position_tilt = {ATTR_TILT: MID_POSITION}
+    _close_position_tilt = {ATTR_TILT: MIN_POSITION}
 
     allowed_positions = (
         {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
@@ -392,22 +486,18 @@ class ShadeBottomUpTiltAnywhere(BaseShadeTilt):
         "Bottom Up Tilt 180°",
     )
 
-    open_position = {
-        ATTR_POSKIND1: 1,
-        ATTR_POSITION1: MAX_POSITION,
-        ATTR_POSKIND2: 3,
-        ATTR_POSITION2: MID_POSITION,
+    _open_position = {
+        ATTR_PRIMARY: MAX_POSITION,
+        ATTR_TILT: MID_POSITION,
     }
 
-    close_position = {
-        ATTR_POSKIND1: 1,
-        ATTR_POSITION1: MIN_POSITION,
-        ATTR_POSKIND2: 3,
-        ATTR_POSITION2: MIN_POSITION,
+    _close_position = {
+        ATTR_PRIMARY: MIN_POSITION,
+        ATTR_TILT: MIN_POSITION,
     }
 
-    open_position_tilt = {ATTR_POSITION1: MID_POSITION, ATTR_POSKIND1: 3}
-    close_position_tilt = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 3}
+    _open_position_tilt = {ATTR_TILT: MID_POSITION}
+    _close_position_tilt = {ATTR_TILT: MIN_POSITION}
 
     allowed_positions = (
         {ATTR_POSITION: {ATTR_POSKIND1: 1, ATTR_POSKIND2: 3}, ATTR_COMMAND: ATTR_MOVE},
@@ -472,9 +562,7 @@ class ShadeTiltOnly(BaseShadeTilt):
     A shade with tilt anywhere capabilities only.
     """
 
-    shade_types = (
-        shade_type(66, "Palm Beach Shutters"),
-    )
+    shade_types = (shade_type(66, "Palm Beach Shutters"),)
 
     capability = capability(
         5,
@@ -485,15 +573,13 @@ class ShadeTiltOnly(BaseShadeTilt):
         "Tilt Only 180°",
     )
 
-    open_position = {}
-    close_position = {}
+    _open_position = {}
+    _close_position = {}
 
-    open_position_tilt = {ATTR_POSITION1: MID_POSITION, ATTR_POSKIND1: 3}
-    close_position_tilt = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 3}
+    _open_position_tilt = {ATTR_TILT: MID_POSITION}
+    _close_position_tilt = {ATTR_TILT: MIN_POSITION}
 
-    allowed_positions = (
-        {ATTR_POSITION: {ATTR_POSKIND1: 3}, ATTR_COMMAND: ATTR_TILT},
-    )
+    allowed_positions = ({ATTR_POSITION: {ATTR_POSKIND1: 3}, ATTR_COMMAND: ATTR_TILT},)
 
     async def move(self):
         _LOGGER.error("Move not supported.")
@@ -506,9 +592,7 @@ class ShadeTopDown(BaseShade):
     A shade with top down capabilities only.
     """
 
-    shade_types = (
-        shade_type(7, "Top Down"),
-    )
+    shade_types = (shade_type(7, "Top Down"),)
 
     capability = capability(
         6,
@@ -519,12 +603,10 @@ class ShadeTopDown(BaseShade):
         "Top Down",
     )
 
-    open_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 1}
-    close_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
+    _open_position = {ATTR_PRIMARY: MIN_POSITION}
+    _close_position = {ATTR_PRIMARY: MAX_POSITION}
 
-    allowed_positions = (
-        {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
-    )
+    allowed_positions = ({ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},)
 
 
 class ShadeTopDownBottomUp(BaseShade):
@@ -549,18 +631,14 @@ class ShadeTopDownBottomUp(BaseShade):
         "Top Down Bottom Up",
     )
 
-    open_position = {
-        ATTR_POSITION1: MAX_POSITION,
-        ATTR_POSITION2: MIN_POSITION,
-        ATTR_POSKIND1: 1,
-        ATTR_POSKIND2: 2,
+    _open_position = {
+        ATTR_PRIMARY: MAX_POSITION,
+        ATTR_SECONDARY: MIN_POSITION,
     }
 
-    close_position = {
-        ATTR_POSITION1: MIN_POSITION,
-        ATTR_POSITION2: MIN_POSITION,
-        ATTR_POSKIND1: 1,
-        ATTR_POSKIND2: 2,
+    _close_position = {
+        ATTR_PRIMARY: MIN_POSITION,
+        ATTR_SECONDARY: MIN_POSITION,
     }
 
     allowed_positions = (
@@ -589,8 +667,8 @@ class ShadeDualOverlapped(BaseShade):
         "Dual Shade Overlapped",
     )
 
-    open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
-    close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 2}
+    _open_position = {ATTR_PRIMARY: MAX_POSITION}
+    _close_position = {ATTR_SECONDARY: MIN_POSITION}
 
     allowed_positions = (
         {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
@@ -605,9 +683,7 @@ class ShadeDualOverlappedTilt90(BaseShadeTilt):
     Tilt on these is unique in that it requires the rear shade open and front shade closed.
     """
 
-    shade_types = (
-        shade_type(38, "Silhouette Duolite"),
-    )
+    shade_types = (shade_type(38, "Silhouette Duolite"),)
 
     capability = capability(
         9,
@@ -623,11 +699,11 @@ class ShadeDualOverlappedTilt90(BaseShadeTilt):
 
     shade_limits = ShadeLimits(tilt_max=MID_POSITION)
 
-    open_position = {ATTR_POSITION1: MAX_POSITION, ATTR_POSKIND1: 1}
-    close_position = {ATTR_POSITION1: MIN_POSITION, ATTR_POSKIND1: 2}
+    _open_position = {ATTR_PRIMARY: MAX_POSITION}
+    _close_position = {ATTR_SECONDARY: MIN_POSITION}
 
-    open_position_tilt = {ATTR_POSITION2: MID_POSITION, ATTR_POSKIND1: 3}
-    close_position_tilt = {ATTR_POSITION2: MIN_POSITION, ATTR_POSKIND1: 3}
+    _open_position_tilt = {ATTR_TILT: MID_POSITION}
+    _close_position_tilt = {ATTR_TILT: MIN_POSITION}
 
     allowed_positions = (
         {ATTR_POSITION: {ATTR_POSKIND1: 1}, ATTR_COMMAND: ATTR_MOVE},
@@ -643,8 +719,7 @@ class ShadeDualOverlappedTilt180(ShadeDualOverlappedTilt90):
     Tilt on these is unique in that it requires the rear shade open and front shade closed.
     """
 
-    shade_types = (
-    )
+    shade_types = ()
 
     capability = capability(
         10,

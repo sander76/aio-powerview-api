@@ -26,6 +26,7 @@ class TestScene(TestApiResource):
     def get_resource(self):
         _request = Mock()
         _request.hub_ip = FAKE_BASE_URL
+        _request.api_version = 2
         return Scene(SCENE_RAW_DATA, _request)
 
     def test_name_property(self):
