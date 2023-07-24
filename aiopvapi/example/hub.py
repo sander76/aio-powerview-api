@@ -19,8 +19,8 @@ async def get_firmware(hub_ip):
 async def get_user_data(hub_ip):
     request = AioRequest(hub_ip)
     hub = Hub(request)
-    await hub.query_user_data()
+    await hub.query_firmware()
 
     print("UserData")
-    print("hub name: {}".format(hub.user_data.hub_name))
-    pprint(hub.user_data._raw)
+    print("hub name: {}".format(hub.hub_name))
+    pprint(hub._raw)
