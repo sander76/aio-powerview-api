@@ -49,5 +49,8 @@ Changelog
 
 **v3.0.0**
 
-- Major overhaul to incorporate gateway version 3 API.  Version detection is supported and both should be serviced by this update.
-- UserData object is deprecated as it is no longer supported in the Version 3 API.
+- Major overhaul to incorporate gateway version 3 API.  Version can be automatically detected or manually specified.
+- UserData class is deprecated and replaced with Hub.
+- ShadePosition class now replaces the raw json management of shades in support of cross generational management.
+- Schedules / Automations are now supported by the API
+- New get_*objecttype* methods available to returned structured data objects for consistent management
