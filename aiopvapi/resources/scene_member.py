@@ -2,7 +2,11 @@
 
 from aiopvapi.helpers.aiorequest import AioRequest
 from aiopvapi.helpers.api_base import ApiResource
-from aiopvapi.helpers.constants import ATTR_SCENE_MEMBER, ATTR_SCENE_ID, ATTR_SHADE_ID
+from aiopvapi.helpers.constants import (
+    ATTR_SCENE_MEMBER,
+    ATTR_SCENE_ID,
+    ATTR_SHADE_ID,
+)
 
 
 class SceneMember(ApiResource):

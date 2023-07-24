@@ -61,7 +61,8 @@ class SceneMembers(ApiEntryPoint):
     async def delete_shade_from_scene(self, shade_id, scene_id):
         """Delete a shade from a scene."""
         return await self.request.delete(
-            self.base_path, params={ATTR_SCENE_ID: scene_id, ATTR_SHADE_ID: shade_id}
+            self.base_path,
+            params={ATTR_SCENE_ID: scene_id, ATTR_SHADE_ID: shade_id},
         )
 
     async def get_scene_members(self) -> PowerviewData:

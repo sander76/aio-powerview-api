@@ -32,7 +32,11 @@ class Rooms(ApiEntryPoint):
         """Create a room on the hub"""
         name = unicode_to_base64(name)
         data = {
-            ATTR_ROOM: {ATTR_NAME: name, ATTR_COLOR_ID: color_id, ATTR_ICON_ID: icon_id}
+            ATTR_ROOM: {
+                ATTR_NAME: name,
+                ATTR_COLOR_ID: color_id,
+                ATTR_ICON_ID: icon_id,
+            }
         }
         return await self.request.post(self.base_path, data=data)
 

@@ -70,11 +70,9 @@ class AioRequest:
             # PvApiResponseStatusError but as this is unavoidable we
             # class this situation as still undergoing maintenance
             _val = False
-            # raise PvApiMaintenance("Powerview Hub is undergoing maintenance1")
         elif response.status in [204, 423]:
             # 423 hub under maintenance, returns data, but not shade
             _val = True
-            # raise PvApiMaintenance("Powerview Hub is undergoing maintenance2")
         elif response.status in valid_response_codes:
             _val = await response.json()
 

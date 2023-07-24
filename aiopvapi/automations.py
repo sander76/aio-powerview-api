@@ -6,13 +6,8 @@ from aiopvapi.helpers.aiorequest import AioRequest
 from aiopvapi.helpers.api_base import ApiEntryPoint
 from aiopvapi.helpers.constants import (
     ATTR_ID,
-    ATTR_NAME,
-    ATTR_ROOM_ID,
-    ATTR_ICON_ID,
-    ATTR_COLOR_ID,
     ATTR_SCHEDULED_EVENT_DATA,
 )
-from aiopvapi.helpers.tools import unicode_to_base64
 from aiopvapi.resources.automation import Automation
 
 from aiopvapi.resources.model import PowerviewData
@@ -54,11 +49,8 @@ class Automations(ApiEntryPoint):
         if self.api_version < 3:
             resources = resources[ATTR_SCHEDULED_EVENT_DATA]
 
-        processed = {
-            entry[ATTR_ID]: Automation(entry, self.request) for entry in resources
-        }
+        processed = {entry[ATTR_ID]: Automation(entry, self.request) for entry in resources}
 
-        # automations dont tell us things like name etc, so we need additional calls
         if fetch_scene_data is True:
             for automation in processed.values():
                 await automation.fetch_associated_scene_data()
