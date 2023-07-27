@@ -89,8 +89,7 @@ class Hub(ApiBase):
 
         if multi_gateway is False or (multi_gateway and gateway_primary):
             return "Primary"
-        else:
-            return "Secondary"
+        return "Secondary"
 
     @property
     def firmware(self) -> str | None:
