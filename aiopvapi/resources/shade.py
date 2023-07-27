@@ -460,6 +460,7 @@ class BaseShade(ApiResource):
         """Query the hub and the actual shade to get the most recent shade
         data. Including current shade position."""
         try:
+            _LOGGER.debug("Refreshing position of: %s", self.name)
             raw_data = await self.request.get(self._resource_path, {"refresh": "true"})
             # Gen <= 2 API has raw data under shade key.  Gen >= 3 API this is flattened.
             self._raw_data = raw_data.get(ATTR_SHADE, raw_data)
