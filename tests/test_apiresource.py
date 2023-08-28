@@ -15,6 +15,7 @@ class TestApiResource(TestFakeServer):
         """Get the resource being tested."""
         _request = Mock()
         _request.hub_ip = FAKE_BASE_URL
+        _request.api_version = 2
         return ApiResource(_request, "base", self.get_resource_raw_data())
 
     def setUp(self):
@@ -30,7 +31,7 @@ class TestApiResource(TestFakeServer):
 
     def test_full_path(self):
         self.assertEqual(
-            self.resource._base_path, "http://{}/base".format(FAKE_BASE_URL)
+            self.resource._base_path, "http://{}/api/base".format(FAKE_BASE_URL)
         )
 
     def test_name_property(self):
@@ -51,6 +52,20 @@ class TestApiResource(TestFakeServer):
         # Try to change the original data, resource should have made a copy!
         data["name"] = "no name"
         self.assertEqual({"name": "name"}, self.resource.raw_data)
+
+
+class TestApiResource_V3(TestApiResource):
+    def get_resource(self):
+        """Get the resource being tested."""
+        _request = Mock()
+        _request.hub_ip = FAKE_BASE_URL
+        _request.api_version = 3
+        return ApiResource(_request, "base", self.get_resource_raw_data())
+
+    def test_full_path(self):
+        self.assertEqual(
+            self.resource._base_path, "http://{}/home/base".format(FAKE_BASE_URL)
+        )
 
     # def test_delete_200(self, mocked):
     #     """Test delete resources with status 200."""
@@ -168,5 +183,9 @@ test_data1 = {
 def test_clean_names():
     req = Mock()
     req.hub_ip = "123.123.123"
+    req.api_version = 2
     api = ApiEntryPoint(req, "abc")
-    clean = api._sanitize_resources(test_data1)
+    try:
+        api._sanitize_resources(test_data1)
+    except NotImplementedError:
+        pass

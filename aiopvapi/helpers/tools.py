@@ -1,3 +1,5 @@
+"""Tools for converting data from powerview hub"""
+
 import base64
 
 from aiopvapi.helpers.constants import ATTR_ID
@@ -14,6 +16,7 @@ def base64_to_unicode(string):
 
 
 def get_base_path(ip_address, url):
+    """Convert url and ip to base path"""
     # Remove scheme if present
     ip_address = ip_address.split("://")[-1].strip("/")
     # clean up url (leading or trailing or multiple '/')

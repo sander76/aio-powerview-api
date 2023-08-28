@@ -8,9 +8,11 @@ from aiopvapi.helpers.constants import ATTR_ROOM
 
 
 class Room(ApiResource):
-    api_path = "api/rooms"
+    """Powerview Rooms"""
 
-    def __init__(self, raw_data: dict, request: AioRequest):
+    api_endpoint = "rooms"
+
+    def __init__(self, raw_data: dict, request: AioRequest) -> None:
         if ATTR_ROOM in raw_data:
             raw_data = raw_data.get(ATTR_ROOM)
-        super().__init__(request, self.api_path, raw_data)
+        super().__init__(request, self.api_endpoint, raw_data)

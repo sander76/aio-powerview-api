@@ -4,53 +4,84 @@ import logging
 
 from aiopvapi.helpers.aiorequest import AioRequest
 from aiopvapi.helpers.api_base import ApiEntryPoint
-from aiopvapi.helpers.constants import ATTR_NAME, ATTR_NAME_UNICODE
+from aiopvapi.helpers.constants import (
+    ATTR_ID,
+    ATTR_NAME,
+    ATTR_NAME_UNICODE,
+    ATTR_SHADE_DATA,
+)
 from aiopvapi.helpers.tools import base64_to_unicode
 from aiopvapi.resources import shade
 
-LOGGER = logging.getLogger("__name__")
+from aiopvapi.resources.model import PowerviewData
 
-ATTR_SHADE_DATA = "shadeData"
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class Shades(ApiEntryPoint):
     """Shades entry point"""
 
-    api_path = "api/shades"
+    api_endpoint = "shades"
 
-    def __init__(self, request: AioRequest):
-        super().__init__(request, self.api_path)
+    def __init__(self, request: AioRequest) -> None:
+        super().__init__(request, self.api_endpoint)
 
-    @staticmethod
-    def sanitize_resources(resource: dict):
-        """Cleans up incoming scene data
+    def _sanitize_resources(self, resources: dict) -> dict | None:
+        """Cleans up incoming shade data
 
-        :param resource: The dict with scene data to be sanitized.
-        :returns: Cleaned up scene dict.
+        :param resources: The dict with shade data to be sanitized.
+        :returns: Cleaned up shade dict.
         """
+        if self.api_version < 3:
+            resources = resources[ATTR_SHADE_DATA]
+
         try:
-            for shade in resource[ATTR_SHADE_DATA]:
-                _name = shade.get(ATTR_NAME)
+            for _shade in resources:
+                _name = _shade.get(ATTR_NAME)
                 if _name:
-                    shade[ATTR_NAME_UNICODE] = base64_to_unicode(_name)
-            return resource
+                    _shade[ATTR_NAME_UNICODE] = base64_to_unicode(_name)
+            return resources
         except (KeyError, TypeError):
-            LOGGER.debug("no shade data available")
+            _LOGGER.debug("No shade data available")
             return None
 
     def _resource_factory(self, raw):
         return shade.factory(raw, self.request)
 
-    @staticmethod
-    def _loop_raw(raw):
-        for _raw in raw[ATTR_SHADE_DATA]:
+    def _loop_raw(self, raw):
+        if self.api_version < 3:
+            raw = raw[ATTR_SHADE_DATA]
+
+        for _raw in raw:
             yield _raw
 
-    @staticmethod
-    def _get_to_actual_data(raw):
+    def _get_to_actual_data(self, raw):
+        if self.api_version >= 3:
+            return raw
         return raw.get("shade")
 
-    # async def get_shade(self, shade_id: int):
+    async def get_shades(self) -> PowerviewData:
+        """Get a list of shades.
+
+        :returns PowerviewData object
+        :raises PvApiError when an error occurs.
+        """
+        resources = await self.get_resources()
+        if self.api_version < 3:
+            resources = resources[ATTR_SHADE_DATA]
+
+        _LOGGER.debug("Raw shades data: %s", resources)
+
+        processed = {
+            entry[ATTR_ID]: shade.factory(entry, self.request) for entry in resources
+        }
+
+        _LOGGER.debug("Raw shades data: %s", resources)
+        return PowerviewData(raw=resources, processed=processed)
+
+        # async def get_shade(self, shade_id: int):
+
     #     _url = '{}/{}'.format(self.api_path, shade_id)
     #     _raw = await self.request.get(_url)
     #     return shade.factory(_raw, self.request)
