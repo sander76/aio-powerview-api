@@ -577,8 +577,15 @@ class BaseShadeTilt(BaseShade):
 
     # even for shades that can 180° tilt, this would just result in
     # two closed positions. 90° will always be the open position
-    _open_position_tilt = ShadePosition(tilt=MID_POSITION)
-    _close_position_tilt = ShadePosition(tilt=MIN_POSITION)
+
+    def __init__(
+        self, raw_data: dict, shade_type: ShadeType, request: AioRequest
+    ) -> None:
+        super().__init__(raw_data, shade_type, request)
+        self._open_position_tilt = ShadePosition(tilt=MAX_POSITION)
+        self._close_position_tilt = ShadePosition(tilt=MIN_POSITION)
+        if self.api_version < 3:
+            self._open_position_tilt = ShadePosition(tilt=MID_POSITION)
 
     async def tilt_raw(self, position_data):
         """Tilt the shade to a set position using raw data"""
@@ -638,8 +645,12 @@ class ShadeBottomUp(BaseShade):
         "Bottom Up",
     )
 
-    _open_position = ShadePosition(primary=MAX_POSITION)
-    _close_position = ShadePosition(primary=MIN_POSITION)
+    def __init__(
+        self, raw_data: dict, shade_type: ShadeType, request: AioRequest
+    ) -> None:
+        super().__init__(raw_data, shade_type, request)
+        self._open_position = ShadePosition(primary=MAX_POSITION)
+        self._close_position = ShadePosition(primary=MIN_POSITION)
 
 
 class ShadeBottomUpTiltOnClosed180(BaseShadeTilt):
@@ -665,11 +676,16 @@ class ShadeBottomUpTiltOnClosed180(BaseShadeTilt):
         "Bottom Up Tilt 180°",
     )
 
-    _open_position = ShadePosition(primary=MAX_POSITION)
-    _close_position = ShadePosition(primary=MIN_POSITION)
-
-    _open_position_tilt = ShadePosition(tilt=MID_POSITION)
-    _close_position_tilt = ShadePosition(tilt=MIN_POSITION)
+    def __init__(
+        self, raw_data: dict, shade_type: ShadeType, request: AioRequest
+    ) -> None:
+        super().__init__(raw_data, shade_type, request)
+        self._open_position = ShadePosition(primary=MAX_POSITION)
+        self._close_position = ShadePosition(primary=MIN_POSITION)
+        self._open_position_tilt = ShadePosition(tilt=MAX_POSITION)
+        self._close_position_tilt = ShadePosition(tilt=MIN_POSITION)
+        if self.api_version < 3:
+            self._open_position_tilt = ShadePosition(tilt=MID_POSITION)
 
 
 class ShadeBottomUpTiltOnClosed90(BaseShadeTilt):
@@ -694,13 +710,18 @@ class ShadeBottomUpTiltOnClosed90(BaseShadeTilt):
         "Bottom Up Tilt 90°",
     )
 
-    shade_limits = ShadeLimits(tilt_max=MID_POSITION)
-
-    _open_position = ShadePosition(primary=MAX_POSITION)
-    _close_position = ShadePosition(primary=MIN_POSITION)
-
-    _open_position_tilt = ShadePosition(tilt=MID_POSITION)
-    _close_position_tilt = ShadePosition(tilt=MIN_POSITION)
+    def __init__(
+        self, raw_data: dict, shade_type: ShadeType, request: AioRequest
+    ) -> None:
+        super().__init__(raw_data, shade_type, request)
+        self.shade_limits = ShadeLimits(tilt_max=MAX_POSITION)
+        self._open_position = ShadePosition(primary=MAX_POSITION)
+        self._close_position = ShadePosition(primary=MIN_POSITION)
+        self._open_position_tilt = ShadePosition(tilt=MAX_POSITION)
+        self._close_position_tilt = ShadePosition(tilt=MIN_POSITION)
+        if self.api_version < 3:
+            self.shade_limits = ShadeLimits(tilt_max=MID_POSITION)
+            self._open_position_tilt = ShadePosition(tilt=MID_POSITION)
 
 
 class ShadeBottomUpTiltAnywhere(BaseShadeTilt):
@@ -724,11 +745,18 @@ class ShadeBottomUpTiltAnywhere(BaseShadeTilt):
         "Bottom Up Tilt 180°",
     )
 
-    _open_position = ShadePosition(primary=MAX_POSITION, tilt=MID_POSITION)
-    _close_position = ShadePosition(primary=MIN_POSITION, tilt=MIN_POSITION)
-
-    _open_position_tilt = ShadePosition(tilt=MID_POSITION)
-    _close_position_tilt = ShadePosition(tilt=MIN_POSITION)
+    def __init__(
+        self, raw_data: dict, shade_type: ShadeType, request: AioRequest
+    ) -> None:
+        super().__init__(raw_data, shade_type, request)
+        self._open_position = ShadePosition(primary=MAX_POSITION, tilt=MAX_POSITION)
+        self._close_position = ShadePosition(primary=MIN_POSITION, tilt=MAX_POSITION)
+        self._open_position_tilt = ShadePosition(tilt=MAX_POSITION)
+        self._close_position_tilt = ShadePosition(tilt=MIN_POSITION)
+        if self.api_version < 3:
+            self._open_position = ShadePosition(primary=MAX_POSITION, tilt=MID_POSITION)
+            self._close_position = ShadePosition(primary=MIN_POSITION, tilt=MID_POSITION)
+            self._open_position_tilt = ShadePosition(tilt=MID_POSITION)
 
 
 class ShadeVertical(ShadeBottomUp):
@@ -799,11 +827,16 @@ class ShadeTiltOnly(BaseShadeTilt):
         "Tilt Only 180°",
     )
 
-    _open_position = ShadePosition()
-    _close_position = ShadePosition()
-
-    _open_position_tilt = ShadePosition(tilt=MID_POSITION)
-    _close_position_tilt = ShadePosition(tilt=MIN_POSITION)
+    def __init__(
+        self, raw_data: dict, shade_type: ShadeType, request: AioRequest
+    ) -> None:
+        super().__init__(raw_data, shade_type, request)
+        self._open_position = ShadePosition()
+        self._close_position = ShadePosition()
+        self._open_position_tilt = ShadePosition(tilt=MAX_POSITION)
+        self._close_position_tilt = ShadePosition(tilt=MIN_POSITION)
+        if self.api_version < 3:
+            self._open_position_tilt = ShadePosition(tilt=MID_POSITION)
 
     async def move(self, position_data=None):
         _LOGGER.error("Move unsupported. Position request(%s) ignored", position_data)
@@ -831,8 +864,12 @@ class ShadeTopDown(BaseShade):
         "Top Down",
     )
 
-    _open_position = ShadePosition(primary=MIN_POSITION)
-    _close_position = ShadePosition(primary=MAX_POSITION)
+    def __init__(
+        self, raw_data: dict, shade_type: ShadeType, request: AioRequest
+    ) -> None:
+        super().__init__(raw_data, shade_type, request)
+        self._open_position = ShadePosition(primary=MIN_POSITION)
+        self._close_position = ShadePosition(primary=MAX_POSITION)
 
 
 class ShadeTopDownBottomUp(BaseShade):
@@ -857,8 +894,12 @@ class ShadeTopDownBottomUp(BaseShade):
         "Top Down Bottom Up",
     )
 
-    _open_position = ShadePosition(primary=MAX_POSITION, secondary=MIN_POSITION)
-    _close_position = ShadePosition(primary=MIN_POSITION, secondary=MIN_POSITION)
+    def __init__(
+        self, raw_data: dict, shade_type: ShadeType, request: AioRequest
+    ) -> None:
+        super().__init__(raw_data, shade_type, request)
+        self._open_position = ShadePosition(primary=MAX_POSITION, secondary=MIN_POSITION)
+        self._close_position = ShadePosition(primary=MIN_POSITION, secondary=MIN_POSITION)
 
     def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
         """Returns additonal positions not reported by the hub"""
@@ -890,8 +931,12 @@ class ShadeDualOverlapped(BaseShade):
         "Dual Shade Overlapped",
     )
 
-    _open_position = ShadePosition(primary=MAX_POSITION)
-    _close_position = ShadePosition(secondary=MIN_POSITION)
+    def __init__(
+        self, raw_data: dict, shade_type: ShadeType, request: AioRequest
+    ) -> None:
+        super().__init__(raw_data, shade_type, request)
+        self._open_position = ShadePosition(primary=MAX_POSITION)
+        self._close_position = ShadePosition(secondary=MIN_POSITION)
 
     def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
         """Returns additonal positions not reported by the hub"""
@@ -934,13 +979,18 @@ class ShadeDualOverlappedTilt90(BaseShadeTilt):
         "Dual Shade Overlapped Tilt 90°",
     )
 
-    shade_limits = ShadeLimits(tilt_max=MID_POSITION)
-
-    _open_position = ShadePosition(primary=MAX_POSITION)
-    _close_position = ShadePosition(secondary=MIN_POSITION)
-
-    _open_position_tilt = ShadePosition(tilt=MID_POSITION)
-    _close_position_tilt = ShadePosition(tilt=MIN_POSITION)
+    def __init__(
+        self, raw_data: dict, shade_type: ShadeType, request: AioRequest
+    ) -> None:
+        super().__init__(raw_data, shade_type, request)
+        self.shade_limits = ShadeLimits(tilt_max=MAX_POSITION)
+        self._open_position = ShadePosition(primary=MAX_POSITION)
+        self._close_position = ShadePosition(secondary=MIN_POSITION)
+        self._open_position_tilt = ShadePosition(tilt=MAX_POSITION)
+        self._close_position_tilt = ShadePosition(tilt=MIN_POSITION)
+        if self.api_version < 3:
+            self.shade_limits = ShadeLimits(tilt_max=MID_POSITION)
+            self._open_position_tilt = ShadePosition(tilt=MID_POSITION)
 
     def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
         """Returns additonal positions not reported by the hub"""
@@ -983,8 +1033,12 @@ class ShadeDualOverlappedTilt180(ShadeDualOverlappedTilt90):
         "Dual Shade Overlapped Tilt 180°",
     )
 
-    shade_limits = ShadeLimits(tilt_max=MAX_POSITION)
-
+    def __init__(
+        self, raw_data: dict, shade_type: ShadeType, request: AioRequest
+    ) -> None:
+        super().__init__(raw_data, shade_type, request)
+        if self.api_version < 3:
+            self.shade_limits = ShadeLimits(tilt_max=MAX_POSITION)
 
 def factory(raw_data: dict, request: AioRequest):
     """Class factory to create different types of shades
