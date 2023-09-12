@@ -230,8 +230,19 @@ class Hub(ApiBase):
         self.hub_name = self.mac_address
         if HUB_NAME not in self._parse(CONFIG):
             # Get gateway name from home API until it is in the gateway API
-            home = await self.request.get(self.base_path)
-            self.hub_name = home["gateways"][0]["name"]
+            home = await self.request_home_data()
+            # Find the hub based on the serial number or MAC
+            hub = None
+            for gateway in home["gateways"]:
+                if gateway.get("serial") == self.serial_number:
+                    self.hub_name = gateway.get("name")
+                    break
+                if gateway.get("mac") == self.mac_address:
+                    self.hub_name = gateway.get("name")
+                    break
+
+            if hub is None:
+                _LOGGER.debug(f"Hub with serial {self.serial_number} not found.")
 
     def _make_version(self, data: dict) -> Version:
         return Version(
@@ -269,6 +280,15 @@ class Hub(ApiBase):
             data_url = get_base_path(self.request.hub_ip, "gateway")
         return await self.request.get(data_url)
 
+    async def request_home_data(self):
+        """
+        Raw data update request. Allows patching of data for testing
+        """
+        await self.detect_api_version()
+        data_url = join_path(self.base_path, "userdata")
+        if self.api_version is not None and self.api_version >= 3:
+            data_url = self.base_path
+        return await self.request.get(data_url)
     async def detect_api_version(self):
         """
         Set the API generation based on what the gateway responds to.
