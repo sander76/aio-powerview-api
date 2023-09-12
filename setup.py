@@ -21,7 +21,7 @@ REQUIRES_PYTHON = ">=3.5.0"
 VERSION = None
 
 # What packages are required for this module to be executed?
-REQUIRED = ["async_timeout", "aiohttp>=3.7.4,<4"]
+REQUIRED = ["asyncio", "aiohttp>=3.7.4,<4"]
 
 # What packages are optional?
 EXTRAS = {}
@@ -75,8 +75,7 @@ class UploadCommand(Command):
             pass
 
         self.status("Building Source and Wheel (universal) distribution…")
-        os.system(
-            "{0} setup.py sdist bdist_wheel --universal".format(sys.executable))
+        os.system("{0} setup.py sdist bdist_wheel --universal".format(sys.executable))
 
         self.status("Uploading the package to PyPI via Twine…")
         os.system("twine upload dist/*")
