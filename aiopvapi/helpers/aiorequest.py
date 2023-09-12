@@ -184,28 +184,3 @@ class AioRequest:
         finally:
             if response is not None:
                 await response.release()
-
-    async def set_api_version(self):
-        """
-        Set the API generation based on what the gateway responds to.
-        """
-        _LOGGER.debug("Attempting Gen 2 connection")
-        try:
-            await self.get(get_base_path(self.hub_ip, join_path("api", FWVERSION)))
-            self.api_version = 2
-            _LOGGER.debug("Powerview api version changed to %s", self.api_version)
-            return
-        except Exception:  # pylint: disable=broad-except
-            _LOGGER.debug("Gen 2 connection failed")
-
-        _LOGGER.debug("Attempting Gen 3 connection")
-        try:
-            await self.get(get_base_path(self.hub_ip, join_path("gateway", "info")))
-            self.api_version = 3
-            _LOGGER.debug("Powerview api version changed to %s", self.api_version)
-            # TODO: what about dual hubs
-            return
-        except Exception as err:  # pylint: disable=broad-except
-            _LOGGER.debug("Gen 3 connection failed %s", err)
-
-        raise PvApiConnectionError("Failed to discover gateway version")

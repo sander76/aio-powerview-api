@@ -1,5 +1,6 @@
 """Hub class acting as the base for the PowerView API."""
 import logging
+from aiopvapi.helpers.aiorequest import PvApiConnectionError
 
 from aiopvapi.helpers.api_base import ApiBase
 from aiopvapi.helpers.constants import (
@@ -33,21 +34,29 @@ _LOGGER = logging.getLogger(__name__)
 class Version:
     """PowerView versioning scheme class."""
 
-    def __init__(self, build, revision, sub_revision, name=None) -> None:
-        self._build = build
+    def __init__(self, revision, sub_revision, build, name=None) -> None:
         self._revision = revision
         self._sub_revision = sub_revision
+        self._build = build
         self._name = name
 
     def __repr__(self):
-        return "BUILD: {} REVISION: {} SUB_REVISION: {}".format(
-            self._build, self._revision, self._sub_revision
+        return "REVISION: {} SUB_REVISION: {} BUILD: {} ".format(
+            self._revision, self._sub_revision, self._build
         )
 
     @property
     def name(self) -> str:
         """Return the name of the device"""
         return self._name
+
+    @property
+    def api(self) -> str:
+        """
+        Return the hardware build of the device.
+        This correlates to the api version
+        """
+        return self._revision
 
     @property
     def sw_version(self) -> str | None:
@@ -74,7 +83,7 @@ class Hub(ApiBase):
 
     def is_supported(self, function: str) -> bool:
         """Confirm availble features based on api version"""
-        if self.api_version >= 3:
+        if self.api_version is not None and self.api_version >= 3:
             return function in (FUNCTION_REBOOT, FUNCTION_IDENTIFY)
         return False
 
@@ -155,8 +164,7 @@ class Hub(ApiBase):
         """
         Query the firmware versions.  If API version is not set yet, get the API version first.
         """
-        if not self.api_version:
-            await self.request.set_api_version()
+        await self.detect_api_version()
         if self.api_version >= 3:
             await self._query_firmware_g3()
         else:
@@ -223,10 +231,59 @@ class Hub(ApiBase):
             home = await self.request.get(self.base_path)
             self.hub_name = home["gateways"][0]["name"]
 
-    def _make_version(self, data: dict):
+    def _make_version(self, data: dict) -> Version:
         return Version(
-            data[FIRMWARE_BUILD],
             data[FIRMWARE_REVISION],
             data[FIRMWARE_SUB_REVISION],
+            data[FIRMWARE_BUILD],
             data.get(FIRMWARE_NAME),
         )
+
+    def _make_version_data_from_str(self, fwVersion: str, name: str = None) -> dict:
+        # Split the version string into components
+        components = fwVersion.split(".")
+
+        if len(components) != 3:
+            raise ValueError("Invalid version format: {}".format(fwVersion))
+
+        revision, sub_revision, build = map(int, components)
+
+        version_data = {
+            FIRMWARE_REVISION: revision,
+            FIRMWARE_SUB_REVISION: sub_revision,
+            FIRMWARE_BUILD: build,
+            FIRMWARE_NAME: name,
+        }
+
+        return version_data
+    async def detect_api_version(self):
+        """
+        Set the API generation based on what the gateway responds to.
+        """
+        if not self.api_version:
+            self._raw_firmware = await self.request_raw_firmware()
+            _main = None
+            if USER_DATA in self._raw_firmware:
+                _main = self._parse(
+                    USER_DATA, FIRMWARE, FIRMWARE_MAINPROCESSOR, data=self._raw_firmware
+                )
+            elif CONFIG in self._raw_firmware:
+                _main = self._parse(
+                    CONFIG, FIRMWARE, FIRMWARE_MAINPROCESSOR, data=self._raw_firmware
+                )
+            elif FIRMWARE in self._raw_firmware:
+                _main = self._parse(
+                    FIRMWARE, FIRMWARE_MAINPROCESSOR, data=self._raw_firmware
+                )
+            elif "fwVersion" in self._raw_firmware:
+                _main = self._make_version_data_from_str(
+                    self._raw_firmware.get("fwVersion"), "Powerview Generation 3"
+                )
+
+            if _main:
+                self._main_processor_version = self._make_version(_main)
+                self.request.api_version = self._main_processor_version.api
+                _LOGGER.error(self._main_processor_version.api)
+
+        if not self.api_version:
+            _LOGGER.error(self._raw_firmware)
