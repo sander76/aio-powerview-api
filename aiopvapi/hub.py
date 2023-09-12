@@ -74,6 +74,8 @@ class Hub(ApiBase):
         super().__init__(request, self.api_endpoint)
         self._main_processor_version: Version | None = None
         self._radio_version: list[Version] | None = None
+        self._raw_firmware: dict | None = None
+        self._raw_data: dict | None = None
         self.hub_name = None
         self.ip = None
         self.ssid = None
