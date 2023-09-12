@@ -54,3 +54,10 @@ Changelog
 - ShadePosition class now replaces the raw json management of shades in support of cross generational management.
 - Schedules / Automations are now supported by the API
 - New get_*objecttype* methods available to returned structured data objects for consistent management
+
+**v3.0.1**
+
+- Raw hub data updates made via defined function (`request_raw_data`, `request_home_data`, `request_raw_firware`, `detect_api_version`)
+- Parse Gen 3 hub name based on serial + mac
+- Find API version based on firmware revision
+- Remove async_timeout and move to asyncio
