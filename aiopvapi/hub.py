@@ -180,7 +180,9 @@ class Hub(ApiBase):
         _main = self._parse(USER_DATA, FIRMWARE, FIRMWARE_MAINPROCESSOR)
         if not _main:
             # do some checking for legacy v1 failures
-            _fw = await self.request.get(join_path(self.base_path, FWVERSION))
+            if not self._raw_firmware:
+                self._raw_firmware = await self.request_raw_firmware()
+            _fw = self._raw_firmware
             # _fw = await self.request.get(join_path(self._base_path, FWVERSION))
             if FIRMWARE in _fw:
                 _main = self._parse(FIRMWARE, FIRMWARE_MAINPROCESSOR, data=_fw)
@@ -289,6 +291,37 @@ class Hub(ApiBase):
         if self.api_version is not None and self.api_version >= 3:
             data_url = self.base_path
         return await self.request.get(data_url)
+
+    async def request_raw_firmware(self):
+        """
+        Raw data update request. Allows patching of data for testing
+        """
+
+        gen2_url = join_path(self.base_path, FWVERSION)
+        gen3_url = get_base_path(self.request.hub_ip, join_path("gateway", "info"))
+
+        if self.api_version is not None:
+            data_url = gen3_url if self.api_version >= 3 else gen2_url
+            return await self.request.get(data_url)
+
+        _LOGGER.debug("Searching for firmware file")
+        try:
+            _LOGGER.debug("Attempting Gen 2 connection")
+            gen2 = await self.request.get(gen2_url)
+            return gen2
+        except Exception:  # pylint: disable=broad-except
+            _LOGGER.debug("Gen 2 connection failed")
+
+        try:
+            _LOGGER.debug("Attempting Gen 3 connection")
+            gen3 = await self.request.get(gen3_url)
+            # Secondary hubs not supported - second hub is essentially a repeater
+            return gen3
+        except Exception as err:  # pylint: disable=broad-except
+            _LOGGER.debug("Gen 3 connection failed %s", err)
+
+        raise PvApiConnectionError("Failed to discover gateway version")
+
     async def detect_api_version(self):
         """
         Set the API generation based on what the gateway responds to.
