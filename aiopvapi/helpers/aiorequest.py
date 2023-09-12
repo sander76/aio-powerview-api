@@ -4,10 +4,6 @@ import asyncio
 import logging
 
 import aiohttp
-import async_timeout
-
-from aiopvapi.helpers.constants import FWVERSION
-from aiopvapi.helpers.tools import join_path, get_base_path
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -101,7 +97,7 @@ class AioRequest:
         response = None
         try:
             _LOGGER.debug("Sending GET request to: %s params: %s", url, params)
-            with async_timeout.timeout(self._timeout):
+            async with asyncio.timeout(self._timeout):
                 response = await self.websession.get(url, params=params)
                 return await self.check_response(response, [200, 204])
         except (asyncio.TimeoutError, aiohttp.ClientError) as error:
@@ -123,7 +119,7 @@ class AioRequest:
         response = None
         try:
             _LOGGER.debug("Sending POST request to: %s data: %s", url, data)
-            with async_timeout.timeout(self._timeout):
+            async with asyncio.timeout(self._timeout):
                 response = await self.websession.post(url, json=data)
                 return await self.check_response(response, [200, 201])
         except (asyncio.TimeoutError, aiohttp.ClientError) as error:
@@ -150,7 +146,7 @@ class AioRequest:
                 params,
                 data,
             )
-            with async_timeout.timeout(self._timeout):
+            async with asyncio.timeout(self._timeout):
                 response = await self.websession.put(url, json=data, params=params)
                 return await self.check_response(response, [200, 204])
         except (asyncio.TimeoutError, aiohttp.ClientError) as error:
@@ -174,7 +170,7 @@ class AioRequest:
         response = None
         try:
             _LOGGER.debug("Sending DELETE request to: %s with param %s", url, params)
-            with async_timeout.timeout(self._timeout):
+            async with asyncio.timeout(self._timeout):
                 response = await self.websession.delete(url, params=params)
                 return await self.check_response(response, [200, 204])
         except (asyncio.TimeoutError, aiohttp.ClientError) as error:
