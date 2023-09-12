@@ -175,7 +175,7 @@ class Hub(ApiBase):
 
     async def _query_firmware_g2(self):
         # self._raw_data = await self.request.get(join_path(self._base_path, "userdata"))
-        self._raw_data = await self.request.get(join_path(self.base_path, "userdata"))
+        self._raw_data = await self.request_raw_data()
 
         _main = self._parse(USER_DATA, FIRMWARE, FIRMWARE_MAINPROCESSOR)
         if not _main:
@@ -208,8 +208,8 @@ class Hub(ApiBase):
         self.hub_name = self._parse(USER_DATA, HUB_NAME, converter=base64_to_unicode)
 
     async def _query_firmware_g3(self):
-        gateway = get_base_path(self.request.hub_ip, "gateway")
-        self._raw_data = await self.request.get(gateway)
+        # self._raw_data = await self.request.get(gateway)
+        self._raw_data = await self.request_raw_data()
 
         _main = self._parse(CONFIG, FIRMWARE, FIRMWARE_MAINPROCESSOR)
         if _main:
@@ -258,6 +258,17 @@ class Hub(ApiBase):
         }
 
         return version_data
+
+    async def request_raw_data(self):
+        """
+        Raw data update request. Allows patching of data for testing
+        """
+        await self.detect_api_version()
+        data_url = join_path(self.base_path, "userdata")
+        if self.api_version is not None and self.api_version >= 3:
+            data_url = get_base_path(self.request.hub_ip, "gateway")
+        return await self.request.get(data_url)
+
     async def detect_api_version(self):
         """
         Set the API generation based on what the gateway responds to.
