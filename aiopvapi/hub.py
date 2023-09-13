@@ -1,5 +1,6 @@
 """Hub class acting as the base for the PowerView API."""
 import logging
+from aiopvapi.helpers.aiorequest import PvApiConnectionError
 
 from aiopvapi.helpers.api_base import ApiBase
 from aiopvapi.helpers.constants import (
@@ -33,21 +34,29 @@ _LOGGER = logging.getLogger(__name__)
 class Version:
     """PowerView versioning scheme class."""
 
-    def __init__(self, build, revision, sub_revision, name=None) -> None:
-        self._build = build
+    def __init__(self, revision, sub_revision, build, name=None) -> None:
         self._revision = revision
         self._sub_revision = sub_revision
+        self._build = build
         self._name = name
 
     def __repr__(self):
-        return "BUILD: {} REVISION: {} SUB_REVISION: {}".format(
-            self._build, self._revision, self._sub_revision
+        return "REVISION: {} SUB_REVISION: {} BUILD: {} ".format(
+            self._revision, self._sub_revision, self._build
         )
 
     @property
     def name(self) -> str:
         """Return the name of the device"""
         return self._name
+
+    @property
+    def api(self) -> str:
+        """
+        Return the hardware build of the device.
+        This correlates to the api version
+        """
+        return self._revision
 
     @property
     def sw_version(self) -> str | None:
@@ -65,6 +74,8 @@ class Hub(ApiBase):
         super().__init__(request, self.api_endpoint)
         self._main_processor_version: Version | None = None
         self._radio_version: list[Version] | None = None
+        self._raw_firmware: dict | None = None
+        self._raw_data: dict | None = None
         self.hub_name = None
         self.ip = None
         self.ssid = None
@@ -74,7 +85,7 @@ class Hub(ApiBase):
 
     def is_supported(self, function: str) -> bool:
         """Confirm availble features based on api version"""
-        if self.api_version >= 3:
+        if self.api_version is not None and self.api_version >= 3:
             return function in (FUNCTION_REBOOT, FUNCTION_IDENTIFY)
         return False
 
@@ -155,8 +166,7 @@ class Hub(ApiBase):
         """
         Query the firmware versions.  If API version is not set yet, get the API version first.
         """
-        if not self.api_version:
-            await self.request.set_api_version()
+        await self.detect_api_version()
         if self.api_version >= 3:
             await self._query_firmware_g3()
         else:
@@ -165,12 +175,14 @@ class Hub(ApiBase):
 
     async def _query_firmware_g2(self):
         # self._raw_data = await self.request.get(join_path(self._base_path, "userdata"))
-        self._raw_data = await self.request.get(join_path(self.base_path, "userdata"))
+        self._raw_data = await self.request_raw_data()
 
         _main = self._parse(USER_DATA, FIRMWARE, FIRMWARE_MAINPROCESSOR)
         if not _main:
             # do some checking for legacy v1 failures
-            _fw = await self.request.get(join_path(self.base_path, FWVERSION))
+            if not self._raw_firmware:
+                self._raw_firmware = await self.request_raw_firmware()
+            _fw = self._raw_firmware
             # _fw = await self.request.get(join_path(self._base_path, FWVERSION))
             if FIRMWARE in _fw:
                 _main = self._parse(FIRMWARE, FIRMWARE_MAINPROCESSOR, data=_fw)
@@ -198,8 +210,8 @@ class Hub(ApiBase):
         self.hub_name = self._parse(USER_DATA, HUB_NAME, converter=base64_to_unicode)
 
     async def _query_firmware_g3(self):
-        gateway = get_base_path(self.request.hub_ip, "gateway")
-        self._raw_data = await self.request.get(gateway)
+        # self._raw_data = await self.request.get(gateway)
+        self._raw_data = await self.request_raw_data()
 
         _main = self._parse(CONFIG, FIRMWARE, FIRMWARE_MAINPROCESSOR)
         if _main:
@@ -220,13 +232,124 @@ class Hub(ApiBase):
         self.hub_name = self.mac_address
         if HUB_NAME not in self._parse(CONFIG):
             # Get gateway name from home API until it is in the gateway API
-            home = await self.request.get(self.base_path)
-            self.hub_name = home["gateways"][0]["name"]
+            home = await self.request_home_data()
+            # Find the hub based on the serial number or MAC
+            hub = None
+            for gateway in home["gateways"]:
+                if gateway.get("serial") == self.serial_number:
+                    self.hub_name = gateway.get("name")
+                    break
+                if gateway.get("mac") == self.mac_address:
+                    self.hub_name = gateway.get("name")
+                    break
 
-    def _make_version(self, data: dict):
+            if hub is None:
+                _LOGGER.debug(f"Hub with serial {self.serial_number} not found.")
+
+    def _make_version(self, data: dict) -> Version:
         return Version(
-            data[FIRMWARE_BUILD],
             data[FIRMWARE_REVISION],
             data[FIRMWARE_SUB_REVISION],
+            data[FIRMWARE_BUILD],
             data.get(FIRMWARE_NAME),
         )
+
+    def _make_version_data_from_str(self, fwVersion: str, name: str = None) -> dict:
+        # Split the version string into components
+        components = fwVersion.split(".")
+
+        if len(components) != 3:
+            raise ValueError("Invalid version format: {}".format(fwVersion))
+
+        revision, sub_revision, build = map(int, components)
+
+        version_data = {
+            FIRMWARE_REVISION: revision,
+            FIRMWARE_SUB_REVISION: sub_revision,
+            FIRMWARE_BUILD: build,
+            FIRMWARE_NAME: name,
+        }
+
+        return version_data
+
+    async def request_raw_data(self):
+        """
+        Raw data update request. Allows patching of data for testing
+        """
+        await self.detect_api_version()
+        data_url = join_path(self.base_path, "userdata")
+        if self.api_version is not None and self.api_version >= 3:
+            data_url = get_base_path(self.request.hub_ip, "gateway")
+        return await self.request.get(data_url)
+
+    async def request_home_data(self):
+        """
+        Raw data update request. Allows patching of data for testing
+        """
+        await self.detect_api_version()
+        data_url = join_path(self.base_path, "userdata")
+        if self.api_version is not None and self.api_version >= 3:
+            data_url = self.base_path
+        return await self.request.get(data_url)
+
+    async def request_raw_firmware(self):
+        """
+        Raw data update request. Allows patching of data for testing
+        """
+
+        gen2_url = join_path(self.base_path, FWVERSION)
+        gen3_url = get_base_path(self.request.hub_ip, join_path("gateway", "info"))
+
+        if self.api_version is not None:
+            data_url = gen3_url if self.api_version >= 3 else gen2_url
+            return await self.request.get(data_url)
+
+        _LOGGER.debug("Searching for firmware file")
+        try:
+            _LOGGER.debug("Attempting Gen 2 connection")
+            gen2 = await self.request.get(gen2_url)
+            return gen2
+        except Exception:  # pylint: disable=broad-except
+            _LOGGER.debug("Gen 2 connection failed")
+
+        try:
+            _LOGGER.debug("Attempting Gen 3 connection")
+            gen3 = await self.request.get(gen3_url)
+            # Secondary hubs not supported - second hub is essentially a repeater
+            return gen3
+        except Exception as err:  # pylint: disable=broad-except
+            _LOGGER.debug("Gen 3 connection failed %s", err)
+
+        raise PvApiConnectionError("Failed to discover gateway version")
+
+    async def detect_api_version(self):
+        """
+        Set the API generation based on what the gateway responds to.
+        """
+        if not self.api_version:
+            self._raw_firmware = await self.request_raw_firmware()
+            _main = None
+            if USER_DATA in self._raw_firmware:
+                _main = self._parse(
+                    USER_DATA, FIRMWARE, FIRMWARE_MAINPROCESSOR, data=self._raw_firmware
+                )
+            elif CONFIG in self._raw_firmware:
+                _main = self._parse(
+                    CONFIG, FIRMWARE, FIRMWARE_MAINPROCESSOR, data=self._raw_firmware
+                )
+            elif FIRMWARE in self._raw_firmware:
+                _main = self._parse(
+                    FIRMWARE, FIRMWARE_MAINPROCESSOR, data=self._raw_firmware
+                )
+            elif "fwVersion" in self._raw_firmware:
+                _main = self._make_version_data_from_str(
+                    self._raw_firmware.get("fwVersion"), "Powerview Generation 3"
+                )
+
+            if _main:
+                self._main_processor_version = self._make_version(_main)
+                self.request.api_version = self._main_processor_version.api
+                _LOGGER.error(self._main_processor_version.api)
+
+        if not self.api_version:
+            _LOGGER.error(self._raw_firmware)

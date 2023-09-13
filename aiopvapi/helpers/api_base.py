@@ -57,7 +57,7 @@ class ApiBase:
             for key in keys:
                 val = val[key]
         except KeyError as err:
-            _LOGGER.error(err)
+            _LOGGER.debug("Key '%s' missing", err)
             return None
         if converter:
             return converter(val)
