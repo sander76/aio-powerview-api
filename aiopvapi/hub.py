@@ -349,7 +349,7 @@ class Hub(ApiBase):
             if _main:
                 self._main_processor_version = self._make_version(_main)
                 self.request.api_version = self._main_processor_version.api
-                _LOGGER.error(self._main_processor_version.api)
+                _LOGGER.debug("API Version: %s", self._main_processor_version.api)
 
         if not self.api_version:
-            _LOGGER.error(self._raw_firmware)
+            _LOGGER.error("Unable to decipher firmware %s", self._raw_firmware)
