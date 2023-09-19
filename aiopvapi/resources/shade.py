@@ -809,6 +809,14 @@ class ShadeVerticalTiltAnywhere(ShadeBottomUpTiltAnywhere):
         "Vertical Tilt Anywhere",
     )
 
+    def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
+        """Returns additonal positions not reported by the hub"""
+        if positions.primary is None:
+            positions.primary = MIN_POSITION
+        if positions.tilt is None:
+            positions.tilt = MIN_POSITION
+        return positions
+
 
 class ShadeTiltOnly(BaseShadeTilt):
     """Type 5 - Tilt Only 180°
@@ -833,14 +841,8 @@ class ShadeTiltOnly(BaseShadeTilt):
         super().__init__(raw_data, shade_type, request)
         self._open_position = ShadePosition()
         self._close_position = ShadePosition()
-        self._open_position_tilt = ShadePosition(tilt=MAX_POSITION)
+        self._open_position_tilt = ShadePosition(tilt=MID_POSITION)
         self._close_position_tilt = ShadePosition(tilt=MIN_POSITION)
-        if self.api_version < 3:
-            self._open_position_tilt = ShadePosition(tilt=MID_POSITION)
-
-    async def move(self, position_data=None):
-        _LOGGER.error("Move unsupported. Position request(%s) ignored", position_data)
-        return
 
     def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
         """Returns additonal positions not reported by the hub"""
@@ -1039,6 +1041,7 @@ class ShadeDualOverlappedTilt180(ShadeDualOverlappedTilt90):
         super().__init__(raw_data, shade_type, request)
         if self.api_version < 3:
             self.shade_limits = ShadeLimits(tilt_max=MAX_POSITION)
+
 
 def factory(raw_data: dict, request: AioRequest):
     """Class factory to create different types of shades
