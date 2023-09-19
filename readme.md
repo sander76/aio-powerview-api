@@ -71,6 +71,11 @@ Have a look at the examples folder for some guidance how to use it.
 - Find API version based on firmware revision
 - Remove async_timeout and move to asyncio
 
+### v3.0.2
+
+- Bugfix logging on initial setup
+- Fixes for ShadeVerticalTiltAnywhere + ShadeTiltOnly
+
 ## Links
 
 ---

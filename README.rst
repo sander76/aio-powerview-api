@@ -61,3 +61,8 @@ Changelog
 - Parse Gen 3 hub name based on serial + mac
 - Find API version based on firmware revision
 - Remove async_timeout and move to asyncio
+
+**v3.0.2**
+
+- Bugfix logging on initial setup
+- Fixes for ShadeVerticalTiltAnywhere + ShadeTiltOnly
