@@ -5,4 +5,3 @@ nox
 pytest-cov
 python-coveralls
 wheel
-json
