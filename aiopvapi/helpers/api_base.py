@@ -60,7 +60,11 @@ class ApiBase:
             _LOGGER.debug("Key '%s' missing", err)
             return None
         if converter:
-            return converter(val)
+            try:
+                return converter(val)
+            except UnicodeDecodeError as err:
+                _LOGGER.error("UnicodeDecodeError converting '%s', err=%s", val, err)
+                return None
         return val
 
 

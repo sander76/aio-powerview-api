@@ -26,23 +26,24 @@ class TestRoom(TestApiResource):
         _request = Mock()
         _request.hub_ip = FAKE_BASE_URL
         _request.api_version = 2
+        _request.api_path = "api"
         return Room(ROOM_RAW_DATA, _request)
 
     def test_full_path(self):
         self.assertEqual(
-            self.resource._base_path, "http://{}/api/rooms".format(FAKE_BASE_URL)
+            self.resource.base_path, "http://{}/api/rooms".format(FAKE_BASE_URL)
         )
 
     def test_name_property(self):
         # No name_unicode, so base64 encoded is returned
-        self.assertEqual("RGluaW5nIFJvb20=", self.resource.name)
+        self.assertEqual("Dining Room", self.resource.name)
 
     def test_delete_room_success(self):
         """Tests deleting a room"""
 
         async def go():
             await self.start_fake_server()
-            room = Room(self.get_resource_raw_data(), self.request)
+            room = self.get_resource()
             resp = await room.delete()
             return resp
 
@@ -54,7 +55,7 @@ class TestRoom(TestApiResource):
 
         async def go():
             await self.start_fake_server()
-            room = Room(self.get_resource_raw_data(), self.request)
+            room = self.get_resource()
             room._resource_path += "1"
             resp = await room.delete()
             return resp

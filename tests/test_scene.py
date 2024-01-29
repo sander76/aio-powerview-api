@@ -1,6 +1,7 @@
 from unittest.mock import Mock
 
 from aiopvapi.helpers.aiorequest import PvApiResponseStatusError
+from aiopvapi.helpers.aiorequest import AioRequest
 from aiopvapi.resources.scene import Scene
 
 from tests.fake_server import FAKE_BASE_URL
@@ -24,21 +25,23 @@ class TestScene(TestApiResource):
         return "http://{}/api/scenes/37217".format(FAKE_BASE_URL)
 
     def get_resource(self):
-        _request = Mock()
+        _request = Mock(spec=AioRequest)
         _request.hub_ip = FAKE_BASE_URL
         _request.api_version = 2
+        _request.api_path = "api"
         return Scene(SCENE_RAW_DATA, _request)
 
     def test_name_property(self):
         # No name_unicode, so base64 encoded is returned
-        self.assertEqual("RGluaW5nIFZhbmVzIE9wZW4=", self.resource.name)
+        # "RGluaW5nIFZhbmVzIE9wZW4="
+        self.assertEqual("Dining Vanes Open", self.resource.name)
 
     def test_room_id_property(self):
         self.assertEqual(26756, self.resource.room_id)
 
     def test_full_path(self):
         self.assertEqual(
-            self.resource._base_path,
+            self.resource.base_path,
             "http://{}/api/scenes".format(FAKE_BASE_URL),
         )
 
@@ -47,7 +50,7 @@ class TestScene(TestApiResource):
 
         async def go():
             await self.start_fake_server()
-            scene = Scene({"id": 10}, self.request)
+            scene = self.get_resource()
             resp = await scene.activate()
             return resp
 
@@ -59,7 +62,7 @@ class TestScene(TestApiResource):
 
         async def go():
             await self.start_fake_server()
-            scene = Scene({"id": 11}, self.request)
+            scene = self.get_resource()
             resp = await scene.activate()
             return resp
 

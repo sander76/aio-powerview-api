@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 
 from aiopvapi.helpers.aiorequest import AioRequest
-from aiopvapi.resources.shade import BaseShade, shade_type
+from aiopvapi.resources.shade import BaseShade, ShadeType
 from aiopvapi.helpers.constants import (
     ATTR_POSKIND1,
     ATTR_POSITION1,
@@ -24,7 +24,7 @@ SHADE_RAW_DATA = {
     "type": 6,
     "batteryStatus": 0,
     "batteryStrength": 0,
-    "name": "UmlnaHQ=",
+    "name": "UmlnaHQ=",  # "Right"
     "roomId": 12372,
     "groupId": 18480,
     "positions": {"posKind1": 1, "position1": 0},
@@ -43,21 +43,23 @@ class TestShade(TestApiResource):
         _request = Mock(spec=AioRequest)
         _request.hub_ip = FAKE_BASE_URL
         _request.api_version = 2
-        return BaseShade(SHADE_RAW_DATA, shade_type(0, ""), _request)
+        _request.api_path = "api"
+        return BaseShade(SHADE_RAW_DATA, ShadeType(0, "undefined type"), _request)
 
     def test_full_path(self):
         self.assertEqual(
-            self.resource._base_path, "http://{}/api/shades".format(FAKE_BASE_URL)
+            self.resource.base_path, "http://{}/api/shades".format(FAKE_BASE_URL)
         )
 
     def test_name_property(self):
-        # No name_unicode, so base64 encoded is returned
-        self.assertEqual("UmlnaHQ=", self.resource.name)
+        # No name_unicode, although name is base64 encoded
+        # thus base64 decoded is returned
+        self.assertEqual("Right", self.resource.name)
 
     def test_add_shade_to_room(self):
         async def go():
             await self.start_fake_server()
-            shade = BaseShade({"id": 111}, shade_type(0, ""), self.request)
+            shade = self.get_resource()
             res = await shade.add_shade_to_room(123)
             return res
 
@@ -96,21 +98,23 @@ class TestShade_V3(TestApiResource):
         _request = Mock(spec=AioRequest)
         _request.hub_ip = FAKE_BASE_URL
         _request.api_version = 3
-        return BaseShade(SHADE_RAW_DATA, shade_type(0, ""), _request)
+        _request.api_path = "home"
+        return BaseShade(SHADE_RAW_DATA, ShadeType(0, "undefined type"), _request)
 
     def test_full_path(self):
         self.assertEqual(
-            self.resource._base_path, "http://{}/home/shades".format(FAKE_BASE_URL)
+            self.resource.base_path, "http://{}/home/shades".format(FAKE_BASE_URL)
         )
 
     def test_name_property(self):
-        # No name_unicode, so base64 encoded is returned
-        self.assertEqual("UmlnaHQ=", self.resource.name)
+        # No name_unicode, although name is base64 encoded
+        # thus base64 decoded is returned
+        self.assertEqual("Right", self.resource.name)
 
     def test_add_shade_to_room(self):
         async def go():
             await self.start_fake_server()
-            shade = BaseShade({"id": 111}, shade_type(0, ""), self.request)
+            shade = self.get_resource()
             res = await shade.add_shade_to_room(123)
             return res
 
