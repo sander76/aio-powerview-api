@@ -629,6 +629,7 @@ class ShadeBottomUp(BaseShade):
         ShadeType(5, "Bottom Up"),
         ShadeType(6, "Duette"),
         ShadeType(10, "Duette and Applause SkyLift"),
+        ShadeType(19, "Provenance Woven Wood"),
         ShadeType(31, "Vignette"),
         ShadeType(32, "Vignette"),
         ShadeType(42, "M25T Roller Blind"),
