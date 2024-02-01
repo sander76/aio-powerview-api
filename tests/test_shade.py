@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 
 from aiopvapi.helpers.aiorequest import AioRequest
-from aiopvapi.resources.shade import BaseShade, ShadeType
+from aiopvapi.resources.shade import BaseShade, ShadeType, ShadePosition
 from aiopvapi.helpers.constants import (
     ATTR_POSKIND1,
     ATTR_POSITION1,
@@ -69,21 +69,22 @@ class TestShade(TestApiResource):
     def test_convert_g2(self):
         shade = self.get_resource()
         self.assertEqual(
-            shade.convert_to_v2({ATTR_PRIMARY: MAX_POSITION}),
-            {ATTR_POSITION1: MAX_POSITION_V2, ATTR_POSKIND1: 1},
+            shade.percent_to_api(MAX_POSITION, ATTR_PRIMARY),
+            MAX_POSITION_V2
         )
         self.assertEqual(
-            shade.convert_to_v2({ATTR_TILT: MID_POSITION}),
-            {ATTR_POSITION1: MID_POSITION_V2, ATTR_POSKIND1: 3},
+            shade.percent_to_api(MID_POSITION, ATTR_TILT),
+            MID_POSITION_V2
         )
+        positions = shade.structured_to_raw(ShadePosition(MAX_POSITION, None, MID_POSITION))['shade']['positions']
         self.assertEqual(
-            shade.convert_to_v2({ATTR_PRIMARY: MAX_POSITION, ATTR_TILT: MID_POSITION}),
+            positions,
             {
                 ATTR_POSKIND1: 1,
                 ATTR_POSITION1: MAX_POSITION_V2,
                 ATTR_POSKIND2: 3,
                 ATTR_POSITION2: MID_POSITION_V2,
-            },
+            }
         )
 
 

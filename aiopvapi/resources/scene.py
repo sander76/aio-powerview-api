@@ -42,7 +42,7 @@ class Scene(ApiResource):
             _val = await self.request.get(
                 self.base_path, params={ATTR_SCENE_ID: self._id}
             )
-            # v2 returns format {'sceneIds': ids} so flattening the list to align v3
+            # v2 returns format {'shadeIds': ids} so flattening the list to align v3
             _val = _val.get(ATTR_SHADE_IDS)
         # should return an array of ID's that belong to the scene
         return _val
