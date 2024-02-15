@@ -64,5 +64,11 @@ Changelog
 
 **v3.0.2**
 
-- Bugfix logging on initial setup
+- Add type 19 (Provenance Woven Wood)
+- Fix Positioning for ShadeVerticalTiltAnywhere + ShadeTiltOnly (Mid only)  
+- Fix logging regression on initial setup
 - Fixes for ShadeVerticalTiltAnywhere + ShadeTiltOnly
+- Fix tests
+- Remove unneeded declerations
+- Fix shade position reporting for v2 shades
+- Dandle empty hub data being returned
