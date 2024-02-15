@@ -61,3 +61,14 @@ Changelog
 - Parse Gen 3 hub name based on serial + mac
 - Find API version based on firmware revision
 - Remove async_timeout and move to asyncio
+
+**v3.0.2**
+
+- Add type 19 (Provenance Woven Wood)
+- Fix Positioning for ShadeVerticalTiltAnywhere + ShadeTiltOnly (Mid only)  
+- Fix logging regression on initial setup
+- Fixes for ShadeVerticalTiltAnywhere + ShadeTiltOnly
+- Fix tests
+- Remove unneeded declerations
+- Fix shade position reporting for v2 shades
+- Dandle empty hub data being returned

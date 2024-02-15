@@ -1,6 +1,6 @@
 """Hub class acting as the base for the PowerView API."""
 import logging
-from aiopvapi.helpers.aiorequest import PvApiConnectionError
+from aiopvapi.helpers.aiorequest import PvApiConnectionError, PvApiEmptyData
 
 from aiopvapi.helpers.api_base import ApiBase
 from aiopvapi.helpers.constants import (
@@ -41,9 +41,7 @@ class Version:
         self._name = name
 
     def __repr__(self):
-        return "REVISION: {} SUB_REVISION: {} BUILD: {} ".format(
-            self._revision, self._sub_revision, self._build
-        )
+        return f"REVISION: {self._revision} SUB_REVISION: {self._sub_revision} BUILD: {self._build}"
 
     @property
     def name(self) -> str:
@@ -177,6 +175,9 @@ class Hub(ApiBase):
         # self._raw_data = await self.request.get(join_path(self._base_path, "userdata"))
         self._raw_data = await self.request_raw_data()
 
+        if not self._raw_data or self._raw_data == {}:
+            raise PvApiEmptyData("Hub returned empty data")
+
         _main = self._parse(USER_DATA, FIRMWARE, FIRMWARE_MAINPROCESSOR)
         if not _main:
             # do some checking for legacy v1 failures
@@ -213,6 +214,9 @@ class Hub(ApiBase):
         # self._raw_data = await self.request.get(gateway)
         self._raw_data = await self.request_raw_data()
 
+        if not self._raw_data or self._raw_data == {}:
+            raise PvApiEmptyData("Hub returned empty data")
+
         _main = self._parse(CONFIG, FIRMWARE, FIRMWARE_MAINPROCESSOR)
         if _main:
             self._main_processor_version = self._make_version(_main)
@@ -235,16 +239,19 @@ class Hub(ApiBase):
             home = await self.request_home_data()
             # Find the hub based on the serial number or MAC
             hub = None
-            for gateway in home["gateways"]:
-                if gateway.get("serial") == self.serial_number:
-                    self.hub_name = gateway.get("name")
-                    break
-                if gateway.get("mac") == self.mac_address:
-                    self.hub_name = gateway.get("name")
-                    break
+            if "gateways" in home:
+                for gateway in home["gateways"]:
+                    if gateway.get("serial") == self.serial_number:
+                        hub = gateway.get("name")
+                        self.hub_name = gateway.get("name")
+                        break
+                    if gateway.get("mac") == self.mac_address:
+                        hub = gateway.get("name")
+                        self.hub_name = gateway.get("name")
+                        break
 
             if hub is None:
-                _LOGGER.debug(f"Hub with serial {self.serial_number} not found.")
+                _LOGGER.debug("Hub with serial %s not found.",self.serial_number)
 
     def _make_version(self, data: dict) -> Version:
         return Version(
@@ -254,12 +261,12 @@ class Hub(ApiBase):
             data.get(FIRMWARE_NAME),
         )
 
-    def _make_version_data_from_str(self, fwVersion: str, name: str = None) -> dict:
+    def _make_version_data_from_str(self, fw_version: str, name: str = None) -> dict:
         # Split the version string into components
-        components = fwVersion.split(".")
+        components = fw_version.split(".")
 
         if len(components) != 3:
-            raise ValueError("Invalid version format: {}".format(fwVersion))
+            raise ValueError(f"Invalid version format: {fw_version}")
 
         revision, sub_revision, build = map(int, components)
 
@@ -349,7 +356,7 @@ class Hub(ApiBase):
             if _main:
                 self._main_processor_version = self._make_version(_main)
                 self.request.api_version = self._main_processor_version.api
-                _LOGGER.error(self._main_processor_version.api)
+                _LOGGER.debug("API Version: %s", self._main_processor_version.api)
 
         if not self.api_version:
-            _LOGGER.error(self._raw_firmware)
+            _LOGGER.error("Unable to decipher firmware %s", self._raw_firmware)

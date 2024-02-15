@@ -23,6 +23,8 @@ from aiopvapi.helpers.constants import (
     ATTR_TILT,
     ATTR_BATTERY_KIND,
     ATTR_POWER_TYPE,
+    CLOSED_POSITION,
+    CLOSED_POSITION_V2,
     FIRMWARE,
     FIRMWARE_REVISION,
     FIRMWARE_SUB_REVISION,
@@ -186,7 +188,12 @@ class BaseShade(ApiResource):
         if FIRMWARE not in self.raw_data:
             return None
         firmware = self.raw_data[FIRMWARE]
-        return f"{firmware[FIRMWARE_REVISION]}.{firmware[FIRMWARE_SUB_REVISION]}.{firmware[FIRMWARE_BUILD]}"
+
+        revision = firmware[FIRMWARE_REVISION]
+        sub_revision = firmware[FIRMWARE_SUB_REVISION]
+        build = firmware[FIRMWARE_BUILD]
+
+        return f"{revision}.{sub_revision}.{build}"
 
     @property
     def url(self) -> str:
@@ -252,8 +259,8 @@ class BaseShade(ApiResource):
         if self.api_version < 3:
             max_position_api = MAX_POSITION_V2 * max_position_api
 
-        percent = self.position_limit(round((position / max_position_api) * 100))
-        return percent
+        percent = self.position_limit((position / max_position_api) * 100)
+        return round(percent)
 
     def structured_to_raw(self, data: ShadePosition) -> dict[str, Any]:
         """Convert structured ShadePosition to API relevant dict"""
@@ -414,6 +421,15 @@ class BaseShade(ApiResource):
         }
 
         min_limit, max_limit = limits.get(position_type, (0, 100))
+
+        if self.api_version < 3 and position != 0 and position < CLOSED_POSITION_V2:
+            _LOGGER.debug(
+                "%s: Assuming shade is closed as %s is less than %s", 
+                self.name,
+                position,
+                CLOSED_POSITION,
+            )
+            position = CLOSED_POSITION
 
         return min(max(min_limit, position), max_limit)
 
@@ -629,6 +645,7 @@ class ShadeBottomUp(BaseShade):
         ShadeType(5, "Bottom Up"),
         ShadeType(6, "Duette"),
         ShadeType(10, "Duette and Applause SkyLift"),
+        ShadeType(19, "Provenance Woven Wood"),
         ShadeType(31, "Vignette"),
         ShadeType(32, "Vignette"),
         ShadeType(42, "M25T Roller Blind"),
@@ -673,7 +690,7 @@ class ShadeBottomUpTiltOnClosed180(BaseShadeTilt):
             tilt_onclosed=True,
             tilt_180=True,
         ),
-        "Bottom Up Tilt 180°",
+        "Bottom Up TiltOnClosed 180°",
     )
 
     def __init__(
@@ -707,7 +724,7 @@ class ShadeBottomUpTiltOnClosed90(BaseShadeTilt):
             tilt_onclosed=True,
             tilt_90=True,
         ),
-        "Bottom Up Tilt 90°",
+        "Bottom Up TiltOnClosed 90°",
     )
 
     def __init__(
@@ -742,7 +759,7 @@ class ShadeBottomUpTiltAnywhere(BaseShadeTilt):
             tilt_anywhere=True,
             tilt_180=True,
         ),
-        "Bottom Up Tilt 180°",
+        "Bottom Up TiltAnywhere 180°",
     )
 
     def __init__(
@@ -809,6 +826,14 @@ class ShadeVerticalTiltAnywhere(ShadeBottomUpTiltAnywhere):
         "Vertical Tilt Anywhere",
     )
 
+    def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
+        """Returns additonal positions not reported by the hub"""
+        if positions.primary is None:
+            positions.primary = MIN_POSITION
+        if positions.tilt is None:
+            positions.tilt = MIN_POSITION
+        return positions
+
 
 class ShadeTiltOnly(BaseShadeTilt):
     """Type 5 - Tilt Only 180°
@@ -833,14 +858,8 @@ class ShadeTiltOnly(BaseShadeTilt):
         super().__init__(raw_data, shade_type, request)
         self._open_position = ShadePosition()
         self._close_position = ShadePosition()
-        self._open_position_tilt = ShadePosition(tilt=MAX_POSITION)
+        self._open_position_tilt = ShadePosition(tilt=MID_POSITION)
         self._close_position_tilt = ShadePosition(tilt=MIN_POSITION)
-        if self.api_version < 3:
-            self._open_position_tilt = ShadePosition(tilt=MID_POSITION)
-
-    async def move(self, position_data=None):
-        _LOGGER.error("Move unsupported. Position request(%s) ignored", position_data)
-        return
 
     def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
         """Returns additonal positions not reported by the hub"""
@@ -1039,6 +1058,7 @@ class ShadeDualOverlappedTilt180(ShadeDualOverlappedTilt90):
         super().__init__(raw_data, shade_type, request)
         if self.api_version < 3:
             self.shade_limits = ShadeLimits(tilt_max=MAX_POSITION)
+
 
 def factory(raw_data: dict, request: AioRequest):
     """Class factory to create different types of shades
