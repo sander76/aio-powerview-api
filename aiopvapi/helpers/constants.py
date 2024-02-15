@@ -66,7 +66,7 @@ CLOSED_POSITION = 0
 # this number is generally below 491.5125, and if not a calibration
 # can bring the shade within this realm
 # essentially treat a v2 shade that reports a position of 491.5125 or
-# less as closed
+# less as closed. Still use percentage based for compatability
 CLOSED_POSITION_V2 = 0.75
 
 # v2
