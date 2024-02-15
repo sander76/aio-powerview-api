@@ -208,7 +208,7 @@ class FakePowerViewHub:
                     web.put("/api/shades/{shade_id}", self.add_shade_to_room),
                     web.delete("/api/sceneMembers", self.remove_shade_from_scene),
                     web.get("/api/fwversion", self.get_fwversion),
-                    web.get("/userdata", self.get_user_data),
+                    web.get("/api/userdata", self.get_user_data),
                 ]
             )
         self.runner = None

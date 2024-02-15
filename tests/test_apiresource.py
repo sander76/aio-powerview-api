@@ -1,6 +1,7 @@
 from unittest.mock import Mock
 
 from aiopvapi.helpers.api_base import ApiResource, ApiEntryPoint
+from aiopvapi.helpers.aiorequest import AioRequest
 from tests.fake_server import TestFakeServer, FAKE_BASE_URL
 
 
@@ -13,9 +14,10 @@ class TestApiResource(TestFakeServer):
 
     def get_resource(self):
         """Get the resource being tested."""
-        _request = Mock()
+        _request = Mock(spec=AioRequest)
         _request.hub_ip = FAKE_BASE_URL
         _request.api_version = 2
+        _request.api_path = "api"
         return ApiResource(_request, "base", self.get_resource_raw_data())
 
     def setUp(self):
@@ -31,7 +33,7 @@ class TestApiResource(TestFakeServer):
 
     def test_full_path(self):
         self.assertEqual(
-            self.resource._base_path, "http://{}/api/base".format(FAKE_BASE_URL)
+            self.resource.base_path, "http://{}/api/base".format(FAKE_BASE_URL)
         )
 
     def test_name_property(self):
@@ -60,11 +62,12 @@ class TestApiResource_V3(TestApiResource):
         _request = Mock()
         _request.hub_ip = FAKE_BASE_URL
         _request.api_version = 3
+        _request.api_path = "home"
         return ApiResource(_request, "base", self.get_resource_raw_data())
 
     def test_full_path(self):
         self.assertEqual(
-            self.resource._base_path, "http://{}/home/base".format(FAKE_BASE_URL)
+            self.resource.base_path, "http://{}/home/base".format(FAKE_BASE_URL)
         )
 
     # def test_delete_200(self, mocked):
@@ -184,6 +187,7 @@ def test_clean_names():
     req = Mock()
     req.hub_ip = "123.123.123"
     req.api_version = 2
+    req.api_path = "api"
     api = ApiEntryPoint(req, "abc")
     try:
         api._sanitize_resources(test_data1)

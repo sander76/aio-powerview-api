@@ -20,9 +20,9 @@ def fake_aiorequest():
 
 def test_version():
     version1 = Version(123, 456, 789)
-    assert version1._build == 123
-    assert version1._revision == 456
-    assert version1._sub_revision == 789
+    assert version1._revision == 123
+    assert version1._sub_revision == 456
+    assert version1._build == 789
 
     version2 = Version(123, 456, 789)
 
@@ -47,14 +47,14 @@ class TestHub_v2(TestFakeServer):
 
         hub = self.loop.run_until_complete(go())
 
-        assert hub._base_path == "http://" + FAKE_BASE_URL + "/api"
+        assert hub.base_path == "http://" + FAKE_BASE_URL + "/api"
 
         # self.request.get.mock.assert_called_once_with(FAKE_BASE_URL + "/userdata")
         data = json.loads(USER_DATA_VALUE)
 
         assert hub.main_processor_info == data["userData"]["firmware"]["mainProcessor"]
-        assert hub.main_processor_version == "BUILD: 395 REVISION: 2 SUB_REVISION: 0"
-        assert hub.radio_version == "BUILD: 1307 REVISION: 2 SUB_REVISION: 0"
+        assert hub.main_processor_version == Version(2, 0, 395)  # "REVISION: 2 SUB_REVISION: 0 BUILD: 395"
+        assert hub.radio_version == [Version(2, 0, 1307)]  # ["REVISION: 2 SUB_REVISION: 0 BUILD: 1307"]
         assert hub.ssid == "cisco789"
         assert hub.name == "Hubby"
 
@@ -73,12 +73,13 @@ class TestHub_v3(TestFakeServer):
 
         hub = self.loop.run_until_complete(go())
 
-        assert hub._base_path == "http://" + FAKE_BASE_URL + "/gateway"
+        assert hub.base_path == "http://" + FAKE_BASE_URL + "/home"
 
         # self.request.get.mock.assert_called_once_with(FAKE_BASE_URL + "/userdata")
         data = json.loads(USER_DATA_VALUE)
 
         assert hub.main_processor_info == data["userData"]["firmware"]["mainProcessor"]
-        assert hub.main_processor_version == "BUILD: 395 REVISION: 2 SUB_REVISION: 0"
-        assert hub.radio_version == ["BUILD: 1307 REVISION: 2 SUB_REVISION: 0"]
+        assert hub.main_processor_version == Version(2, 0, 395)  # "REVISION: 2 SUB_REVISION: 0 BUILD: 395"
+        assert hub.radio_version == [Version(2, 0, 1307)]  # ["REVISION: 2 SUB_REVISION: 0 BUILD: 1307"]
         assert hub.ssid == "cisco789"
+        assert hub.name == "00:26:74:af:fd:ae"

@@ -21,7 +21,7 @@ class TestSceneMembers(unittest.TestCase):
     def setUp(self):
         self.fake_ip = '123.123.123.123'
 
-    @mock.patch('aiopvapi.helpers.aiorequest.check_response', new=AsyncMock())
+    @mock.patch('aiopvapi.helpers.aiorequest.AioRequest.check_response', new=AsyncMock())
     def test_remove_shade_from_scene(self):
         """Tests create new scene."""
         loop = asyncio.get_event_loop()
