@@ -25,6 +25,10 @@ class PvApiConnectionError(PvApiError):
     """Problem connecting to PowerView hub."""
 
 
+class PvApiEmptyData(PvApiError):
+    """PowerView hub returned empty data."""
+
+
 class AioRequest:
     """Request class managing hub connection."""
 
