@@ -23,6 +23,8 @@ from aiopvapi.helpers.constants import (
     ATTR_TILT,
     ATTR_BATTERY_KIND,
     ATTR_POWER_TYPE,
+    CLOSED_POSITION,
+    CLOSED_POSITION_V2,
     FIRMWARE,
     FIRMWARE_REVISION,
     FIRMWARE_SUB_REVISION,
@@ -252,8 +254,8 @@ class BaseShade(ApiResource):
         if self.api_version < 3:
             max_position_api = MAX_POSITION_V2 * max_position_api
 
-        percent = self.position_limit(round((position / max_position_api) * 100))
-        return percent
+        percent = self.position_limit((position / max_position_api) * 100)
+        return round(percent)
 
     def structured_to_raw(self, data: ShadePosition) -> dict[str, Any]:
         """Convert structured ShadePosition to API relevant dict"""
@@ -414,6 +416,10 @@ class BaseShade(ApiResource):
         }
 
         min_limit, max_limit = limits.get(position_type, (0, 100))
+
+        if self.api_version < 3 and position != 0 and position < CLOSED_POSITION_V2:
+            _LOGGER.debug("%s: Assuming shade is closed as %s is less than %s", self.name, position, CLOSED_POSITION)
+            position = CLOSED_POSITION
 
         return min(max(min_limit, position), max_limit)
 
@@ -674,7 +680,7 @@ class ShadeBottomUpTiltOnClosed180(BaseShadeTilt):
             tilt_onclosed=True,
             tilt_180=True,
         ),
-        "Bottom Up Tilt 180°",
+        "Bottom Up TiltOnClosed 180°",
     )
 
     def __init__(
@@ -708,7 +714,7 @@ class ShadeBottomUpTiltOnClosed90(BaseShadeTilt):
             tilt_onclosed=True,
             tilt_90=True,
         ),
-        "Bottom Up Tilt 90°",
+        "Bottom Up TiltOnClosed 90°",
     )
 
     def __init__(
@@ -743,7 +749,7 @@ class ShadeBottomUpTiltAnywhere(BaseShadeTilt):
             tilt_anywhere=True,
             tilt_180=True,
         ),
-        "Bottom Up Tilt 180°",
+        "Bottom Up TiltAnywhere 180°",
     )
 
     def __init__(
