@@ -188,7 +188,12 @@ class BaseShade(ApiResource):
         if FIRMWARE not in self.raw_data:
             return None
         firmware = self.raw_data[FIRMWARE]
-        return f"{firmware[FIRMWARE_REVISION]}.{firmware[FIRMWARE_SUB_REVISION]}.{firmware[FIRMWARE_BUILD]}"
+
+        revision = firmware[FIRMWARE_REVISION]
+        sub_revision = firmware[FIRMWARE_SUB_REVISION]
+        build = firmware[FIRMWARE_BUILD]
+
+        return f"{revision}.{sub_revision}.{build}"
 
     @property
     def url(self) -> str:
@@ -418,7 +423,12 @@ class BaseShade(ApiResource):
         min_limit, max_limit = limits.get(position_type, (0, 100))
 
         if self.api_version < 3 and position != 0 and position < CLOSED_POSITION_V2:
-            _LOGGER.debug("%s: Assuming shade is closed as %s is less than %s", self.name, position, CLOSED_POSITION)
+            _LOGGER.debug(
+                "%s: Assuming shade is closed as %s is less than %s", 
+                self.name,
+                position,
+                CLOSED_POSITION,
+            )
             position = CLOSED_POSITION
 
         return min(max(min_limit, position), max_limit)
