@@ -1,44 +1,51 @@
 """Shade class managing all shade types."""
 
-import logging
 from dataclasses import dataclass
+import logging
 from typing import Any
 
 from aiopvapi.helpers.aiorequest import AioRequest, PvApiMaintenance
 from aiopvapi.helpers.api_base import ApiResource
-from aiopvapi.helpers.tools import join_path
 from aiopvapi.helpers.constants import (
+    ATTR_BATTERY_KIND,
     ATTR_CAPABILITIES,
-    ATTR_POSITIONS,
-    ATTR_SHADE,
-    ATTR_TYPE,
     ATTR_ID,
-    ATTR_ROOM_ID,
-    ATTR_POSKIND1,
     ATTR_POSITION1,
     ATTR_POSITION2,
+    ATTR_POSITIONS,
+    ATTR_POSKIND1,
     ATTR_POSKIND2,
-    ATTR_PRIMARY,
-    ATTR_SECONDARY,
-    ATTR_TILT,
-    ATTR_BATTERY_KIND,
     ATTR_POWER_TYPE,
+    ATTR_PRIMARY,
+    ATTR_ROOM_ID,
+    ATTR_SECONDARY,
+    ATTR_SHADE,
+    ATTR_SIGNAL_STRENGTH,
+    ATTR_SIGNAL_STRENGTH_MAX,
+    ATTR_TILT,
+    ATTR_TYPE,
+    BATTERY_KIND_HARDWIRED,
     CLOSED_POSITION,
     CLOSED_POSITION_V2,
     FIRMWARE,
+    FIRMWARE_BUILD,
     FIRMWARE_REVISION,
     FIRMWARE_SUB_REVISION,
-    FIRMWARE_BUILD,
+    FUNCTION_SET_POWER,
     MAX_POSITION,
+    MAX_POSITION_V2,
     MID_POSITION,
     MIN_POSITION,
-    MAX_POSITION_V2,
+    MOTION_CALIBRATE,
+    MOTION_FAVORITE,
+    MOTION_JOG,
     MOTION_STOP,
+    MOTION_VELOCITY,
+    POSITIONS_V2,
+    POSITIONS_V3,
     POSKIND_PRIMARY,
     POSKIND_SECONDARY,
     POSKIND_TILT,
-    ATTR_SIGNAL_STRENGTH,
-    ATTR_SIGNAL_STRENGTH_MAX,
     POWERTYPE_BATTERY,
     POWERTYPE_HARDWIRED,
     POWERTYPE_MAP_V2,
@@ -46,15 +53,8 @@ from aiopvapi.helpers.constants import (
     POWERTYPE_RECHARGABLE,
     SHADE_BATTERY_STATUS,
     SHADE_BATTERY_STRENGTH,
-    POSITIONS_V2,
-    POSITIONS_V3,
-    BATTERY_KIND_HARDWIRED,
-    MOTION_VELOCITY,
-    MOTION_JOG,
-    MOTION_CALIBRATE,
-    MOTION_FAVORITE,
-    FUNCTION_SET_POWER,
 )
+from aiopvapi.helpers.tools import join_path
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -100,7 +100,7 @@ class ShadePosition:
 
 @dataclass
 class ShadeType:
-    """Shade information based on type and description"""
+    """Shade information based on type and description."""
 
     type: int | str
     description: str
@@ -108,7 +108,7 @@ class ShadeType:
 
 @dataclass
 class ShadeCapability:
-    """Shade capability information"""
+    """Shade capability information."""
 
     type: int | str
     capabilities: PowerviewCapabilities
@@ -134,6 +134,7 @@ class BaseShade(ApiResource):
     def __init__(
         self, raw_data: dict, shade_type: ShadeType, request: AioRequest
     ) -> None:
+        """Initialize Base shade."""
         self.shade_type = shade_type
         super().__init__(request, self.api_endpoint, raw_data=raw_data)
 
@@ -202,22 +203,22 @@ class BaseShade(ApiResource):
 
     @property
     def open_position(self) -> ShadePosition:
-        """Return the shade opened position"""
+        """Return the shade opened position."""
         return self._open_position
 
     @property
     def close_position(self) -> ShadePosition:
-        """Return the shade closed position"""
+        """Return the shade closed position."""
         return self._close_position
 
     @property
     def open_position_tilt(self) -> ShadePosition:
-        """Return the tilt opened position"""
+        """Return the tilt opened position."""
         return self._open_position_tilt
 
     @property
     def close_position_tilt(self) -> ShadePosition:
-        """Return the tilt closed position"""
+        """Return the tilt closed position."""
         return self._close_position_tilt
 
     def percent_to_api(self, position: float, position_type: str) -> int | float:
@@ -263,7 +264,7 @@ class BaseShade(ApiResource):
         return round(percent)
 
     def structured_to_raw(self, data: ShadePosition) -> dict[str, Any]:
-        """Convert structured ShadePosition to API relevant dict"""
+        """Convert structured ShadePosition to API relevant dict."""
         _LOGGER.debug("Structured Data %s: %s", self.name, data)
 
         if self.api_version >= 3:
@@ -319,7 +320,7 @@ class BaseShade(ApiResource):
         return raw
 
     def raw_to_structured(self, shade_data: dict[int | str, Any]) -> ShadePosition:
-        """Convert API dict info to structured ShadePosition dataclass"""
+        """Convert API dict info to structured ShadePosition dataclass."""
         _LOGGER.debug("Raw Data %s: %s", self.name, shade_data)
 
         if ATTR_POSITIONS not in shade_data:
@@ -357,7 +358,7 @@ class BaseShade(ApiResource):
         return position
 
     def _create_shade_data(self, position_data=None, room_id=None):
-        """Create a shade data object to be sent to the hub"""
+        """Create a shade data object to be sent to the hub."""
         if self.api_version >= 3:
             return {"positions": position_data}
 
@@ -369,7 +370,7 @@ class BaseShade(ApiResource):
         return base
 
     async def move_raw(self, position_data: dict):
-        """Move the shade to a set position using raw data"""
+        """Move the shade to a set position using raw data."""
         _LOGGER.debug("Shade %s move to: %s", self.name, position_data)
         data = self._create_shade_data(position_data=position_data)
         return await self._move(data)
@@ -387,22 +388,22 @@ class BaseShade(ApiResource):
         return result
 
     async def move(self, position_data: ShadePosition) -> ShadePosition:
-        """Move the shade to a set position"""
+        """Move the shade to a set position."""
         _LOGGER.debug("Shade %s move to: %s", self.name, position_data)
         data = self.structured_to_raw(position_data)
         await self._move(data)
         return self.current_position
 
     def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
-        """Returns additonal positions not reported by the hub"""
+        """Return additional positions not reported by the hub."""
         return positions
 
     async def open(self):
-        """Open the shade"""
+        """Open the shade."""
         return await self.move(position_data=self.open_position)
 
     async def close(self):
-        """Close the shade"""
+        """Close the shade."""
         return await self.move(position_data=self.close_position)
 
     def position_limit(self, position: int, position_type: str = ""):
@@ -424,7 +425,7 @@ class BaseShade(ApiResource):
 
         if self.api_version < 3 and position != 0 and position < CLOSED_POSITION_V2:
             _LOGGER.debug(
-                "%s: Assuming shade is closed as %s is less than %s", 
+                "%s: Assuming shade is closed as %s is less than %s",
                 self.name,
                 position,
                 CLOSED_POSITION,
@@ -472,9 +473,11 @@ class BaseShade(ApiResource):
         data = self._create_shade_data(room_id=room_id)
         return await self.request.put(self._resource_path, data)
 
-    async def refresh(self):
-        """Query the hub and the actual shade to get the most recent shade
-        data. Including current shade position."""
+        """Query the hub and refresh the most recent position state.
+
+        :param kwargs: Keyword arguments to be passed to the get request.
+                   For example, timeout can be passed as kwargs.
+        """
         try:
             _LOGGER.debug("Refreshing position of: %s", self.name)
             raw_data = await self.request.get(self._resource_path, {"refresh": "true"})
@@ -484,9 +487,13 @@ class BaseShade(ApiResource):
             _LOGGER.debug("Hub undergoing maintenance. Please try again")
         return
 
-    async def refresh_battery(self):
-        """Query the hub and request the most recent battery state."""
+        """Query the hub and request the most recent battery state.
+
+        :param kwargs: Keyword arguments to be passed to the get request.
+                   For example, timeout can be passed as kwargs.
+        """
         try:
+            _LOGGER.debug("Refreshing battery of: %s", self.name)
             raw_data = await self.request.get(
                 self._resource_path, {"updateBatteryLevel": "true"}
             )
@@ -597,6 +604,7 @@ class BaseShadeTilt(BaseShade):
     def __init__(
         self, raw_data: dict, shade_type: ShadeType, request: AioRequest
     ) -> None:
+        """Initialize shade with tilt."""
         super().__init__(raw_data, shade_type, request)
         self._open_position_tilt = ShadePosition(tilt=MAX_POSITION)
         self._close_position_tilt = ShadePosition(tilt=MIN_POSITION)
@@ -604,28 +612,28 @@ class BaseShadeTilt(BaseShade):
             self._open_position_tilt = ShadePosition(tilt=MID_POSITION)
 
     async def tilt_raw(self, position_data):
-        """Tilt the shade to a set position using raw data"""
+        """Tilt the shade to a set position using raw data."""
         _LOGGER.debug("Shade %s tilt to: %s", self.name, position_data)
         data = self._create_shade_data(position_data=position_data)
         return await self._move(data)
 
     async def tilt(self, position_data: ShadePosition):
-        """Tilt the shade to a set position"""
+        """Tilt the shade to a set position."""
         _LOGGER.debug("Shade %s move to: %s", self.name, position_data)
         data = self.structured_to_raw(position_data)
         await self._move(data)
         return self.current_position
 
     async def tilt_open(self):
-        """Tilt to close position."""
+        """Tilt to open position."""
         return await self.tilt(position_data=self.open_position_tilt)
 
     async def tilt_close(self):
-        """Tilt to close position"""
+        """Tilt to close position."""
         return await self.tilt(position_data=self.close_position_tilt)
 
     def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
-        """Returns additonal positions not reported by the hub"""
+        """Return additional positions not reported by the hub."""
         if positions.primary and positions.tilt is None:
             positions.tilt = MIN_POSITION
         elif positions.tilt and positions.primary is None:
@@ -665,6 +673,7 @@ class ShadeBottomUp(BaseShade):
     def __init__(
         self, raw_data: dict, shade_type: ShadeType, request: AioRequest
     ) -> None:
+        """Initialize Standard Bottom Up shade."""
         super().__init__(raw_data, shade_type, request)
         self._open_position = ShadePosition(primary=MAX_POSITION)
         self._close_position = ShadePosition(primary=MIN_POSITION)
@@ -696,6 +705,7 @@ class ShadeBottomUpTiltOnClosed180(BaseShadeTilt):
     def __init__(
         self, raw_data: dict, shade_type: ShadeType, request: AioRequest
     ) -> None:
+        """Initialize shade with tilt on closed functions."""
         super().__init__(raw_data, shade_type, request)
         self._open_position = ShadePosition(primary=MAX_POSITION)
         self._close_position = ShadePosition(primary=MIN_POSITION)
@@ -730,6 +740,7 @@ class ShadeBottomUpTiltOnClosed90(BaseShadeTilt):
     def __init__(
         self, raw_data: dict, shade_type: ShadeType, request: AioRequest
     ) -> None:
+        """Initialize shade with tilt on closed functions."""
         super().__init__(raw_data, shade_type, request)
         self.shade_limits = ShadeLimits(tilt_max=MAX_POSITION)
         self._open_position = ShadePosition(primary=MAX_POSITION)
@@ -765,6 +776,7 @@ class ShadeBottomUpTiltAnywhere(BaseShadeTilt):
     def __init__(
         self, raw_data: dict, shade_type: ShadeType, request: AioRequest
     ) -> None:
+        """Initialize shade with tilt anywhere."""
         super().__init__(raw_data, shade_type, request)
         self._open_position = ShadePosition(primary=MAX_POSITION, tilt=MAX_POSITION)
         self._close_position = ShadePosition(primary=MIN_POSITION, tilt=MAX_POSITION)
@@ -777,7 +789,7 @@ class ShadeBottomUpTiltAnywhere(BaseShadeTilt):
 
 
 class ShadeVertical(ShadeBottomUp):
-    """Type 3 - Vertical Open Close
+    """Type 3 - Vertical Open Close.
 
     A vertical shade with open/close only
     Same capabilities as type 0 (no tilt) but vertical.
@@ -803,7 +815,7 @@ class ShadeVertical(ShadeBottomUp):
 
 
 class ShadeVerticalTiltAnywhere(ShadeBottomUpTiltAnywhere):
-    """Type 4 - Vertical tiltAnywhere 180°
+    """Type 4 - Vertical tiltAnywhere 180°.
 
     A vertical shade with open/close and tilt anywhere
     Same capabilities as type 2 but vertical.
@@ -827,7 +839,7 @@ class ShadeVerticalTiltAnywhere(ShadeBottomUpTiltAnywhere):
     )
 
     def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
-        """Returns additonal positions not reported by the hub"""
+        """Return additional positions not reported by the hub."""
         if positions.primary is None:
             positions.primary = MIN_POSITION
         if positions.tilt is None:
@@ -836,7 +848,7 @@ class ShadeVerticalTiltAnywhere(ShadeBottomUpTiltAnywhere):
 
 
 class ShadeTiltOnly(BaseShadeTilt):
-    """Type 5 - Tilt Only 180°
+    """Type 5 - Tilt Only 180°.
 
     A shade with tilt anywhere capabilities only.
     """
@@ -855,6 +867,7 @@ class ShadeTiltOnly(BaseShadeTilt):
     def __init__(
         self, raw_data: dict, shade_type: ShadeType, request: AioRequest
     ) -> None:
+        """Initialize shade with tilt only."""
         super().__init__(raw_data, shade_type, request)
         self._open_position = ShadePosition()
         self._close_position = ShadePosition()
@@ -862,12 +875,12 @@ class ShadeTiltOnly(BaseShadeTilt):
         self._close_position_tilt = ShadePosition(tilt=MIN_POSITION)
 
     def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
-        """Returns additonal positions not reported by the hub"""
+        """Return additional positions not reported by the hub."""
         return positions
 
 
 class ShadeTopDown(BaseShade):
-    """Type 6 - Top Down Only
+    """Type 6 - Top Down Only.
 
     A shade with top down capabilities only.
     """
@@ -886,13 +899,14 @@ class ShadeTopDown(BaseShade):
     def __init__(
         self, raw_data: dict, shade_type: ShadeType, request: AioRequest
     ) -> None:
+        """Initialize shade with top down only."""
         super().__init__(raw_data, shade_type, request)
         self._open_position = ShadePosition(primary=MIN_POSITION)
         self._close_position = ShadePosition(primary=MAX_POSITION)
 
 
 class ShadeTopDownBottomUp(BaseShade):
-    """Type 7 - Top Down Bottom Up
+    """Type 7 - Top Down Bottom Up.
 
     A shade with top down bottom up capabilities.
     """
@@ -916,12 +930,13 @@ class ShadeTopDownBottomUp(BaseShade):
     def __init__(
         self, raw_data: dict, shade_type: ShadeType, request: AioRequest
     ) -> None:
+        """Initialize shade with top down bottom up."""
         super().__init__(raw_data, shade_type, request)
         self._open_position = ShadePosition(primary=MAX_POSITION, secondary=MIN_POSITION)
         self._close_position = ShadePosition(primary=MIN_POSITION, secondary=MIN_POSITION)
 
     def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
-        """Returns additonal positions not reported by the hub"""
+        """Return additional positions not reported by the hub."""
         if positions.primary is None:
             positions.primary = MIN_POSITION
         if positions.secondary is None:
@@ -930,7 +945,7 @@ class ShadeTopDownBottomUp(BaseShade):
 
 
 class ShadeDualOverlapped(BaseShade):
-    """Type 8 - Dual Shade Overlapped
+    """Type 8 - Dual Shade Overlapped.
 
     A shade with a front sheer and rear blackout shade.
     """
@@ -953,12 +968,13 @@ class ShadeDualOverlapped(BaseShade):
     def __init__(
         self, raw_data: dict, shade_type: ShadeType, request: AioRequest
     ) -> None:
+        """Initialize shade with sheer front and rear blockout."""
         super().__init__(raw_data, shade_type, request)
         self._open_position = ShadePosition(primary=MAX_POSITION)
         self._close_position = ShadePosition(secondary=MIN_POSITION)
 
     def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
-        """Returns additonal positions not reported by the hub"""
+        """Return additional positions not reported by the hub."""
         if positions.primary:
             if positions.secondary is None:
                 positions.secondary = MAX_POSITION
@@ -978,7 +994,7 @@ class ShadeDualOverlapped(BaseShade):
 
 
 class ShadeDualOverlappedTilt90(BaseShadeTilt):
-    """Type 9 - Dual Shade Overlapped with tiltOnClosed
+    """Type 9 - Dual Shade Overlapped with tiltOnClosed.
 
     A shade with a front sheer and rear blackout shade.
     Tilt on these is unique in that it requires the rear shade open and front shade closed.
@@ -1001,6 +1017,7 @@ class ShadeDualOverlappedTilt90(BaseShadeTilt):
     def __init__(
         self, raw_data: dict, shade_type: ShadeType, request: AioRequest
     ) -> None:
+        """Initialize shade with sheer front and rear blockout + tilt."""
         super().__init__(raw_data, shade_type, request)
         self.shade_limits = ShadeLimits(tilt_max=MAX_POSITION)
         self._open_position = ShadePosition(primary=MAX_POSITION)
@@ -1012,7 +1029,7 @@ class ShadeDualOverlappedTilt90(BaseShadeTilt):
             self._open_position_tilt = ShadePosition(tilt=MID_POSITION)
 
     def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
-        """Returns additonal positions not reported by the hub"""
+        """Return additional positions not reported by the hub."""
         if positions.primary:
             if positions.secondary is None:
                 positions.secondary = MAX_POSITION
@@ -1032,7 +1049,7 @@ class ShadeDualOverlappedTilt90(BaseShadeTilt):
 
 
 class ShadeDualOverlappedTilt180(ShadeDualOverlappedTilt90):
-    """Type 10 - Dual Shade Overlapped with tiltOnClosed
+    """Type 10 - Dual Shade Overlapped with tiltOnClosed.
 
     A shade with a front sheer and rear blackout shade.
     Tilt on these is unique in that it requires the rear shade open and front shade closed.
@@ -1055,14 +1072,14 @@ class ShadeDualOverlappedTilt180(ShadeDualOverlappedTilt90):
     def __init__(
         self, raw_data: dict, shade_type: ShadeType, request: AioRequest
     ) -> None:
+        """Initialize shade with sheer front and rear blockout + tilt."""
         super().__init__(raw_data, shade_type, request)
         if self.api_version < 3:
             self.shade_limits = ShadeLimits(tilt_max=MAX_POSITION)
 
 
 def factory(raw_data: dict, request: AioRequest):
-    """Class factory to create different types of shades
-    depending on shade type."""
+    """Class factory to create different shade types."""
 
     if ATTR_SHADE in raw_data:
         raw_data = raw_data.get(ATTR_SHADE)
@@ -1101,7 +1118,7 @@ def factory(raw_data: dict, request: AioRequest):
         # class check is more concise as we have tested positioning
         _shade = find_type(cls)
         if _shade:
-            _LOGGER.debug("Match type       : %s - %s", _shade, raw_data)
+            _LOGGER.debug("Shade match on type: %s - %s", _shade, raw_data)
             return _shade
 
     for cls in classes:
@@ -1109,8 +1126,12 @@ def factory(raw_data: dict, request: AioRequest):
         # type 0 that contain tilt would not be caught here
         _shade = find_capability(cls)
         if _shade:
-            _LOGGER.debug("Match capability : %s - %s", _shade, raw_data)
+            _LOGGER.debug("Shade match on capability: %s - %s", _shade, raw_data)
             return _shade
 
-    _LOGGER.debug("Shade unmatched  : %s - %s", BaseShade, raw_data)
+    _LOGGER.warning(
+        "Shade type not found. Falling back to basic bottom up capabilities: %s - %s",
+        BaseShade,
+        raw_data,
+    )
     return BaseShade(raw_data, BaseShade.shade_types[0], request)

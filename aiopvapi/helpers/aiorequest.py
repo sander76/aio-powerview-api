@@ -9,8 +9,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class PvApiError(Exception):
-    """General Api error. Means we have a problem communication with
-    the PowerView hub."""
+    """General Api error."""
 
 
 class PvApiResponseStatusError(PvApiError):
@@ -40,6 +39,7 @@ class AioRequest:
         timeout: int = 15,
         api_version: int | None = None,
     ) -> None:
+        """Initialize request class."""
         self.hub_ip = hub_ip
         self._timeout = timeout
         if loop:
@@ -56,7 +56,7 @@ class AioRequest:
 
     @property
     def api_path(self) -> str:
-        """Returns the initial api call path"""
+        """Return the initial api call path."""
         if self.api_version and self.api_version >= 3:
             return "home"
         return "api"
@@ -113,8 +113,7 @@ class AioRequest:
                 await response.release()
 
     async def post(self, url: str, data: dict = None):
-        """
-        Post a resource update.
+        """Post a resource update.
 
         :param url:
         :param data: a Dict. later converted to json.
@@ -135,8 +134,7 @@ class AioRequest:
                 await response.release()
 
     async def put(self, url: str, data: dict = None, params=None):
-        """
-        Do a put request.
+        """Do a put request.
 
         :param url: string
         :param data: a Dict. later converted to json.
@@ -162,8 +160,7 @@ class AioRequest:
                 await response.release()
 
     async def delete(self, url: str, params: dict = None):
-        """
-        Delete a resource.
+        """Delete a resource.
 
         :param url: Endpoint
         :param params: parameters
