@@ -679,6 +679,7 @@ class ShadeBottomUp(BaseShade):
         ShadeType(42, "M25T Roller Blind"),
         ShadeType(49, "AC Roller"),
         ShadeType(52, "Banded Shades"),
+        ShadeType(53, "Sonnette"),
         ShadeType(84, "Vignette"),
     )
 
@@ -973,6 +974,7 @@ class ShadeDualOverlapped(BaseShade):
     shade_types = (
         ShadeType(65, "Vignette Duolite"),
         ShadeType(79, "Duolite Lift"),
+        ShadeType(95, "Aura Illuminated, Roller"), #Capabilites 11 to be implemented
     )
 
     capability = ShadeCapability(
