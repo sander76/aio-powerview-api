@@ -122,7 +122,7 @@ class BaseShade(ApiResource):
 
     shade_types: tuple[ShadeType] = (ShadeType(0, "undefined type"),)
     capability: ShadeCapability = ShadeCapability(
-        "-1", PowerviewCapabilities(primary=True), "undefined"
+        -1, PowerviewCapabilities(primary=True), "undefined"
     )
     _open_position: ShadePosition = ShadePosition(primary=MAX_POSITION)
     _close_position: ShadePosition = ShadePosition(primary=MIN_POSITION)
@@ -335,7 +335,9 @@ class BaseShade(ApiResource):
                     setattr(
                         position,
                         position_key,
-                        self.api_to_percent(position_data[position_key], position_key),
+                        self.api_to_percent(
+                            float(position_data[position_key] or 0), position_key
+                        ),
                     )
 
         else:
@@ -351,7 +353,9 @@ class BaseShade(ApiResource):
                     setattr(
                         position,
                         target_key,
-                        self.api_to_percent(position_data[position_key], target_key),
+                        self.api_to_percent(
+                            float(position_data[position_key] or 0), target_key
+                        ),
                     )
 
         _LOGGER.debug("Structured Conversion %s: %s", self.name, position)
@@ -650,9 +654,9 @@ class BaseShadeTilt(BaseShade):
 
     def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
         """Return additional positions not reported by the hub."""
-        if positions.primary and positions.tilt is None:
+        if positions.primary is not None and positions.tilt is None:
             positions.tilt = MIN_POSITION
-        elif positions.tilt and positions.primary is None:
+        elif positions.tilt is not None and positions.primary is None:
             positions.primary = MIN_POSITION
         return positions
 
@@ -991,17 +995,17 @@ class ShadeDualOverlapped(BaseShade):
 
     def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
         """Return additional positions not reported by the hub."""
-        if positions.primary:
+        if positions.primary is not None:
             if positions.secondary is None:
                 positions.secondary = MAX_POSITION
             if positions.tilt is None:
                 positions.tilt = MIN_POSITION
-        elif positions.secondary:
+        elif positions.secondary is not None:
             if positions.primary is None:
                 positions.primary = MIN_POSITION
             if positions.tilt is None:
                 positions.tilt = MIN_POSITION
-        elif positions.tilt:
+        elif positions.tilt is not None:
             if positions.primary is None:
                 positions.primary = MIN_POSITION
             if positions.secondary is None:
@@ -1046,17 +1050,17 @@ class ShadeDualOverlappedTilt90(BaseShadeTilt):
 
     def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
         """Return additional positions not reported by the hub."""
-        if positions.primary:
+        if positions.primary is not None:
             if positions.secondary is None:
                 positions.secondary = MAX_POSITION
             if positions.tilt is None:
                 positions.tilt = MIN_POSITION
-        elif positions.secondary:
+        elif positions.secondary is not None:
             if positions.primary is None:
                 positions.primary = MIN_POSITION
             if positions.tilt is None:
                 positions.tilt = MIN_POSITION
-        elif positions.tilt:
+        elif positions.tilt is not None:
             if positions.primary is None:
                 positions.primary = MIN_POSITION
             if positions.secondary is None:
