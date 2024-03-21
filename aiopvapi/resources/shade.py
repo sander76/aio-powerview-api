@@ -473,6 +473,7 @@ class BaseShade(ApiResource):
         data = self._create_shade_data(room_id=room_id)
         return await self.request.put(self._resource_path, data)
 
+    async def refresh(self, suppress_timeout: bool = False, **kwargs):
         """Query the hub and refresh the most recent position state.
 
         :param kwargs: Keyword arguments to be passed to the get request.
@@ -480,13 +481,22 @@ class BaseShade(ApiResource):
         """
         try:
             _LOGGER.debug("Refreshing position of: %s", self.name)
-            raw_data = await self.request.get(self._resource_path, {"refresh": "true"})
+            raw_data = await self.request.get(
+                self._resource_path,
+                {"refresh": "true"},
+                suppress_timeout=suppress_timeout,
+                **kwargs,
+            )
+            if raw_data is None:
+                _LOGGER.debug("No update received for: %s", self.name)
+                return
             # Gen <= 2 API has raw data under shade key.  Gen >= 3 API this is flattened.
             self._raw_data = raw_data.get(ATTR_SHADE, raw_data)
         except PvApiMaintenance:
             _LOGGER.debug("Hub undergoing maintenance. Please try again")
         return
 
+    async def refresh_battery(self, suppress_timeout: bool = False, **kwargs):
         """Query the hub and request the most recent battery state.
 
         :param kwargs: Keyword arguments to be passed to the get request.
@@ -495,9 +505,15 @@ class BaseShade(ApiResource):
         try:
             _LOGGER.debug("Refreshing battery of: %s", self.name)
             raw_data = await self.request.get(
-                self._resource_path, {"updateBatteryLevel": "true"}
+                self._resource_path,
+                {"updateBatteryLevel": "true"},
+                suppress_timeout=suppress_timeout,
+                **kwargs,
             )
             # Gen <= 2 API has raw data under shade key.  Gen >= 3 API this is flattened.
+            if raw_data is None:
+                _LOGGER.debug("No update received for: %s", self.name)
+                return
             self._raw_data = raw_data.get(ATTR_SHADE, raw_data)
         except PvApiMaintenance:
             _LOGGER.debug("Hub undergoing maintenance. Please try again")

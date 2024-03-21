@@ -39,15 +39,17 @@ class Automations(ApiEntryPoint):
             return raw
         return raw.get("scene")
 
-    async def get_automations(self, fetch_scene_data: bool = True) -> PowerviewData:
+    async def get_automations(self, fetch_scene_data: bool = True, **kwargs) -> PowerviewData:
         """Get a list of automations.
 
         :returns PowerviewData object
         :raises PvApiError when an error occurs.
         """
-        resources = await self.get_resources()
+        resources = await self.get_resources(**kwargs)
         if self.api_version < 3:
             resources = resources[ATTR_SCHEDULED_EVENT_DATA]
+            
+        _LOGGER.debug("Raw automation data: %s", resources)
 
         processed = {entry[ATTR_ID]: Automation(entry, self.request) for entry in resources}
 
@@ -55,5 +57,4 @@ class Automations(ApiEntryPoint):
             for automation in processed.values():
                 await automation.fetch_associated_scene_data()
 
-        _LOGGER.debug("Raw automation data: %s", resources)
         return PowerviewData(raw=resources, processed=processed)

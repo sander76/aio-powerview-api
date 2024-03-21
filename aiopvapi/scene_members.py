@@ -65,19 +65,20 @@ class SceneMembers(ApiEntryPoint):
             params={ATTR_SCENE_ID: scene_id, ATTR_SHADE_ID: shade_id},
         )
 
-    async def get_scene_members(self) -> PowerviewData:
+    async def get_scene_members(self, **kwargs) -> PowerviewData:
         """Get a list of scene members.
 
         :raises PvApiError when an error occurs.
         """
-        resources = await self.get_resources()
+        resources = await self.get_resources(**kwargs)
         if self.api_version < 3:
             resources = resources[SCENE_MEMBER_DATA]
 
+        _LOGGER.debug("Raw scene_member data: %s", resources)
+        
         # return array of scenes attached to a shade
         processed = {
             entry["shadeId"]: SceneMember(entry, self.request) for entry in resources
         }
 
-        _LOGGER.debug("Raw scene_member data: %s", resources)
         return PowerviewData(raw=resources, processed=processed)

@@ -55,17 +55,18 @@ class Rooms(ApiEntryPoint):
             return raw
         return raw.get("room")
 
-    async def get_rooms(self) -> PowerviewData:
+    async def get_rooms(self, **kwargs) -> PowerviewData:
         """Get a list of rooms.
 
         :returns PowerviewData object
         :raises PvApiError when an error occurs.
         """
-        resources = await self.get_resources()
+        resources = await self.get_resources(**kwargs)
         if self.api_version < 3:
             resources = resources[ATTR_ROOM_DATA]
 
+        _LOGGER.debug("Raw rooms data: %s", resources)
+
         processed = {entry[ATTR_ID]: Room(entry, self.request) for entry in resources}
 
-        _LOGGER.debug("Raw room data: %s", resources)
         return PowerviewData(raw=resources, processed=processed)

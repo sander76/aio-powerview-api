@@ -61,13 +61,13 @@ class Shades(ApiEntryPoint):
             return raw
         return raw.get("shade")
 
-    async def get_shades(self) -> PowerviewData:
+    async def get_shades(self, **kwargs) -> PowerviewData:
         """Get a list of shades.
 
         :returns PowerviewData object
         :raises PvApiError when an error occurs.
         """
-        resources = await self.get_resources()
+        resources = await self.get_resources(**kwargs)
         if self.api_version < 3:
             resources = resources[ATTR_SHADE_DATA]
 
@@ -76,8 +76,7 @@ class Shades(ApiEntryPoint):
         processed = {
             entry[ATTR_ID]: shade.factory(entry, self.request) for entry in resources
         }
-
-        _LOGGER.debug("Raw shades data: %s", resources)
+        
         return PowerviewData(raw=resources, processed=processed)
 
         # async def get_shade(self, shade_id: int):
