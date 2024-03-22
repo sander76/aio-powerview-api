@@ -24,7 +24,6 @@ from aiopvapi.helpers.constants import (
     ATTR_SIGNAL_STRENGTH_MAX,
     ATTR_TILT,
     ATTR_TYPE,
-    BATTERY_KIND_HARDWIRED,
     CLOSED_POSITION,
     CLOSED_POSITION_V2,
     FIRMWARE,
@@ -46,6 +45,7 @@ from aiopvapi.helpers.constants import (
     POSKIND_PRIMARY,
     POSKIND_SECONDARY,
     POSKIND_TILT,
+    POWER_SOURCE_HARDWIRED,
     POWERTYPE_BATTERY,
     POWERTYPE_HARDWIRED,
     POWERTYPE_MAP_V2,
@@ -141,7 +141,11 @@ class BaseShade(ApiResource):
     def is_supported(self, function: str) -> bool:
         """Return if api supports this function."""
         if self.api_version >= 3:
-            return function in (MOTION_JOG, MOTION_VELOCITY, MOTION_STOP)
+            return function in (
+                MOTION_JOG,
+                MOTION_VELOCITY,
+                MOTION_STOP
+            )
         elif self.api_version == 2:
             return function in (
                 MOTION_JOG,
@@ -529,10 +533,14 @@ class BaseShade(ApiResource):
             return bool(SHADE_BATTERY_STATUS in self.raw_data)
         return bool(SHADE_BATTERY_STRENGTH in self.raw_data)
 
+    def get_battery_info(self) -> int:
+        """Return the battery powerType."""
+        attr = ATTR_POWER_TYPE if self.api_version >= 3 else ATTR_BATTERY_KIND
+        return self.raw_data.get(attr)
+
     def is_battery_powered(self) -> bool:
         """Confirm if the shade is battery or hardwired."""
-        attr = ATTR_POWER_TYPE if self.api_version >= 3 else ATTR_BATTERY_KIND
-        return bool(self.raw_data.get(attr) != BATTERY_KIND_HARDWIRED)
+        return bool(self.get_battery_info() not in POWER_SOURCE_HARDWIRED)
 
     def supported_power_sources(self) -> list[str]:
         """List supported power sources."""
@@ -546,7 +554,7 @@ class BaseShade(ApiResource):
 
         raw_num = self.raw_data.get(attr)
         battery_type = powertype_map.get(raw_num, None)
-        _LOGGER.debug("Mapping power source %s to %s", raw_num, battery_type)
+        _LOGGER.debug("%s: Mapping %s %s to %s", self.name, attr, raw_num, battery_type)
         return battery_type
 
     async def set_power_source(self, power_source):
