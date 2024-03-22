@@ -158,6 +158,9 @@ Shades not listed will get their features from their **capabilities**, unfortuna
 - Add type 53 (Sonnette) and yype 95 (Aura Illuminated, Roller). Note: *Type 95 do not support light control*
 - Handle PowerType 11 + 12. Both are fixed and cannot be edited
 
+### v3.1.1
+- Fix missed timeout blocks and handle in websession
+
 ## Links
 
 ---
