@@ -74,6 +74,7 @@ class PowerviewCapabilities:
     secondary_inverted: bool = False
     secondary_overlapped: bool = False
     vertical: bool = False
+    light: bool = False
 
 
 @dataclass
@@ -982,7 +983,6 @@ class ShadeDualOverlapped(BaseShade):
     shade_types = (
         ShadeType(65, "Vignette Duolite"),
         ShadeType(79, "Duolite Lift"),
-        ShadeType(95, "Aura Illuminated, Roller"), #Capabilites 11 to be implemented
     )
 
     capability = ShadeCapability(
@@ -1108,6 +1108,28 @@ class ShadeDualOverlappedTilt180(ShadeDualOverlappedTilt90):
             self.shade_limits = ShadeLimits(tilt_max=MAX_POSITION)
 
 
+class ShadeDualOverlappedIlluminated(ShadeDualOverlapped):
+    """Type 11 - Illuminated Shades.
+
+    A shade with a front sheer and rear blackout shade, plus an embedded light.
+    """
+
+    shade_types = (
+        ShadeType(95, "Aura Illuminated, Roller"), #Capabilites 11 to be implemented
+    )
+
+    capability = ShadeCapability(
+        11,
+        PowerviewCapabilities(
+            primary=True,
+            secondary=True,
+            secondary_overlapped=True,
+            light=True
+        ),
+        "Illuminated Shades",
+    )
+
+
 def factory(raw_data: dict, request: AioRequest):
     """Class factory to create different shade types."""
 
@@ -1142,6 +1164,7 @@ def factory(raw_data: dict, request: AioRequest):
         ShadeDualOverlapped,
         ShadeDualOverlappedTilt90,
         ShadeDualOverlappedTilt180,
+        ShadeDualOverlappedIlluminated,
     ]
 
     for cls in classes:
