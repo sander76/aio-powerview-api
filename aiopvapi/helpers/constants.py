@@ -55,6 +55,9 @@ MOTION_STOP = "stop"
 POWERTYPE_HARDWIRED = "Hardwired"
 POWERTYPE_BATTERY = "Battery"
 POWERTYPE_RECHARGABLE = "Rechargable"
+# a "fixed" type is a value locked by the Shade and cannot be changed
+POWERTYPE_FIXED_RECHARGABLE = "Rechargable-Fixed"
+POWERTYPE_FIXED_HARDWIRED = "Hardwired-Fixed"
 
 # using percentage based positions in aiopvapi v3
 MIN_POSITION = 0
@@ -68,6 +71,16 @@ CLOSED_POSITION = 0
 # essentially treat a v2 shade that reports a position of 491.5125 or
 # less as closed. Still use percentage based for compatability
 CLOSED_POSITION_V2 = 0.75
+
+#types of power sources
+BATTERY_KIND_HARDWIRED = 1
+BATTERY_KIND_BATTERY = 2
+BATTERY_KIND_RECHARGABLE = 3
+BATTERY_KIND_FIXED_RECHARGABLE = 11
+BATTERY_KIND_FIXED_HARDWIRED = 12
+
+POWER_SOURCE_BATTERY = [2,3,11]
+POWER_SOURCE_HARDWIRED = [1,12]
 
 # v2
 FWVERSION = "fwversion"
@@ -84,9 +97,6 @@ POSKIND_SECONDARY = 2
 POSKIND_TILT = 3
 
 ATTR_BATTERY_KIND = "batteryKind"
-BATTERY_KIND_HARDWIRED = 1
-BATTERY_KIND_BATTERY = 2
-BATTERY_KIND_RECHARGABLE = 3
 
 ATTR_POSKIND1 = "posKind1"
 ATTR_POSKIND2 = "posKind2"
@@ -137,6 +147,8 @@ POWERTYPE_MAP_V3 = {
     POWERTYPE_BATTERY: 0,
     POWERTYPE_HARDWIRED: 1,
     POWERTYPE_RECHARGABLE: 2,
+    POWERTYPE_FIXED_RECHARGABLE: 11,
+    POWERTYPE_FIXED_HARDWIRED: 12,
 }
 
 # Legacy (Gen1) where firmware needs to be hardcoded

@@ -1,22 +1,35 @@
-"""Tools for converting data from powerview hub"""
+"""Tools for converting data from powerview hub."""
 
 import base64
+import logging
 
 from aiopvapi.helpers.constants import ATTR_ID
 
+_LOGGER = logging.getLogger(__name__)
+
 
 def unicode_to_base64(string):
-    """converts unicode to base64"""
-    return base64.b64encode(string.encode()).decode("utf-8")
+    """Convert unicode to base64."""
+    try:
+        return base64.b64encode(string.encode()).decode("utf-8")
+    except (base64.binascii.Error, UnicodeDecodeError) as e:
+        # Handle the error and return the string
+        _LOGGER.debug("Error encoding string '%s': %s", string, e)
+        return string
 
 
 def base64_to_unicode(string):
-    """Converts base64 to unicode."""
-    return base64.b64decode(string).decode("utf-8")
+    """Convert base64 to unicode."""
+    try:
+        return base64.b64decode(string).decode("utf-8")
+    except (base64.binascii.Error, UnicodeDecodeError) as e:
+        # Handle the error and return the base64
+        _LOGGER.debug("Error decoding base64 string '%s': %s", string, e)
+        return string
 
 
 def get_base_path(ip_address, url):
-    """Convert url and ip to base path"""
+    """Convert url and ip to base path."""
     # Remove scheme if present
     ip_address = ip_address.split("://")[-1].strip("/")
     # clean up url (leading or trailing or multiple '/')
@@ -26,7 +39,7 @@ def get_base_path(ip_address, url):
 
 
 def join_path(base, *parts: str):
-    """Creates urls from base path and additional parts."""
+    """Create urls from base path and additional parts."""
     _parts = "/".join((_part.strip("/") for _part in parts))
     # _parts = '/'.join(parts)
     if base.endswith("/"):
@@ -37,8 +50,9 @@ def join_path(base, *parts: str):
 
 
 def get_raw_id(id_):
-    """Creates a dict with the resource id.
+    """Create a dict with the resource id.
 
     This can serve as the minimal raw input for ie scene instantiation
-    and allows for simple activation of that scene."""
+    and allows for simple activation of that scene.
+    """
     return {ATTR_ID: id_}

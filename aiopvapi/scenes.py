@@ -52,19 +52,20 @@ class Scenes(ApiEntryPoint):
             return resources[ATTR_SCENE_DATA]
         return resources
 
-    async def get_scenes(self) -> PowerviewData:
+    async def get_scenes(self, **kwargs) -> PowerviewData:
         """Get a list of scenes.
 
         :raises PvApiError when an error occurs.
         """
-        resources = await self.get_resources()
+        resources = await self.get_resources(**kwargs)
         if self.api_version < 3:
             resources = resources[ATTR_SCENE_DATA]
+            
+        _LOGGER.debug("Raw scenes data: %s", resources)
 
         # return array of scenes attached to a shade
         processed = {entry[ATTR_ID]: Scene(entry, self.request) for entry in resources}
 
-        _LOGGER.debug("Raw scenes data: %s", resources)
         return PowerviewData(raw=resources, processed=processed)
 
     async def create_scene(self, room_id, name, color_id=0, icon_id=0):

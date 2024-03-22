@@ -160,20 +160,20 @@ class Hub(ApiBase):
         url = get_base_path(self.request.hub_ip, join_path("gateway", "identify"))
         await self.request.get(url, params={"time": interval})
 
-    async def query_firmware(self):
+    async def query_firmware(self, **kwargs):
         """
         Query the firmware versions.  If API version is not set yet, get the API version first.
         """
-        await self.detect_api_version()
+        await self.detect_api_version(**kwargs)
         if self.api_version >= 3:
-            await self._query_firmware_g3()
+            await self._query_firmware_g3(**kwargs)
         else:
-            await self._query_firmware_g2()
+            await self._query_firmware_g2(**kwargs)
         _LOGGER.debug("Raw hub data: %s", self._raw_data)
 
-    async def _query_firmware_g2(self):
+    async def _query_firmware_g2(self, **kwargs):
         # self._raw_data = await self.request.get(join_path(self._base_path, "userdata"))
-        self._raw_data = await self.request_raw_data()
+        self._raw_data = await self.request_raw_data(**kwargs)
 
         if not self._raw_data or self._raw_data == {}:
             raise PvApiEmptyData("Hub returned empty data")
@@ -182,7 +182,7 @@ class Hub(ApiBase):
         if not _main:
             # do some checking for legacy v1 failures
             if not self._raw_firmware:
-                self._raw_firmware = await self.request_raw_firmware()
+                self._raw_firmware = await self.request_raw_firmware(**kwargs)
             _fw = self._raw_firmware
             # _fw = await self.request.get(join_path(self._base_path, FWVERSION))
             if FIRMWARE in _fw:
@@ -210,9 +210,9 @@ class Hub(ApiBase):
 
         self.hub_name = self._parse(USER_DATA, HUB_NAME, converter=base64_to_unicode)
 
-    async def _query_firmware_g3(self):
+    async def _query_firmware_g3(self, **kwargs):
         # self._raw_data = await self.request.get(gateway)
-        self._raw_data = await self.request_raw_data()
+        self._raw_data = await self.request_raw_data(**kwargs)
 
         if not self._raw_data or self._raw_data == {}:
             raise PvApiEmptyData("Hub returned empty data")
@@ -236,7 +236,7 @@ class Hub(ApiBase):
         self.hub_name = self.mac_address
         if HUB_NAME not in self._parse(CONFIG):
             # Get gateway name from home API until it is in the gateway API
-            home = await self.request_home_data()
+            home = await self.request_home_data(**kwargs)
             # Find the hub based on the serial number or MAC
             hub = None
             if "gateways" in home:
@@ -279,27 +279,27 @@ class Hub(ApiBase):
 
         return version_data
 
-    async def request_raw_data(self):
+    async def request_raw_data(self, **kwargs):
         """
         Raw data update request. Allows patching of data for testing
         """
-        await self.detect_api_version()
+        await self.detect_api_version(**kwargs)
         data_url = join_path(self.base_path, "userdata")
         if self.api_version is not None and self.api_version >= 3:
             data_url = get_base_path(self.request.hub_ip, "gateway")
-        return await self.request.get(data_url)
+        return await self.request.get(data_url, **kwargs)
 
-    async def request_home_data(self):
+    async def request_home_data(self, **kwargs):
         """
         Raw data update request. Allows patching of data for testing
         """
-        await self.detect_api_version()
+        await self.detect_api_version(**kwargs)
         data_url = join_path(self.base_path, "userdata")
         if self.api_version is not None and self.api_version >= 3:
             data_url = self.base_path
-        return await self.request.get(data_url)
+        return await self.request.get(data_url, **kwargs)
 
-    async def request_raw_firmware(self):
+    async def request_raw_firmware(self, **kwargs):
         """
         Raw data update request. Allows patching of data for testing
         """
@@ -309,19 +309,19 @@ class Hub(ApiBase):
 
         if self.api_version is not None:
             data_url = gen3_url if self.api_version >= 3 else gen2_url
-            return await self.request.get(data_url)
+            return await self.request.get(data_url, **kwargs)
 
         _LOGGER.debug("Searching for firmware file")
         try:
             _LOGGER.debug("Attempting Gen 2 connection")
-            gen2 = await self.request.get(gen2_url)
+            gen2 = await self.request.get(gen2_url, **kwargs)
             return gen2
         except Exception:  # pylint: disable=broad-except
             _LOGGER.debug("Gen 2 connection failed")
 
         try:
             _LOGGER.debug("Attempting Gen 3 connection")
-            gen3 = await self.request.get(gen3_url)
+            gen3 = await self.request.get(gen3_url, **kwargs)
             # Secondary hubs not supported - second hub is essentially a repeater
             return gen3
         except Exception as err:  # pylint: disable=broad-except
@@ -329,12 +329,12 @@ class Hub(ApiBase):
 
         raise PvApiConnectionError("Failed to discover gateway version")
 
-    async def detect_api_version(self):
+    async def detect_api_version(self, **kwargs):
         """
         Set the API generation based on what the gateway responds to.
         """
         if not self.api_version:
-            self._raw_firmware = await self.request_raw_firmware()
+            self._raw_firmware = await self.request_raw_firmware(**kwargs)
             _main = None
             if USER_DATA in self._raw_firmware:
                 _main = self._parse(

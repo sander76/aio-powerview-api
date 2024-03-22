@@ -71,4 +71,12 @@ Changelog
 - Fix tests
 - Remove unneeded declerations
 - Fix shade position reporting for v2 shades
-- Dandle empty hub data being returned
+- Handle empty hub data being returned
+
+**v3.1.0**
+- General docstring updates
+- Handle kwargs in websessions for management of timeout internally
+- Update error handling in tools
+- Handle empty values and zeros better
+- Add type 53 (Sonnette) and yype 95 (Aura Illuminated, Roller). Note: *Type 95 do not support light control*
+- Handle PowerType 11 + 12. Both are fixed and cannot be edited

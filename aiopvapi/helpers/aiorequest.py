@@ -9,8 +9,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class PvApiError(Exception):
-    """General Api error. Means we have a problem communication with
-    the PowerView hub."""
+    """General Api error."""
 
 
 class PvApiResponseStatusError(PvApiError):
@@ -22,15 +21,15 @@ class PvApiMaintenance(PvApiError):
 
 
 class PvApiConnectionError(PvApiError):
-    """Problem connecting to PowerView hub."""
+    """Problem connecting to PowerView Hub."""
 
 
 class PvApiEmptyData(PvApiError):
-    """PowerView hub returned empty data."""
+    """PowerView Hub returned empty data."""
 
 
 class AioRequest:
-    """Request class managing hub connection."""
+    """Request class managing Powerview Hub connection."""
 
     def __init__(
         self,
@@ -40,6 +39,7 @@ class AioRequest:
         timeout: int = 15,
         api_version: int | None = None,
     ) -> None:
+        """Initialize request class."""
         self.hub_ip = hub_ip
         self._timeout = timeout
         if loop:
@@ -56,7 +56,7 @@ class AioRequest:
 
     @property
     def api_path(self) -> str:
-        """Returns the initial api call path"""
+        """Return the initial api call path."""
         if self.api_version and self.api_version >= 3:
             return "home"
         return "api"
@@ -90,80 +90,92 @@ class AioRequest:
         # finally, return the result
         return _val
 
-    async def get(self, url: str, params: str = None) -> dict:
-        """
-        Get a resource.
+    async def get(self, url: str, params: str = None, suppress_timeout: bool = False, **kwargs) -> dict:
+        """Get a resource.
 
-        :param url:
-        :param params:
-        :return:
+        :param url: The URL to fetch.
+        :param params: Dictionary or bytes to be sent in the query string of the new request
+                    (optional).
+        :param suppress_timeout: Stermine if timeouts will return an error
+        :param kwargs: Keyword arguments to be passed to aiohttp ClientSession get method.
+                    For example, timeout can be passed as kwargs.
+        :return: A dictionary representing the JSON response.
         """
         response = None
         try:
-            _LOGGER.debug("Sending GET request to: %s params: %s", url, params)
+            _LOGGER.debug("Sending GET request to: %s params: %s kwargs: %s", url, params, kwargs)
             async with asyncio.timeout(self._timeout):
-                response = await self.websession.get(url, params=params)
+                response = await self.websession.get(url, params=params, **kwargs)
                 return await self.check_response(response, [200, 204])
-        except (asyncio.TimeoutError, aiohttp.ClientError) as error:
-            raise PvApiConnectionError(
-                "Failed to communicate with PowerView hub"
-            ) from error
+        except TimeoutError as error:
+            if suppress_timeout:
+                _LOGGER.debug("Timeout occurred but was suppressed: %s", error)
+                return None
+            raise PvApiConnectionError("Timeout in communicating with PowerView Hub") from error
+        except aiohttp.ClientError as error:
+            raise PvApiConnectionError("Failed to communicate with PowerView Hub") from error
         finally:
             if response is not None:
                 await response.release()
 
-    async def post(self, url: str, data: dict = None):
-        """
-        Post a resource update.
+    async def post(self, url: str, data: dict = None, suppress_timeout: bool = False, **kwargs):
+        """Post a resource update.
 
-        :param url:
-        :param data: a Dict. later converted to json.
-        :return:
+        :param url: The URL to fetch.
+        :param data: Dictionary later converted to json. Sent in the request
+        :param suppress_timeout: Stermine if timeouts will return an error
+        :param kwargs: Keyword arguments to be passed to aiohttp ClientSession get method.
+                    For example, timeout can be passed as kwargs.
+        :return: A dictionary representing the JSON response.
         """
         response = None
         try:
-            _LOGGER.debug("Sending POST request to: %s data: %s", url, data)
+            _LOGGER.debug("Sending POST request to: %s data: %s kwargs: %s", url, data, kwargs)
             async with asyncio.timeout(self._timeout):
-                response = await self.websession.post(url, json=data)
+                response = await self.websession.post(url, json=data, **kwargs)
                 return await self.check_response(response, [200, 201])
-        except (asyncio.TimeoutError, aiohttp.ClientError) as error:
-            raise PvApiConnectionError(
-                "Failed to communicate with PowerView hub"
-            ) from error
+        except TimeoutError as error:
+            if suppress_timeout:
+                _LOGGER.debug("Timeout occurred but was suppressed: %s", error)
+                return None
+            raise PvApiConnectionError("Timeout in communicating with PowerView Hub") from error
+        except aiohttp.ClientError as error:
+            raise PvApiConnectionError("Failed to communicate with PowerView Hub") from error
         finally:
             if response is not None:
                 await response.release()
 
-    async def put(self, url: str, data: dict = None, params=None):
-        """
-        Do a put request.
+    async def put(self, url: str, data: dict = None, params=None, suppress_timeout: bool = False, **kwargs):
+        """Do a put request.
 
-        :param url: string
-        :param data: a Dict. later converted to json.
-        :return:
+        :param url: The URL to fetch.
+        :param data: Dictionary later converted to json. Sent in the request
+        :param params: Dictionary or bytes to be sent in the query string of the new request
+                    (optional).
+        :param suppress_timeout: Stermine if timeouts will return an error
+        :param kwargs: Keyword arguments to be passed to aiohttp ClientSession get method.
+                    For example, timeout can be passed as kwargs.
+        :return: A dictionary representing the JSON response.
         """
         response = None
         try:
-            _LOGGER.debug(
-                "Sending PUT request to: %s params: %s data: %s",
-                url,
-                params,
-                data,
-            )
+            _LOGGER.debug("Sending PUT request to: %s params: %s data: %s kwargs: %s", url, params, data, kwargs)
             async with asyncio.timeout(self._timeout):
-                response = await self.websession.put(url, json=data, params=params)
+                response = await self.websession.put(url, json=data, params=params, **kwargs)
                 return await self.check_response(response, [200, 204])
-        except (asyncio.TimeoutError, aiohttp.ClientError) as error:
-            raise PvApiConnectionError(
-                "Failed to communicate with PowerView hub"
-            ) from error
+        except TimeoutError as error:
+            if suppress_timeout:
+                _LOGGER.debug("Timeout occurred but was suppressed: %s", error)
+                return None
+            raise PvApiConnectionError("Timeout in communicating with PowerView Hub") from error
+        except aiohttp.ClientError as error:
+            raise PvApiConnectionError("Failed to communicate with PowerView Hub") from error
         finally:
             if response is not None:
                 await response.release()
 
     async def delete(self, url: str, params: dict = None):
-        """
-        Delete a resource.
+        """Delete a resource.
 
         :param url: Endpoint
         :param params: parameters
@@ -177,10 +189,8 @@ class AioRequest:
             async with asyncio.timeout(self._timeout):
                 response = await self.websession.delete(url, params=params)
                 return await self.check_response(response, [200, 204])
-        except (asyncio.TimeoutError, aiohttp.ClientError) as error:
-            raise PvApiConnectionError(
-                "Failed to communicate with PowerView hub"
-            ) from error
+        except (TimeoutError, aiohttp.ClientError) as error:
+            raise PvApiConnectionError("Failed to communicate with PowerView Hub") from error
         finally:
             if response is not None:
                 await response.release()
