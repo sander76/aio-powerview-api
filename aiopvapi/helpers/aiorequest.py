@@ -103,10 +103,10 @@ class AioRequest:
         """
         response = None
         try:
-            _LOGGER.debug("Sending GET request to: %s params: %s kwargs: %s", url, params, kwargs)
-            async with asyncio.timeout(self._timeout):
-                response = await self.websession.get(url, params=params, **kwargs)
-                return await self.check_response(response, [200, 204])
+            timeout = kwargs.pop("timeout", None) or self._timeout
+            _LOGGER.debug("Sending GET request to: %s params: %s timeout: %s kwargs: %s", url, params, timeout, kwargs)
+            response = await self.websession.get(url, params=params, timeout=timeout, **kwargs)
+            return await self.check_response(response, [200, 204])
         except TimeoutError as error:
             if suppress_timeout:
                 _LOGGER.debug("Timeout occurred but was suppressed: %s", error)
@@ -130,10 +130,10 @@ class AioRequest:
         """
         response = None
         try:
-            _LOGGER.debug("Sending POST request to: %s data: %s kwargs: %s", url, data, kwargs)
-            async with asyncio.timeout(self._timeout):
-                response = await self.websession.post(url, json=data, **kwargs)
-                return await self.check_response(response, [200, 201])
+            timeout = kwargs.pop("timeout", None) or self._timeout
+            _LOGGER.debug("Sending POST request to: %s data: %s timeout: %s kwargs: %s", url, data, timeout, kwargs)
+            response = await self.websession.post(url,json=data,timeout=timeout,**kwargs)
+            return await self.check_response(response, [200, 201])
         except TimeoutError as error:
             if suppress_timeout:
                 _LOGGER.debug("Timeout occurred but was suppressed: %s", error)
@@ -159,10 +159,10 @@ class AioRequest:
         """
         response = None
         try:
-            _LOGGER.debug("Sending PUT request to: %s params: %s data: %s kwargs: %s", url, params, data, kwargs)
-            async with asyncio.timeout(self._timeout):
-                response = await self.websession.put(url, json=data, params=params, **kwargs)
-                return await self.check_response(response, [200, 204])
+            timeout = kwargs.pop("timeout", None) or self._timeout
+            _LOGGER.debug("Sending PUT request to: %s params: %s data: %s timeout: %s kwargs: %s", url, params, data, timeout, kwargs)
+            response = await self.websession.put(url, json=data, params=params, timeout=timeout, **kwargs)
+            return await self.check_response(response, [200, 204])
         except TimeoutError as error:
             if suppress_timeout:
                 _LOGGER.debug("Timeout occurred but was suppressed: %s", error)
@@ -174,7 +174,7 @@ class AioRequest:
             if response is not None:
                 await response.release()
 
-    async def delete(self, url: str, params: dict = None):
+    async def delete(self, url: str, params: dict = None, suppress_timeout: bool = False, **kwargs):
         """Delete a resource.
 
         :param url: Endpoint
@@ -185,11 +185,16 @@ class AioRequest:
         """
         response = None
         try:
-            _LOGGER.debug("Sending DELETE request to: %s with param %s", url, params)
-            async with asyncio.timeout(self._timeout):
-                response = await self.websession.delete(url, params=params)
-                return await self.check_response(response, [200, 204])
-        except (TimeoutError, aiohttp.ClientError) as error:
+            timeout = kwargs.pop("timeout", None) or self._timeout
+            _LOGGER.debug("Sending DELETE request to: %s params: %s timeout: %s kwargs: %s",url,params,timeout, kwargs)
+            response = await self.websession.delete(url, params=params, timeout=timeout, **kwargs)
+            return await self.check_response(response, [200, 204])
+        except TimeoutError as error:
+            if suppress_timeout:
+                _LOGGER.debug("Timeout occurred but was suppressed: %s", error)
+                return None
+            raise PvApiConnectionError("Timeout in communicating with PowerView Hub") from error
+        except aiohttp.ClientError as error:
             raise PvApiConnectionError("Failed to communicate with PowerView Hub") from error
         finally:
             if response is not None:
