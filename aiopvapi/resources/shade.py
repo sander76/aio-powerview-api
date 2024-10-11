@@ -808,7 +808,7 @@ class ShadeBottomUpTiltAnywhere(BaseShadeTilt):
         self._close_position_tilt = ShadePosition(tilt=MIN_POSITION)
         if self.api_version < 3:
             self._open_position = ShadePosition(primary=MAX_POSITION, tilt=MID_POSITION)
-            self._close_position = ShadePosition(primary=MIN_POSITION, tilt=MID_POSITION)
+            self._close_position = ShadePosition(primary=MIN_POSITION, tilt=MIN_POSITION)
             self._open_position_tilt = ShadePosition(tilt=MID_POSITION)
 
 
