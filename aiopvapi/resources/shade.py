@@ -145,9 +145,9 @@ class BaseShade(ApiResource):
             return function in (
                 MOTION_JOG,
                 MOTION_VELOCITY,
-                MOTION_STOP
+                MOTION_STOP,
             )
-        elif self.api_version == 2:
+        if self.api_version == 2:
             return function in (
                 MOTION_JOG,
                 MOTION_CALIBRATE,
@@ -155,20 +155,18 @@ class BaseShade(ApiResource):
                 MOTION_STOP,
                 FUNCTION_SET_POWER,
             )
-        else:
-            return function in (
-                MOTION_JOG,
-                MOTION_CALIBRATE,
-                MOTION_FAVORITE,
-                FUNCTION_SET_POWER,
-            )
+        return function in (
+            MOTION_JOG,
+            MOTION_CALIBRATE,
+            MOTION_FAVORITE,
+            FUNCTION_SET_POWER,
+        )
 
     @property
     def current_position(self) -> ShadePosition:
         """Return the current position of the shade as a percentage."""
         position = self.raw_to_structured(self._raw_data)
-        position = self.get_additional_positions(position)
-        return position
+        return self.get_additional_positions(position)
 
     @property
     def room_id(self) -> int:
@@ -391,10 +389,7 @@ class BaseShade(ApiResource):
             # IDs are required in request params for gen 3.
             params = {"ids": self.id}
             resource_path = join_path(self.base_path, "positions")
-        result = await self.request.put(
-            resource_path, data=position_data, params=params
-        )
-        return result
+        return await self.request.put(resource_path, data=position_data, params=params)
 
     async def move(self, position_data: ShadePosition) -> ShadePosition:
         """Move the shade to a set position."""
@@ -554,7 +549,7 @@ class BaseShade(ApiResource):
         powertype_map = {v: k for k, v in version_map.items()}
 
         raw_num = self.raw_data.get(attr)
-        battery_type = powertype_map.get(raw_num, None)
+        battery_type = powertype_map.get(raw_num)
         _LOGGER.debug("%s: Mapping %s %s to %s", self.name, attr, raw_num, battery_type)
         return battery_type
 
@@ -611,8 +606,7 @@ class BaseShade(ApiResource):
         """
         if refresh:
             await self.refresh()
-        position = self._raw_data.get(ATTR_POSITIONS)
-        return position
+        return self._raw_data.get(ATTR_POSITIONS)
 
     async def get_current_position(self, refresh=True) -> ShadePosition:
         """Return the current shade position.
@@ -962,8 +956,12 @@ class ShadeTopDownBottomUp(BaseShade):
     ) -> None:
         """Initialize shade with top down bottom up."""
         super().__init__(raw_data, shade_type, request)
-        self._open_position = ShadePosition(primary=MAX_POSITION, secondary=MIN_POSITION)
-        self._close_position = ShadePosition(primary=MIN_POSITION, secondary=MIN_POSITION)
+        self._open_position = ShadePosition(
+            primary=MAX_POSITION, secondary=MIN_POSITION
+        )
+        self._close_position = ShadePosition(
+            primary=MIN_POSITION, secondary=MIN_POSITION
+        )
 
     def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
         """Return additional positions not reported by the hub."""
@@ -1115,7 +1113,7 @@ class ShadeDualOverlappedIlluminated(ShadeDualOverlapped):
     """
 
     shade_types = (
-        ShadeType(95, "Aura Illuminated, Roller"), #Capabilites 11 to be implemented
+        ShadeType(95, "Aura Illuminated, Roller"),  # TODO: Capabilites 11 (light)
     )
 
     capability = ShadeCapability(
@@ -1124,7 +1122,7 @@ class ShadeDualOverlappedIlluminated(ShadeDualOverlapped):
             primary=True,
             secondary=True,
             secondary_overlapped=True,
-            light=True
+            light=True,
         ),
         "Illuminated Shades",
     )
