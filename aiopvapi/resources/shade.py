@@ -877,7 +877,10 @@ class ShadeTiltOnly(BaseShadeTilt):
     A shade with tilt anywhere capabilities only.
     """
 
-    shade_types = (ShadeType(66, "Palm Beach Shutters"),)
+    shade_types = (
+        ShadeType(40, "Everwood Alternative Wood Blinds"),
+        ShadeType(66, "Palm Beach Shutters"),
+    )
 
     capability = ShadeCapability(
         5,
@@ -900,6 +903,11 @@ class ShadeTiltOnly(BaseShadeTilt):
 
     def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
         """Return additional positions not reported by the hub."""
+        # bug where tilt only return posKind1=1
+        # https://github.com/home-assistant/core/issues/115257
+        if positions.primary is not None:
+            positions.tilt = positions.primary
+            positions.primary = None
         return positions
 
 
