@@ -145,7 +145,7 @@ class Hub(ApiBase):
 
     async def reboot(self) -> None:
         """Reboot the hub."""
-        if not self.is_supported("reboot"):
+        if not self.is_supported(FUNCTION_REBOOT):
             _LOGGER.error("Method not supported")
             return
 
@@ -154,7 +154,7 @@ class Hub(ApiBase):
 
     async def identify(self, interval: int = 10) -> None:
         """Identify the hub."""
-        if not self.is_supported("identify"):
+        if not self.is_supported(FUNCTION_IDENTIFY):
             _LOGGER.error("Method not supported")
             return
 
