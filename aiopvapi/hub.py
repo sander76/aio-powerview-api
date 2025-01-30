@@ -1,6 +1,7 @@
 """Hub class acting as the base for the PowerView API."""
 
 import logging
+import re
 
 from aiopvapi.helpers.aiorequest import PvApiConnectionError, PvApiEmptyData
 from aiopvapi.helpers.api_base import ApiBase
@@ -15,6 +16,7 @@ from aiopvapi.helpers.constants import (
     FIRMWARE_SUB_REVISION,
     FUNCTION_IDENTIFY,
     FUNCTION_REBOOT,
+    FUNCTION_REGISTER,
     FWVERSION,
     HUB_MODEL_MAPPING,
     HUB_NAME,
@@ -85,8 +87,13 @@ class Hub(ApiBase):
     def is_supported(self, function: str) -> bool:
         """Confirm availble features based on api version."""
         if self.api_version is not None and self.api_version >= 3:
-            return function in (FUNCTION_REBOOT, FUNCTION_IDENTIFY)
+            return function in (FUNCTION_REBOOT, FUNCTION_IDENTIFY, FUNCTION_REGISTER)
         return False
+
+    @property
+    def id(self):
+        """The hub unique id."""
+        return self.serial_number
 
     @property
     def role(self) -> str | None:
@@ -142,6 +149,44 @@ class Hub(ApiBase):
         if self.api_version >= 3:
             return self.base_path
         return join_path(self.base_path, "shades")
+
+    def validate_integration_name(self, name):
+        """Confirm name meets hub requirements.
+
+        Unique 3rd party ASCII integration identifier that must be all lower case, can be a maximum
+        of 12 characters in length, and must only contain the characters [a-z], [0-9], or the
+        special characters '.' (dot/period), '@', '_' (underscore) and '-' (hyphen)
+        """
+        pattern = r"^[a-z0-9._@-]{1,12}$"
+        if re.match(pattern, name):
+            return True
+        return False
+
+    async def register_integration(self, name: str) -> None:
+        """Add an integration to the Powerview Gateway."""
+        if not self.is_supported(FUNCTION_REGISTER):
+            _LOGGER.error("Method not supported")
+            return
+
+        if not self.validate_integration_name(name):
+            _LOGGER.error("Invalid name provided")
+            return
+
+        url = get_base_path(self.request.hub_ip, join_path("home", "integration", name))
+        await self.request.post(url)
+
+    async def remeove_integration(self, name: str) -> None:
+        """Remove an integration from the Powerview Gateway."""
+        if not self.is_supported(FUNCTION_REGISTER):
+            _LOGGER.error("Method not supported")
+            return
+
+        if not self.validate_integration_name(name):
+            _LOGGER.error("Invalid name provided")
+            return
+
+        url = get_base_path(self.request.hub_ip, join_path("home", "integration", name))
+        await self.request.delete(url)
 
     async def reboot(self) -> None:
         """Reboot the hub."""

@@ -9,8 +9,7 @@ FUNCTION_IDENTIFY = "identify"
 FUNCTION_REBOOT = "reboot"
 FUNCTION_SET_POWER = "set_power"
 FUNCTION_SCHEDULE = "schedule"
-FUNCTION_REBOOT = "reboot"
-FUNCTION_IDENTIFY = "identify"
+FUNCTION_REGISTER = "register"
 
 # common across all API versions
 HUB_NAME = "hubName"
