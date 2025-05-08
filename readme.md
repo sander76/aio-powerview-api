@@ -58,6 +58,7 @@ Shades not listed will get their features from their **capabilities**, unfortuna
 | Provenance Woven Wood                 |  19  |      0     |
 | Roman                                 |   4  |      0     |
 | Silhouette                            |  23  |      1     |
+| Silhouette                            |  72  |      1     |
 | Silhouette Duolite                    |  38  |      9     |
 | Sonnette                              |  53  |      0     |
 | Skyline Panel, Left Stack             |  26  |      3     |
