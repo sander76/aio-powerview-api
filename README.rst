@@ -83,3 +83,7 @@ Changelog
 
 **v3.1.1**
 - Fix missed timeout blocks and handle in websession
+
+**v3.1.2**
+
+- Add type 72 (Silhoutte)
