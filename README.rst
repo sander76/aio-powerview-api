@@ -14,6 +14,9 @@ Links
 Changelog
 ---------
 
+**v3.2.1**
+- Add type 57 (Carole Roman Shades)
+
 **v3.2.0**
 - Bug fix for gen1 shades with bad data
 - Fix bad close position on tilt shades
