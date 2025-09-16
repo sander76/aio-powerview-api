@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 import logging
 from typing import Any
+import asyncio
 
 from aiopvapi.helpers.aiorequest import AioRequest, PvApiMaintenance
 from aiopvapi.helpers.api_base import ApiResource
@@ -506,19 +507,46 @@ class BaseShade(ApiResource):
         :param kwargs: Keyword arguments to be passed to the get request.
                    For example, timeout can be passed as kwargs.
         """
+        if not self.is_battery_powered:
+            _LOGGER.debug("Shade %s is not battery powered", self.name)
+            return
+
         try:
             _LOGGER.debug("Refreshing battery of: %s", self.name)
-            raw_data = await self.request.get(
-                self._resource_path,
-                {"updateBatteryLevel": "true"},
-                suppress_timeout=suppress_timeout,
-                **kwargs,
-            )
-            # Gen <= 2 API has raw data under shade key.  Gen >= 3 API this is flattened.
-            if raw_data is None:
-                _LOGGER.debug("No update received for: %s", self.name)
-                return
-            self._raw_data = raw_data.get(ATTR_SHADE, raw_data)
+            retries = 3
+            for attempt in range(retries):
+                raw_data = await self.request.get(
+                    self._resource_path,
+                    {"updateBatteryLevel": "true"},
+                    suppress_timeout=suppress_timeout,
+                    **kwargs,
+                )
+                if raw_data is None:
+                    _LOGGER.debug("No update received for: %s", self.name)
+                    return
+                # Gen <= 2 API has raw data under shade key.  Gen >= 3 API this is flattened.
+                self._raw_data = raw_data.get(ATTR_SHADE, raw_data)
+                _LOGGER.debug(
+                    "Shade battery %s %d: %s", self.name, attempt, self._raw_data
+                )
+                if not self._raw_data.get("timedOut", False):
+                    _LOGGER.debug("Shade battery %s %d: Refreshed", self.name, attempt)
+                    break  # timeout is false, so we're done
+                if attempt < retries - 1:
+                    _LOGGER.debug(
+                        "Shade %s timed out, retrying in 2 minutes (attempt %d/%d)",
+                        self.name,
+                        attempt + 1,
+                        retries,
+                    )
+                    await asyncio.sleep(120)
+                else:
+                    _LOGGER.warning(
+                        "Shade battery refresh %s timed out after %d attempts",
+                        self.name,
+                        retries,
+                    )
+                    return
         except PvApiMaintenance:
             _LOGGER.debug("Hub undergoing maintenance. Please try again")
         return
@@ -572,6 +600,12 @@ class BaseShade(ApiResource):
 
     def get_battery_strength(self) -> int:
         """Get battery strength from raw_data and return as a percentage."""
+        if self.api_version < 3:
+            # SHADE_BATTERY_STRENGTH is in tenths of a volt (e.g., 146 = 14.6V), max is 18.0V (180)
+            return round((self.raw_data[SHADE_BATTERY_STRENGTH] / 180) * 100)
+
+        # gen 3 dont return the same information for batteries and
+        # while gen 2 do support the below, it is less accurate than the above
         power_levels = {
             4: 100,  # 4 is hardwired
             3: 100,  # 3 = 100% to 51% power remaining
