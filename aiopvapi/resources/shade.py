@@ -783,6 +783,7 @@ class ShadeBottomUpTiltOnClosed90(BaseShadeTilt):
         ShadeType(18, "Pirouette"),
         ShadeType(23, "Silhouette"),
         ShadeType(43, "Facette"),
+        ShadeType(72, "Silhouette"),
     )
 
     capability = ShadeCapability(
