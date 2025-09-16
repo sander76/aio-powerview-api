@@ -717,6 +717,7 @@ class ShadeBottomUp(BaseShade):
         ShadeType(49, "AC Roller"),
         ShadeType(52, "Banded Shades"),
         ShadeType(53, "Sonnette"),
+        ShadeType(57, "Carole Roman Shades"),
         ShadeType(84, "Vignette"),
     )
 

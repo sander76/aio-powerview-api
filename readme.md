@@ -41,6 +41,7 @@ Shades not listed will get their features from their **capabilities**, unfortuna
 | Aura Illuminated, Roller              |  49  |     11     |
 | Banded Shades                         |  52  |      0     |
 | Bottom Up                             |   5  |      0     |
+| Carole Roman Shades                   |  57  |      0     |
 | Curtain, Left Stack                   |  69  |      3     |
 | Curtain, Right Stack                  |  70  |      3     |
 | Curtain, Split Stack                  |  71  |      3     |
@@ -88,6 +89,9 @@ Shades not listed will get their features from their **capabilities**, unfortuna
 - upload a package `twine upload dist/*.*`
 
 ## Changelog
+
+### v3.2.1
+- Add type 57 (Carole Roman Shades)
 
 ### v3.2.0
 - Bug fix for gen1 shades with bad data
