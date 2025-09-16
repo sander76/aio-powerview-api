@@ -90,7 +90,13 @@ class AioRequest:
         # finally, return the result
         return _val
 
-    async def get(self, url: str, params: str = None, suppress_timeout: bool = False, **kwargs) -> dict:
+    async def get(
+        self,
+        url: str,
+        params: str | None = None,
+        suppress_timeout: bool = False,
+        **kwargs,
+    ) -> dict:
         """Get a resource.
 
         :param url: The URL to fetch.
@@ -104,21 +110,39 @@ class AioRequest:
         response = None
         try:
             timeout = kwargs.pop("timeout", None) or self._timeout
-            _LOGGER.debug("Sending GET request to: %s params: %s timeout: %s kwargs: %s", url, params, timeout, kwargs)
-            response = await self.websession.get(url, params=params, timeout=timeout, **kwargs)
+            _LOGGER.debug(
+                "Sending GET request to: %s params: %s timeout: %s kwargs: %s",
+                url,
+                params,
+                timeout,
+                kwargs,
+            )
+            response = await self.websession.get(
+                url, params=params, timeout=timeout, **kwargs
+            )
             return await self.check_response(response, [200, 204])
         except TimeoutError as error:
             if suppress_timeout:
                 _LOGGER.debug("Timeout occurred but was suppressed: %s", error)
                 return None
-            raise PvApiConnectionError("Timeout in communicating with PowerView Hub") from error
+            raise PvApiConnectionError(
+                "Timeout in communicating with PowerView Hub"
+            ) from error
         except aiohttp.ClientError as error:
-            raise PvApiConnectionError("Failed to communicate with PowerView Hub") from error
+            raise PvApiConnectionError(
+                "Failed to communicate with PowerView Hub"
+            ) from error
         finally:
             if response is not None:
                 await response.release()
 
-    async def post(self, url: str, data: dict = None, suppress_timeout: bool = False, **kwargs):
+    async def post(
+        self,
+        url: str,
+        data: dict | None = None,
+        suppress_timeout: bool = False,
+        **kwargs,
+    ):
         """Post a resource update.
 
         :param url: The URL to fetch.
@@ -131,21 +155,40 @@ class AioRequest:
         response = None
         try:
             timeout = kwargs.pop("timeout", None) or self._timeout
-            _LOGGER.debug("Sending POST request to: %s data: %s timeout: %s kwargs: %s", url, data, timeout, kwargs)
-            response = await self.websession.post(url,json=data,timeout=timeout,**kwargs)
+            _LOGGER.debug(
+                "Sending POST request to: %s data: %s timeout: %s kwargs: %s",
+                url,
+                data,
+                timeout,
+                kwargs,
+            )
+            response = await self.websession.post(
+                url, json=data, timeout=timeout, **kwargs
+            )
             return await self.check_response(response, [200, 201])
         except TimeoutError as error:
             if suppress_timeout:
                 _LOGGER.debug("Timeout occurred but was suppressed: %s", error)
                 return None
-            raise PvApiConnectionError("Timeout in communicating with PowerView Hub") from error
+            raise PvApiConnectionError(
+                "Timeout in communicating with PowerView Hub"
+            ) from error
         except aiohttp.ClientError as error:
-            raise PvApiConnectionError("Failed to communicate with PowerView Hub") from error
+            raise PvApiConnectionError(
+                "Failed to communicate with PowerView Hub"
+            ) from error
         finally:
             if response is not None:
                 await response.release()
 
-    async def put(self, url: str, data: dict = None, params=None, suppress_timeout: bool = False, **kwargs):
+    async def put(
+        self,
+        url: str,
+        data: dict | None = None,
+        params=None,
+        suppress_timeout: bool = False,
+        **kwargs,
+    ):
         """Do a put request.
 
         :param url: The URL to fetch.
@@ -160,21 +203,40 @@ class AioRequest:
         response = None
         try:
             timeout = kwargs.pop("timeout", None) or self._timeout
-            _LOGGER.debug("Sending PUT request to: %s params: %s data: %s timeout: %s kwargs: %s", url, params, data, timeout, kwargs)
-            response = await self.websession.put(url, json=data, params=params, timeout=timeout, **kwargs)
+            _LOGGER.debug(
+                "Sending PUT request to: %s params: %s data: %s timeout: %s kwargs: %s",
+                url,
+                params,
+                data,
+                timeout,
+                kwargs,
+            )
+            response = await self.websession.put(
+                url, json=data, params=params, timeout=timeout, **kwargs
+            )
             return await self.check_response(response, [200, 204])
         except TimeoutError as error:
             if suppress_timeout:
                 _LOGGER.debug("Timeout occurred but was suppressed: %s", error)
                 return None
-            raise PvApiConnectionError("Timeout in communicating with PowerView Hub") from error
+            raise PvApiConnectionError(
+                "Timeout in communicating with PowerView Hub"
+            ) from error
         except aiohttp.ClientError as error:
-            raise PvApiConnectionError("Failed to communicate with PowerView Hub") from error
+            raise PvApiConnectionError(
+                "Failed to communicate with PowerView Hub"
+            ) from error
         finally:
             if response is not None:
                 await response.release()
 
-    async def delete(self, url: str, params: dict = None, suppress_timeout: bool = False, **kwargs):
+    async def delete(
+        self,
+        url: str,
+        params: dict | None = None,
+        suppress_timeout: bool = False,
+        **kwargs,
+    ):
         """Delete a resource.
 
         :param url: Endpoint
@@ -186,16 +248,28 @@ class AioRequest:
         response = None
         try:
             timeout = kwargs.pop("timeout", None) or self._timeout
-            _LOGGER.debug("Sending DELETE request to: %s params: %s timeout: %s kwargs: %s",url,params,timeout, kwargs)
-            response = await self.websession.delete(url, params=params, timeout=timeout, **kwargs)
+            _LOGGER.debug(
+                "Sending DELETE request to: %s params: %s timeout: %s kwargs: %s",
+                url,
+                params,
+                timeout,
+                kwargs,
+            )
+            response = await self.websession.delete(
+                url, params=params, timeout=timeout, **kwargs
+            )
             return await self.check_response(response, [200, 204])
         except TimeoutError as error:
             if suppress_timeout:
                 _LOGGER.debug("Timeout occurred but was suppressed: %s", error)
                 return None
-            raise PvApiConnectionError("Timeout in communicating with PowerView Hub") from error
+            raise PvApiConnectionError(
+                "Timeout in communicating with PowerView Hub"
+            ) from error
         except aiohttp.ClientError as error:
-            raise PvApiConnectionError("Failed to communicate with PowerView Hub") from error
+            raise PvApiConnectionError(
+                "Failed to communicate with PowerView Hub"
+            ) from error
         finally:
             if response is not None:
                 await response.release()

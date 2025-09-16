@@ -1,17 +1,17 @@
 """Scene class managing all scenes."""
 
+import logging
+
 from aiopvapi.helpers.aiorequest import AioRequest, PvApiMaintenance
 from aiopvapi.helpers.api_base import ApiResource
-from aiopvapi.helpers.tools import get_base_path, join_path
 from aiopvapi.helpers.constants import (
+    ATTR_ID,
     ATTR_SCENE_ID,
     ATTR_SCHEDULED_EVENT,
-    ATTR_ID,
     FUNCTION_SCHEDULE,
 )
+from aiopvapi.helpers.tools import get_base_path, join_path
 from aiopvapi.resources.scene import Scene
-
-import logging
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -20,6 +20,7 @@ class Automation(ApiResource):
     """Powerview Automation class."""
 
     def __init__(self, raw_data: dict, request: AioRequest) -> None:
+        """Initialize the automation."""
         self.api_endpoint = "scheduledevents"
         if request.api_version >= 3:
             self.api_endpoint = "automations"
@@ -32,9 +33,8 @@ class Automation(ApiResource):
         """Return if api supports this function."""
         if self.api_version >= 3:
             return False
-        else:
-            if function in FUNCTION_SCHEDULE:
-                return True
+        if function in FUNCTION_SCHEDULE:
+            return True
         return False
 
     @property
@@ -44,10 +44,12 @@ class Automation(ApiResource):
 
     @property
     def id(self) -> int:
+        """Return the automation id."""
         return self._raw_data.get(ATTR_ID)
 
     @property
     def name(self) -> str:
+        """Return the automation name."""
         if self._name is not None:
             return self._name
         return self._raw_data.get(ATTR_SCENE_ID)
@@ -63,7 +65,7 @@ class Automation(ApiResource):
         return self._room_id
 
     def convert_to_12_hour(self, hour: int):
-        """Convert 24 hour time to 12 hour"""
+        """Convert 24 hour time to 12 hour."""
         if hour < 0 or hour > 24:
             _LOGGER.error("%s is not a valid 24 hour time", hour)
             return 0
@@ -74,7 +76,7 @@ class Automation(ApiResource):
         return hour - 12
 
     def format_time(self, hour: int, minute: int):
-        """Convert hour and minute to friendly text format"""
+        """Convert hour and minute to friendly text format."""
         meridiem = "AM" if hour < 12 else "PM"
         hour = hour % 12 if hour % 12 != 0 else 12
 
@@ -86,8 +88,9 @@ class Automation(ApiResource):
         return f"{hour}:{str(abs(minute)).zfill(2)} {meridiem}"
 
     def get_execution_time(self):
-        """Return a friendly string, in the same format the hub
-        does incicating when the time the schedule will execute.
+        """Return a friendly string, in the same format as hub.
+
+        Indicates when the time the schedule will execute.
         """
         # {'id': 437, 'type': 14, 'enabled': False, 'days': 127, 'hour': 1, 'min': 0, 'bleId': 2, 'sceneId': 220, 'errorShd_Ids': []}
         # {'enabled': True, 'sceneId': 14067, 'daySunday': False, 'dayMonday': True, 'dayTuesday': True, 'dayWednesday': True, 'dayThursday': True, 'dayFriday': True, 'daySaturday': False, 'eventType': 0, 'hour': 7, 'minute': 0, 'id': 38971}
@@ -135,8 +138,9 @@ class Automation(ApiResource):
         return f"Unknown Event {event_type}"
 
     def get_execution_days(self):
-        """Return a friendly string, in the same format the hub
-        does incicating when the days the schedule will execute.
+        """Return a friendly string, in the same format as hub.
+
+        Indicates when the days the schedule will execute.
         """
 
         if self.api_version >= 3:
@@ -230,4 +234,3 @@ class Automation(ApiResource):
             self._raw_data = raw_data.get(ATTR_SCHEDULED_EVENT, raw_data)
         except PvApiMaintenance:
             _LOGGER.debug("Hub undergoing maintenance. Please try again")
-        return

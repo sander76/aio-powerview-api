@@ -1,3 +1,5 @@
+"""AIO API Utilities."""
+
 from aiopvapi.helpers.aiorequest import AioRequest
 from aiopvapi.resources.room import Room
 from aiopvapi.resources.scene import Scene
@@ -15,7 +17,8 @@ class ResourceNotFoundException(Exception):
 class PowerViewUtil:
     """A PowerView helper class for basic hub operations."""
 
-    def __init__(self, hub_ip, loop_, session):
+    def __init__(self, hub_ip, loop_, session) -> None:
+        """Initialize the utilities."""
         self.request = AioRequest(hub_ip, loop=loop_, websession=session)
         self._scenes_entry_point = Scenes(self.request)
         self._rooms_entry_point = Rooms(self.request)
@@ -54,7 +57,7 @@ class PowerViewUtil:
         for _scene in self.scenes:
             if _scene.id == scene_id:
                 return _scene
-        raise ResourceNotFoundException("Scene not found scene_id: {}".format(scene_id))
+        raise ResourceNotFoundException(f"Scene not found scene_id: {scene_id}")
 
     async def get_room(self, room_id, from_cache=True) -> Room:
         """Get a scene resource instance.
@@ -67,7 +70,7 @@ class PowerViewUtil:
         for _room in self.rooms:
             if _room.id == room_id:
                 return _room
-        raise ResourceNotFoundException("Room not found. Id: {}".format(room_id))
+        raise ResourceNotFoundException(f"Room not found. Id: {room_id}")
 
     async def get_shade(self, shade_id, from_cache=True) -> BaseShade:
         """Get a shade instance based on shade id."""
@@ -76,7 +79,7 @@ class PowerViewUtil:
         for _shade in self.shades:
             if _shade.id == shade_id:
                 return _shade
-        raise ResourceNotFoundException("Shade not found. Id: {}".format(shade_id))
+        raise ResourceNotFoundException(f"Shade not found. Id: {shade_id}")
 
     async def get_rooms(self):
         """Query the hub for a list of room instances."""
@@ -93,7 +96,7 @@ class PowerViewUtil:
         await _shade.close()
 
     async def activate_scene(self, scene_id: int):
-        """Activate a scene
+        """Activate a scene.
 
         :param scene_id: Scene id.
         :return:
@@ -103,7 +106,7 @@ class PowerViewUtil:
         await _scene.activate()
 
     async def delete_scene(self, scene_id: int):
-        """Delete a scene
+        """Delete a scene.
 
         :param scene_id:
         :return:
@@ -122,7 +125,7 @@ class PowerViewUtil:
         )
 
     async def remove_shade_from_scene(self, shade_id, scene_id):
-        """Remove a shade from a scene"""
+        """Remove a shade from a scene."""
         await self._scene_members_entry_point.delete_shade_from_scene(
             shade_id, scene_id
         )

@@ -2,34 +2,34 @@
 
 import logging
 
-from aiopvapi.helpers.api_base import ApiEntryPoint
 from aiopvapi.helpers.aiorequest import AioRequest
+from aiopvapi.helpers.api_base import ApiEntryPoint
 from aiopvapi.helpers.constants import (
-    ATTR_ID,
-    ATTR_NAME,
     ATTR_COLOR_ID,
     ATTR_ICON_ID,
+    ATTR_ID,
+    ATTR_NAME,
     ATTR_ROOM,
     ATTR_ROOM_DATA,
 )
 from aiopvapi.helpers.tools import unicode_to_base64
-from aiopvapi.resources.room import Room
-
 from aiopvapi.resources.model import PowerviewData
+from aiopvapi.resources.room import Room
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class Rooms(ApiEntryPoint):
-    """Rooms entry point"""
+    """Rooms entry point."""
 
     api_endpoint = "rooms"
 
     def __init__(self, request: AioRequest) -> None:
+        """Initialize the rooms."""
         super().__init__(request, self.api_endpoint)
 
     async def create_room(self, name, color_id=0, icon_id=0):
-        """Create a room on the hub"""
+        """Create a room on the hub."""
         name = unicode_to_base64(name)
         data = {
             ATTR_ROOM: {
@@ -47,8 +47,7 @@ class Rooms(ApiEntryPoint):
         if self.api_version < 3:
             raw = raw[ATTR_ROOM_DATA]
 
-        for _raw in raw:
-            yield _raw
+        yield from raw
 
     def _get_to_actual_data(self, raw):
         if self.api_version >= 3:

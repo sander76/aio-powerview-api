@@ -1,14 +1,15 @@
 """Constants for Hunter Douglas Powerview hub."""
 
 # used for is_supported functions
-MOTION_VELOCITY = "velocity"
-MOTION_JOG = "jog"
 MOTION_CALIBRATE = "calibrate"
 MOTION_FAVORITE = "heart"
+MOTION_JOG = "jog"
+MOTION_VELOCITY = "velocity"
+FUNCTION_IDENTIFY = "identify"
+FUNCTION_REBOOT = "reboot"
 FUNCTION_SET_POWER = "set_power"
 FUNCTION_SCHEDULE = "schedule"
-FUNCTION_REBOOT = "reboot"
-FUNCTION_IDENTIFY = "identify"
+FUNCTION_REGISTER = "register"
 
 # common across all API versions
 HUB_NAME = "hubName"
@@ -72,15 +73,15 @@ CLOSED_POSITION = 0
 # less as closed. Still use percentage based for compatability
 CLOSED_POSITION_V2 = 0.75
 
-#types of power sources
+# types of power sources
 BATTERY_KIND_HARDWIRED = 1
 BATTERY_KIND_BATTERY = 2
 BATTERY_KIND_RECHARGABLE = 3
 BATTERY_KIND_FIXED_RECHARGABLE = 11
 BATTERY_KIND_FIXED_HARDWIRED = 12
 
-POWER_SOURCE_BATTERY = [2,3,11]
-POWER_SOURCE_HARDWIRED = [1,12]
+POWER_SOURCE_BATTERY = [2, 3, 11]
+POWER_SOURCE_HARDWIRED = [1, 12]
 
 # v2
 FWVERSION = "fwversion"

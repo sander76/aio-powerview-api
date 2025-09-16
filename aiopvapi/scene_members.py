@@ -2,32 +2,31 @@
 
 import logging
 
-from aiopvapi.helpers.api_base import ApiEntryPoint
 from aiopvapi.helpers.aiorequest import AioRequest
+from aiopvapi.helpers.api_base import ApiEntryPoint
 from aiopvapi.helpers.constants import (
+    ATTR_POSITIONS,
     ATTR_SCENE_ID,
     ATTR_SHADE_ID,
-    ATTR_POSITIONS,
     SCENE_MEMBER_DATA,
 )
-from aiopvapi.resources.scene_member import ATTR_SCENE_MEMBER, SceneMember
-
 from aiopvapi.resources.model import PowerviewData
+from aiopvapi.resources.scene_member import ATTR_SCENE_MEMBER, SceneMember
 
 _LOGGER = logging.getLogger("__name__")
 
 
 class SceneMembers(ApiEntryPoint):
-    """A scene member is a device, like a shade, being a member
-    of a specific scene."""
+    """A scene member is a device, like a shade, being a member of a specific scene."""
 
     api_endpoint = "scenemembers"
 
     def __init__(self, request: AioRequest) -> None:
+        """Initialize SceneMembers."""
         super().__init__(request, self.api_endpoint)
 
     async def create_scene_member(self, shade_position, scene_id, shade_id):
-        """Adds a shade to an existing scene"""
+        """Add a shade to an existing scene."""
 
         data = {
             ATTR_SCENE_MEMBER: {
@@ -45,8 +44,7 @@ class SceneMembers(ApiEntryPoint):
         if self.api_version < 3:
             raw = raw[SCENE_MEMBER_DATA]
 
-        for _raw in raw:
-            yield _raw
+        yield from raw
 
     def _get_to_actual_data(self, raw):
         if self.api_version >= 3:
@@ -75,7 +73,7 @@ class SceneMembers(ApiEntryPoint):
             resources = resources[SCENE_MEMBER_DATA]
 
         _LOGGER.debug("Raw scene_member data: %s", resources)
-        
+
         # return array of scenes attached to a shade
         processed = {
             entry["shadeId"]: SceneMember(entry, self.request) for entry in resources

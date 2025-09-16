@@ -5,15 +5,11 @@ import logging
 from aiopvapi.helpers.aiorequest import AioRequest
 from aiopvapi.helpers.constants import (
     ATTR_ID,
-    ATTR_NAME_UNICODE,
     ATTR_NAME,
+    ATTR_NAME_UNICODE,
     ATTR_PTNAME,
 )
-from aiopvapi.helpers.tools import (
-    join_path,
-    get_base_path,
-    base64_to_unicode,
-)
+from aiopvapi.helpers.tools import base64_to_unicode, get_base_path, join_path
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -24,6 +20,7 @@ class ApiBase:
     api_endpoint = ""
 
     def __init__(self, request: AioRequest, api_endpoint: str = "") -> None:
+        """Initialize the base api."""
         self.request = request
         self._api_endpoint = api_endpoint
         self._raw_data = None
@@ -72,6 +69,7 @@ class ApiResource(ApiBase):
     """Represent a single PowerView resource such as scene, shade or room."""
 
     def __init__(self, request, api_endpoint, raw_data=None) -> None:
+        """Initialize the API Resource."""
         super().__init__(request, api_endpoint)
         self._id = "unknown" if raw_data is None else raw_data.get(ATTR_ID)
         self._raw_data = raw_data
@@ -122,6 +120,7 @@ class ApiEntryPoint(ApiBase):
     """API entrypoint."""
 
     def __init__(self, request, api_endpoint, use_initial=True) -> None:
+        """Initialize the API Entry Point."""
         super().__init__(request, api_endpoint)
         if use_initial:
             api_endpoint = join_path(self.api_path, api_endpoint)
@@ -137,7 +136,7 @@ class ApiEntryPoint(ApiBase):
                 self._sanitize_resource(resource)
         except (KeyError, TypeError):
             _LOGGER.warning("No shade data available")
-            return None
+            return
 
     @classmethod
     def _sanitize_resource(cls, resource):
@@ -172,10 +171,7 @@ class ApiEntryPoint(ApiBase):
         :raises PvApiError when a hub problem occurs.
         """
         raw_resources = await self.get_resources(**kwargs)
-        _instances = [
-            self._resource_factory(_raw) for _raw in self._loop_raw(raw_resources)
-        ]
-        return _instances
+        return [self._resource_factory(_raw) for _raw in self._loop_raw(raw_resources)]
 
     async def get_instance(self, resource_id) -> ApiResource:
         """Get a single instance of a pv resource.

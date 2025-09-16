@@ -35,12 +35,12 @@ def get_base_path(ip_address, url):
     # clean up url (leading or trailing or multiple '/')
     urls = filter(lambda p: p != "", url.split("/"))
     # Put everything back together
-    return "http://{}".format(join_path(ip_address, *urls))
+    return f"http://{join_path(ip_address, *urls)}"
 
 
 def join_path(base, *parts: str):
     """Create urls from base path and additional parts."""
-    _parts = "/".join((_part.strip("/") for _part in parts))
+    _parts = "/".join(_part.strip("/") for _part in parts)
     # _parts = '/'.join(parts)
     if base.endswith("/"):
         url = base + _parts

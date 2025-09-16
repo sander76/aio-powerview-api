@@ -1,17 +1,17 @@
 """Scene class managing all scenes."""
 
+import logging
+
 from aiopvapi.helpers.aiorequest import AioRequest
 from aiopvapi.helpers.api_base import ApiResource
-from aiopvapi.helpers.tools import join_path
 from aiopvapi.helpers.constants import (
-    ATTR_SCENE,
     ATTR_ROOM_ID,
     ATTR_ROOM_IDS,
+    ATTR_SCENE,
     ATTR_SCENE_ID,
     ATTR_SHADE_IDS,
 )
-
-import logging
+from aiopvapi.helpers.tools import join_path
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -22,6 +22,7 @@ class Scene(ApiResource):
     api_endpoint = "scenes"
 
     def __init__(self, raw_data: dict, request: AioRequest) -> None:
+        """Initialize the scene."""
         if ATTR_SCENE in raw_data:
             raw_data = raw_data.get(ATTR_SCENE)
         super().__init__(request, self.api_endpoint, raw_data)

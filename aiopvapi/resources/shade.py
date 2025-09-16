@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 import logging
 from typing import Any
+import asyncio
 
 from aiopvapi.helpers.aiorequest import AioRequest, PvApiMaintenance
 from aiopvapi.helpers.api_base import ApiResource
@@ -145,9 +146,9 @@ class BaseShade(ApiResource):
             return function in (
                 MOTION_JOG,
                 MOTION_VELOCITY,
-                MOTION_STOP
+                MOTION_STOP,
             )
-        elif self.api_version == 2:
+        if self.api_version == 2:
             return function in (
                 MOTION_JOG,
                 MOTION_CALIBRATE,
@@ -155,20 +156,18 @@ class BaseShade(ApiResource):
                 MOTION_STOP,
                 FUNCTION_SET_POWER,
             )
-        else:
-            return function in (
-                MOTION_JOG,
-                MOTION_CALIBRATE,
-                MOTION_FAVORITE,
-                FUNCTION_SET_POWER,
-            )
+        return function in (
+            MOTION_JOG,
+            MOTION_CALIBRATE,
+            MOTION_FAVORITE,
+            FUNCTION_SET_POWER,
+        )
 
     @property
     def current_position(self) -> ShadePosition:
         """Return the current position of the shade as a percentage."""
         position = self.raw_to_structured(self._raw_data)
-        position = self.get_additional_positions(position)
-        return position
+        return self.get_additional_positions(position)
 
     @property
     def room_id(self) -> int:
@@ -391,10 +390,7 @@ class BaseShade(ApiResource):
             # IDs are required in request params for gen 3.
             params = {"ids": self.id}
             resource_path = join_path(self.base_path, "positions")
-        result = await self.request.put(
-            resource_path, data=position_data, params=params
-        )
-        return result
+        return await self.request.put(resource_path, data=position_data, params=params)
 
     async def move(self, position_data: ShadePosition) -> ShadePosition:
         """Move the shade to a set position."""
@@ -511,19 +507,46 @@ class BaseShade(ApiResource):
         :param kwargs: Keyword arguments to be passed to the get request.
                    For example, timeout can be passed as kwargs.
         """
+        if not self.is_battery_powered:
+            _LOGGER.debug("Shade %s is not battery powered", self.name)
+            return
+
         try:
             _LOGGER.debug("Refreshing battery of: %s", self.name)
-            raw_data = await self.request.get(
-                self._resource_path,
-                {"updateBatteryLevel": "true"},
-                suppress_timeout=suppress_timeout,
-                **kwargs,
-            )
-            # Gen <= 2 API has raw data under shade key.  Gen >= 3 API this is flattened.
-            if raw_data is None:
-                _LOGGER.debug("No update received for: %s", self.name)
-                return
-            self._raw_data = raw_data.get(ATTR_SHADE, raw_data)
+            retries = 3
+            for attempt in range(retries):
+                raw_data = await self.request.get(
+                    self._resource_path,
+                    {"updateBatteryLevel": "true"},
+                    suppress_timeout=suppress_timeout,
+                    **kwargs,
+                )
+                if raw_data is None:
+                    _LOGGER.debug("No update received for: %s", self.name)
+                    return
+                # Gen <= 2 API has raw data under shade key.  Gen >= 3 API this is flattened.
+                self._raw_data = raw_data.get(ATTR_SHADE, raw_data)
+                _LOGGER.debug(
+                    "Shade battery %s %d: %s", self.name, attempt, self._raw_data
+                )
+                if not self._raw_data.get("timedOut", False):
+                    _LOGGER.debug("Shade battery %s %d: Refreshed", self.name, attempt)
+                    break  # timeout is false, so we're done
+                if attempt < retries - 1:
+                    _LOGGER.debug(
+                        "Shade %s timed out, retrying in 2 minutes (attempt %d/%d)",
+                        self.name,
+                        attempt + 1,
+                        retries,
+                    )
+                    await asyncio.sleep(120)
+                else:
+                    _LOGGER.warning(
+                        "Shade battery refresh %s timed out after %d attempts",
+                        self.name,
+                        retries,
+                    )
+                    return
         except PvApiMaintenance:
             _LOGGER.debug("Hub undergoing maintenance. Please try again")
         return
@@ -554,7 +577,7 @@ class BaseShade(ApiResource):
         powertype_map = {v: k for k, v in version_map.items()}
 
         raw_num = self.raw_data.get(attr)
-        battery_type = powertype_map.get(raw_num, None)
+        battery_type = powertype_map.get(raw_num)
         _LOGGER.debug("%s: Mapping %s %s to %s", self.name, attr, raw_num, battery_type)
         return battery_type
 
@@ -577,6 +600,12 @@ class BaseShade(ApiResource):
 
     def get_battery_strength(self) -> int:
         """Get battery strength from raw_data and return as a percentage."""
+        if self.api_version < 3:
+            # SHADE_BATTERY_STRENGTH is in tenths of a volt (e.g., 146 = 14.6V), max is 18.0V (180)
+            return round((self.raw_data[SHADE_BATTERY_STRENGTH] / 180) * 100)
+
+        # gen 3 dont return the same information for batteries and
+        # while gen 2 do support the below, it is less accurate than the above
         power_levels = {
             4: 100,  # 4 is hardwired
             3: 100,  # 3 = 100% to 51% power remaining
@@ -611,8 +640,7 @@ class BaseShade(ApiResource):
         """
         if refresh:
             await self.refresh()
-        position = self._raw_data.get(ATTR_POSITIONS)
-        return position
+        return self._raw_data.get(ATTR_POSITIONS)
 
     async def get_current_position(self, refresh=True) -> ShadePosition:
         """Return the current shade position.
@@ -815,7 +843,7 @@ class ShadeBottomUpTiltAnywhere(BaseShadeTilt):
         self._close_position_tilt = ShadePosition(tilt=MIN_POSITION)
         if self.api_version < 3:
             self._open_position = ShadePosition(primary=MAX_POSITION, tilt=MID_POSITION)
-            self._close_position = ShadePosition(primary=MIN_POSITION, tilt=MID_POSITION)
+            self._close_position = ShadePosition(primary=MIN_POSITION, tilt=MIN_POSITION)
             self._open_position_tilt = ShadePosition(tilt=MID_POSITION)
 
 
@@ -884,7 +912,10 @@ class ShadeTiltOnly(BaseShadeTilt):
     A shade with tilt anywhere capabilities only.
     """
 
-    shade_types = (ShadeType(66, "Palm Beach Shutters"),)
+    shade_types = (
+        ShadeType(40, "Everwood Alternative Wood Blinds"),
+        ShadeType(66, "Palm Beach Shutters"),
+    )
 
     capability = ShadeCapability(
         5,
@@ -907,6 +938,11 @@ class ShadeTiltOnly(BaseShadeTilt):
 
     def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
         """Return additional positions not reported by the hub."""
+        # bug where tilt only return posKind1=1
+        # https://github.com/home-assistant/core/issues/115257
+        if positions.primary is not None:
+            positions.tilt = positions.primary
+            positions.primary = None
         return positions
 
 
@@ -963,8 +999,12 @@ class ShadeTopDownBottomUp(BaseShade):
     ) -> None:
         """Initialize shade with top down bottom up."""
         super().__init__(raw_data, shade_type, request)
-        self._open_position = ShadePosition(primary=MAX_POSITION, secondary=MIN_POSITION)
-        self._close_position = ShadePosition(primary=MIN_POSITION, secondary=MIN_POSITION)
+        self._open_position = ShadePosition(
+            primary=MAX_POSITION, secondary=MIN_POSITION
+        )
+        self._close_position = ShadePosition(
+            primary=MIN_POSITION, secondary=MIN_POSITION
+        )
 
     def get_additional_positions(self, positions: ShadePosition) -> ShadePosition:
         """Return additional positions not reported by the hub."""
@@ -1116,7 +1156,7 @@ class ShadeDualOverlappedIlluminated(ShadeDualOverlapped):
     """
 
     shade_types = (
-        ShadeType(95, "Aura Illuminated, Roller"), #Capabilites 11 to be implemented
+        ShadeType(95, "Aura Illuminated, Roller"),  # TODO: Capabilites 11 (light)
     )
 
     capability = ShadeCapability(
@@ -1125,7 +1165,7 @@ class ShadeDualOverlappedIlluminated(ShadeDualOverlapped):
             primary=True,
             secondary=True,
             secondary_overlapped=True,
-            light=True
+            light=True,
         ),
         "Illuminated Shades",
     )

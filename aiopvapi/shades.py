@@ -12,23 +12,22 @@ from aiopvapi.helpers.constants import (
 )
 from aiopvapi.helpers.tools import base64_to_unicode
 from aiopvapi.resources import shade
-
 from aiopvapi.resources.model import PowerviewData
-
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class Shades(ApiEntryPoint):
-    """Shades entry point"""
+    """Shades entry point."""
 
     api_endpoint = "shades"
 
     def __init__(self, request: AioRequest) -> None:
+        """Initialize the shades."""
         super().__init__(request, self.api_endpoint)
 
     def _sanitize_resources(self, resources: dict) -> dict | None:
-        """Cleans up incoming shade data
+        """Clean up incoming shade data.
 
         :param resources: The dict with shade data to be sanitized.
         :returns: Cleaned up shade dict.
@@ -41,10 +40,11 @@ class Shades(ApiEntryPoint):
                 _name = _shade.get(ATTR_NAME)
                 if _name:
                     _shade[ATTR_NAME_UNICODE] = base64_to_unicode(_name)
-            return resources
         except (KeyError, TypeError):
             _LOGGER.debug("No shade data available")
             return None
+        else:
+            return resources
 
     def _resource_factory(self, raw):
         return shade.factory(raw, self.request)
@@ -53,8 +53,7 @@ class Shades(ApiEntryPoint):
         if self.api_version < 3:
             raw = raw[ATTR_SHADE_DATA]
 
-        for _raw in raw:
-            yield _raw
+        yield from raw
 
     def _get_to_actual_data(self, raw):
         if self.api_version >= 3:
@@ -76,7 +75,7 @@ class Shades(ApiEntryPoint):
         processed = {
             entry[ATTR_ID]: shade.factory(entry, self.request) for entry in resources
         }
-        
+
         return PowerviewData(raw=resources, processed=processed)
 
         # async def get_shade(self, shade_id: int):
