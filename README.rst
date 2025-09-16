@@ -18,6 +18,11 @@ Changelog
 - Bug fix for gen1 shades with bad data
 - Fix bad close position on tilt shades
 - Add hub registration capability
+- Revert gen 1/2 shades to previous power type mapping
+- Add retry logic to battery status requests
+
+**v3.1.2**
+- Add type 72 (Silhoutte)
 
 **v3.1.1**
 - Fix missed timeout blocks and handle in websession

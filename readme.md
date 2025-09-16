@@ -59,6 +59,7 @@ Shades not listed will get their features from their **capabilities**, unfortuna
 | Provenance Woven Wood                 |  19  |      0     |
 | Roman                                 |   4  |      0     |
 | Silhouette                            |  23  |      1     |
+| Silhouette                            |  72  |      1     |
 | Silhouette Duolite                    |  38  |      9     |
 | Sonnette                              |  53  |      0     |
 | Skyline Panel, Left Stack             |  26  |      3     |
@@ -92,6 +93,11 @@ Shades not listed will get their features from their **capabilities**, unfortuna
 - Bug fix for gen1 shades with bad data
 - Fix bad close position on tilt shades
 - Add hub registration capability
+- Revert gen 1/2 shades to previous power type mapping
+- Add retry logic to battery status requests
+
+### v3.1.2
+- Add type 72 (Silhoutte)
 
 ### v3.1.1
 - Fix missed timeout blocks and handle in websession
