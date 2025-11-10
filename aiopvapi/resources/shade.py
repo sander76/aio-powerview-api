@@ -237,7 +237,9 @@ class BaseShade(ApiResource):
         max_position_pct = max_position_pct_mapping.get(position_type, 100)
 
         # ensure the position remains in range 0-100
-        position = self.position_limit(position, position_type)
+        # this may not be needed, causing issues with MID_POSITION and working fine win 0/100 for all other positions
+        # position = self.position_limit(position, position_type)
+        position = self.position_limit(position)
 
         # gen 3 takes 0.0 -> 1.0 (fractional perentage) - float
         if self.api_version >= 3:
