@@ -602,7 +602,8 @@ class BaseShade(ApiResource):
         """Get battery strength from raw_data and return as a percentage."""
         if self.api_version < 3:
             # SHADE_BATTERY_STRENGTH is in tenths of a volt (e.g., 146 = 14.6V), max is 18.0V (180)
-            return round((self.raw_data[SHADE_BATTERY_STRENGTH] / 180) * 100)
+            # use min to ensure we don't exceed 100% when more than 18.0V is supplied
+            return min(100, round((self.raw_data[SHADE_BATTERY_STRENGTH] / 180) * 100))
 
         # gen 3 dont return the same information for batteries and
         # while gen 2 do support the below, it is less accurate than the above
