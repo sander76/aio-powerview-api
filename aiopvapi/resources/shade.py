@@ -1,9 +1,9 @@
 """Shade class managing all shade types."""
 
+import asyncio
 from dataclasses import dataclass
 import logging
 from typing import Any
-import asyncio
 
 from aiopvapi.helpers.aiorequest import AioRequest, PvApiMaintenance
 from aiopvapi.helpers.api_base import ApiResource
@@ -55,7 +55,7 @@ from aiopvapi.helpers.constants import (
     SHADE_BATTERY_STATUS,
     SHADE_BATTERY_STRENGTH,
 )
-from aiopvapi.helpers.tools import join_path
+from aiopvapi.helpers.tools import deep_update_dict, join_path
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -377,6 +377,10 @@ class BaseShade(ApiResource):
             base[ATTR_SHADE][ATTR_ROOM_ID] = room_id
         return base
 
+    def _update_position_from_dict(self, updates: dict) -> None:
+        updates = updates.get(ATTR_SHADE, updates)  # Gen 2 position dict is embedded
+        self._raw_data = deep_update_dict(self._raw_data, updates)
+
     async def move_raw(self, position_data: dict):
         """Move the shade to a set position using raw data."""
         _LOGGER.debug("Shade %s move to: %s", self.name, position_data)
@@ -390,7 +394,10 @@ class BaseShade(ApiResource):
             # IDs are required in request params for gen 3.
             params = {"ids": self.id}
             resource_path = join_path(self.base_path, "positions")
-        return await self.request.put(resource_path, data=position_data, params=params)
+        # store the requested position in the shade data
+        response = await self.request.put(resource_path, data=position_data, params=params)
+        self._update_position_from_dict(position_data)
+        return response
 
     async def move(self, position_data: ShadePosition) -> ShadePosition:
         """Move the shade to a set position."""
@@ -512,6 +519,8 @@ class BaseShade(ApiResource):
             return
 
         try:
+            # the refresh can sometimes first wake the shade, resulting in a timeout
+            # retry to try and get a true value
             _LOGGER.debug("Refreshing battery of: %s", self.name)
             retries = 3
             for attempt in range(retries):

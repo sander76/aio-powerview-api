@@ -5,6 +5,9 @@ import logging
 
 from aiopvapi.helpers.constants import ATTR_ID
 
+from collections.abc import Iterable
+from typing import Any
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -56,3 +59,17 @@ def get_raw_id(id_):
     and allows for simple activation of that scene.
     """
     return {ATTR_ID: id_}
+
+
+def map_data_by_id(data: Iterable[dict[str | int, Any]]):
+    """Return a dict with the key being the id for a list of entries."""
+    return {entry[ATTR_ID]: entry for entry in data}
+
+
+def deep_update_dict(original: dict, updates: dict) -> dict:
+    for key, value in updates.items():
+        if isinstance(value, dict) and isinstance(original.get(key), dict):
+            deep_update_dict(original[key], value)
+        else:
+            original[key] = value
+    return original
