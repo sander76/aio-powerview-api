@@ -1,9 +1,9 @@
 """Shade class managing all shade types."""
 
+import asyncio
 from dataclasses import dataclass
 import logging
 from typing import Any
-import asyncio
 
 from aiopvapi.helpers.aiorequest import AioRequest, PvApiMaintenance
 from aiopvapi.helpers.api_base import ApiResource
@@ -55,7 +55,7 @@ from aiopvapi.helpers.constants import (
     SHADE_BATTERY_STATUS,
     SHADE_BATTERY_STRENGTH,
 )
-from aiopvapi.helpers.tools import join_path
+from aiopvapi.helpers.tools import deep_update_dict, join_path
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -237,7 +237,9 @@ class BaseShade(ApiResource):
         max_position_pct = max_position_pct_mapping.get(position_type, 100)
 
         # ensure the position remains in range 0-100
-        position = self.position_limit(position, position_type)
+        # this may not be needed, causing issues with MID_POSITION and working fine win 0/100 for all other positions
+        # position = self.position_limit(position, position_type)
+        position = self.position_limit(position)
 
         # gen 3 takes 0.0 -> 1.0 (fractional perentage) - float
         if self.api_version >= 3:
@@ -377,6 +379,10 @@ class BaseShade(ApiResource):
             base[ATTR_SHADE][ATTR_ROOM_ID] = room_id
         return base
 
+    def _update_position_from_dict(self, updates: dict) -> None:
+        updates = updates.get(ATTR_SHADE, updates)  # Gen 2 position dict is embedded
+        self._raw_data = deep_update_dict(self._raw_data, updates)
+
     async def move_raw(self, position_data: dict):
         """Move the shade to a set position using raw data."""
         _LOGGER.debug("Shade %s move to: %s", self.name, position_data)
@@ -390,7 +396,10 @@ class BaseShade(ApiResource):
             # IDs are required in request params for gen 3.
             params = {"ids": self.id}
             resource_path = join_path(self.base_path, "positions")
-        return await self.request.put(resource_path, data=position_data, params=params)
+        # store the requested position in the shade data
+        response = await self.request.put(resource_path, data=position_data, params=params)
+        self._update_position_from_dict(position_data)
+        return response
 
     async def move(self, position_data: ShadePosition) -> ShadePosition:
         """Move the shade to a set position."""
@@ -512,6 +521,8 @@ class BaseShade(ApiResource):
             return
 
         try:
+            # the refresh can sometimes first wake the shade, resulting in a timeout
+            # retry to try and get a true value
             _LOGGER.debug("Refreshing battery of: %s", self.name)
             retries = 3
             for attempt in range(retries):
@@ -602,7 +613,8 @@ class BaseShade(ApiResource):
         """Get battery strength from raw_data and return as a percentage."""
         if self.api_version < 3:
             # SHADE_BATTERY_STRENGTH is in tenths of a volt (e.g., 146 = 14.6V), max is 18.0V (180)
-            return round((self.raw_data[SHADE_BATTERY_STRENGTH] / 180) * 100)
+            # use min to ensure we don't exceed 100% when more than 18.0V is supplied
+            return min(100, round((self.raw_data[SHADE_BATTERY_STRENGTH] / 180) * 100))
 
         # gen 3 dont return the same information for batteries and
         # while gen 2 do support the below, it is less accurate than the above

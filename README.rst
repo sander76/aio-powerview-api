@@ -14,6 +14,11 @@ Links
 Changelog
 ---------
 
+**v3.3.0**
+- Limit battery max to 100%
+- Move co-ordinator of shades from HA to API Core
+- Remove shade limiter causing issues with tilt shades
+
 **v3.2.1**
 - Add type 57 (Carole Roman Shades)
 
