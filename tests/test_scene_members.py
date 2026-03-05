@@ -39,4 +39,5 @@ class TestSceneMembers(unittest.TestCase):
         _del_mock.mock.assert_called_once_with(
             'http://{}/api/scenemembers'.format(self.fake_ip),
             params={"sceneId": 5678,
-                    'shadeId': 1234})
+                    'shadeId': 1234},
+            timeout=15)
