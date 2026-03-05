@@ -355,7 +355,7 @@ async def main(loop, api_version=2):
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     loop.run_until_complete(main(loop))
 
 
@@ -365,7 +365,7 @@ class TestFakeServer(unittest.TestCase):
         self.api_version = 2
 
     def setUp(self):
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.new_event_loop()
         self.server = FakePowerViewHub(loop=self.loop, api_version=self.api_version)
         self.request = None
 
