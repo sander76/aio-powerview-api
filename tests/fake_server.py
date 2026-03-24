@@ -53,6 +53,13 @@ SCENE_VALUE_V3 = """
 {"roomId":46688,"name":"VGVzdA==","colorId":7,"iconId":0,"id":43436,"order":0}
 """
 
+SCENE_MEMBERS_VALUE = """
+{"sceneMemberIds":[101,102,103],"sceneMemberData":[
+{"id":101,"sceneId":37217,"shadeId":49988,"positions":{"posKind1":1,"position1":0}},
+{"id":102,"sceneId":64533,"shadeId":49988,"positions":{"posKind1":1,"position1":65535}},
+{"id":103,"sceneId":37217,"shadeId":56112,"positions":{"posKind1":1,"position1":32767}}]}
+"""
+
 USER_DATA_VALUE = """
 {
     "userData" : {
@@ -206,6 +213,7 @@ class FakePowerViewHub:
                     web.get("/api/shades", self.get_shades),
                     web.get("/api/shades/11155", self.get_shade),
                     web.put("/api/shades/{shade_id}", self.add_shade_to_room),
+                    web.get("/api/sceneMembers", self.get_scene_members),
                     web.delete("/api/sceneMembers", self.remove_shade_from_scene),
                     web.get("/api/fwversion", self.get_fwversion),
                     web.get("/api/userdata", self.get_user_data),
@@ -309,6 +317,11 @@ class FakePowerViewHub:
         _js = await request.json()
         return web.json_response(_js)
 
+    async def get_scene_members(self, request):
+        return web.Response(
+            body=SCENE_MEMBERS_VALUE, headers={"content-type": "application/json"}
+        )
+
     async def remove_shade_from_scene(self, request):
         shade_id = request.query.get["shadeId"]
         scene_id = request.query.get["sceneId"]
@@ -365,7 +378,8 @@ class TestFakeServer(unittest.TestCase):
         self.api_version = 2
 
     def setUp(self):
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
         self.server = FakePowerViewHub(loop=self.loop, api_version=self.api_version)
         self.request = None
 

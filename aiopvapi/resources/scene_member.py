@@ -8,7 +8,7 @@ from aiopvapi.helpers.constants import ATTR_SCENE_ID, ATTR_SCENE_MEMBER, ATTR_SH
 class SceneMember(ApiResource):
     """Shades belonging to a scene."""
 
-    api_endpoint = "scenemembers"
+    api_endpoint = "sceneMembers"
 
     def __init__(self, raw_data: dict, request: AioRequest) -> None:
         """Initialize SceneMembers."""
