@@ -28,6 +28,13 @@ class Scene(ApiResource):
         super().__init__(request, self.api_endpoint, raw_data)
 
     @property
+    def shade_ids(self) -> list[int]:
+        """Return shade ids for gen3 hubs, empty list otherwise."""
+        if self.api_version >= 3:
+            return self._raw_data.get(ATTR_SHADE_IDS, [])
+        return []
+
+    @property
     def room_id(self):
         """Return the room id."""
         if self.api_version >= 3:
