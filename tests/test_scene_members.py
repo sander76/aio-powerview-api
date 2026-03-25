@@ -24,19 +24,20 @@ class TestSceneMembers(unittest.TestCase):
     @mock.patch('aiopvapi.helpers.aiorequest.AioRequest.check_response', new=AsyncMock())
     def test_remove_shade_from_scene(self):
         """Tests create new scene."""
-        loop = asyncio.get_event_loop()
-        request = AioRequest(self.fake_ip, loop)
-
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         _del_mock = AsyncMock(return_value=None)
 
-        request.websession.delete = _del_mock
-
         async def go():
+            request = AioRequest(self.fake_ip, loop)
+            request.websession.delete = _del_mock
             scene_members = SceneMembers(request)
             await scene_members.delete_shade_from_scene(1234, 5678)
 
-        resp = loop.run_until_complete(go())
+        loop.run_until_complete(go())
+        loop.close()
         _del_mock.mock.assert_called_once_with(
             'http://{}/api/scenemembers'.format(self.fake_ip),
             params={"sceneId": 5678,
-                    'shadeId': 1234})
+                    'shadeId': 1234},
+            timeout=15)
