@@ -62,7 +62,7 @@ class TestRoom(TestApiResource):
             await self.start_fake_server()
             # room = self.get_resource()
 
-            loop = asyncio.get_event_loop()
+            loop = asyncio.new_event_loop()
             request = AioRequest(FAKE_BASE_URL, loop, api_version=2)
 
             response = Mock(spec=ClientResponse)

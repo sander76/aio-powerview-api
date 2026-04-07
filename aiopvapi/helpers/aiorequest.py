@@ -45,11 +45,11 @@ class AioRequest:
         if loop:
             self.loop = loop
         else:
-            self.loop = asyncio.get_event_loop()
+            self.loop = asyncio.new_event_loop()
         if websession:
             self.websession = websession
         else:
-            self.websession = aiohttp.ClientSession()
+            self.websession = aiohttp.ClientSession(loop=self.loop)
         self.api_version: int | None = api_version
         self._last_request_status: int = 0
         _LOGGER.debug("Powerview api version: %s", self.api_version)
