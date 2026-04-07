@@ -42,6 +42,26 @@ class TestScene(TestApiResource):
     def test_room_id_property(self):
         self.assertEqual(26756, self.resource.room_id)
 
+    def test_shade_ids_v2_returns_empty(self):
+        self.assertEqual([], self.resource.shade_ids)
+
+    def test_shade_ids_v3_returns_ids(self):
+        _request = Mock(spec=AioRequest)
+        _request.hub_ip = FAKE_BASE_URL
+        _request.api_version = 3
+        _request.api_path = "api"
+        raw_data = {**SCENE_RAW_DATA, "shadeIds": [1, 2, 3]}
+        scene = Scene(raw_data, _request)
+        self.assertEqual([1, 2, 3], scene.shade_ids)
+
+    def test_shade_ids_v3_missing_returns_empty(self):
+        _request = Mock(spec=AioRequest)
+        _request.hub_ip = FAKE_BASE_URL
+        _request.api_version = 3
+        _request.api_path = "api"
+        scene = Scene(SCENE_RAW_DATA, _request)
+        self.assertEqual([], scene.shade_ids)
+
     def test_full_path(self):
         self.assertEqual(
             self.resource.base_path,
