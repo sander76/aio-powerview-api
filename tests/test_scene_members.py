@@ -19,11 +19,12 @@ def AsyncMock(*args, **kwargs):
 
 
 class TestSceneMembers(unittest.TestCase):
-
     def setUp(self):
-        self.fake_ip = '123.123.123.123'
+        self.fake_ip = "123.123.123.123"
 
-    @mock.patch('aiopvapi.helpers.aiorequest.AioRequest.check_response', new=AsyncMock())
+    @mock.patch(
+        "aiopvapi.helpers.aiorequest.AioRequest.check_response", new=AsyncMock()
+    )
     def test_remove_shade_from_scene(self):
         """Tests create new scene."""
         loop = asyncio.new_event_loop()
@@ -41,15 +42,15 @@ class TestSceneMembers(unittest.TestCase):
         loop.run_until_complete(go())
         loop.close()
         _del_mock.mock.assert_called_once_with(
-            'http://{}/api/sceneMembers'.format(self.fake_ip),
-            params={"sceneId": 5678,
-                    'shadeId': 1234})
+            f"http://{self.fake_ip}/api/sceneMembers",
+            params={"sceneId": 5678, "shadeId": 1234},
+            timeout=15,
+        )
 
 
 class TestGetSceneMembers(TestFakeServer):
-
     def test_get_scene_members_keyed_by_id(self):
-        """processed is keyed by scene member id, not shadeId."""
+        """Processed is keyed by scene member id, not shadeId."""
 
         async def go():
             await self.start_fake_server()
@@ -73,7 +74,9 @@ class TestGetSceneMembers(TestFakeServer):
         for member in data.processed.values():
             self.assertIsInstance(member, SceneMember)
 
-    def test_get_scene_members_preserves_all_memberships_for_shade_in_multiple_scenes(self):
+    def test_get_scene_members_preserves_all_memberships_for_shade_in_multiple_scenes(
+        self,
+    ):
         """A shade appearing in multiple scenes produces distinct entries, not overwrites."""
 
         async def go():
