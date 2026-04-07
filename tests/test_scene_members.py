@@ -26,6 +26,7 @@ class TestSceneMembers(unittest.TestCase):
         """Tests create new scene."""
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
+
         _del_mock = AsyncMock(return_value=None)
 
         async def go():
