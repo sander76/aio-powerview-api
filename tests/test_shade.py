@@ -13,6 +13,7 @@ from aiopvapi.helpers.constants import (
     MID_POSITION,
     MID_POSITION_V2,
     MAX_POSITION_V2,
+    MOTION_CALIBRATE,
 )
 
 from tests.fake_server import FAKE_BASE_URL
@@ -111,6 +112,9 @@ class TestShade_V3(TestApiResource):
         # No name_unicode, although name is base64 encoded
         # thus base64 decoded is returned
         self.assertEqual("Right", self.resource.name)
+
+    def test_calibrate_is_supported(self):
+        self.assertTrue(self.resource.is_supported(MOTION_CALIBRATE))
 
     def test_add_shade_to_room(self):
         async def go():

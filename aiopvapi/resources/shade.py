@@ -144,6 +144,7 @@ class BaseShade(ApiResource):
         """Return if api supports this function."""
         if self.api_version >= 3:
             return function in (
+                MOTION_CALIBRATE,
                 MOTION_JOG,
                 MOTION_VELOCITY,
                 MOTION_STOP,
