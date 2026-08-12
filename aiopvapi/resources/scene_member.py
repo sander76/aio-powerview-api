@@ -12,7 +12,7 @@ _LOGGER = logging.getLogger(__name__)
 class SceneMember(ApiResource):
     """Shades belonging to a scene."""
 
-    api_endpoint = "sceneMembers"
+    api_endpoint = "scenemembers"
 
     def __init__(self, raw_data: dict, request: AioRequest) -> None:
         """Initialize SceneMembers."""

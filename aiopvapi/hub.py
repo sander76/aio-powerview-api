@@ -175,7 +175,7 @@ class Hub(ApiBase):
         url = get_base_path(self.request.hub_ip, join_path("home", "integration", name))
         await self.request.post(url)
 
-    async def remeove_integration(self, name: str) -> None:
+    async def remove_integration(self, name: str) -> None:
         """Remove an integration from the Powerview Gateway."""
         if not self.is_supported(FUNCTION_REGISTER):
             _LOGGER.error("Method not supported")

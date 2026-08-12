@@ -42,7 +42,7 @@ class TestSceneMembers(unittest.TestCase):
         loop.run_until_complete(go())
         loop.close()
         _del_mock.mock.assert_called_once_with(
-            f"http://{self.fake_ip}/api/sceneMembers",
+            f"http://{self.fake_ip}/api/scenemembers",
             params={"sceneId": 5678, "shadeId": 1234},
             timeout=15,
         )

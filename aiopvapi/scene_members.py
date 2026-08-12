@@ -65,6 +65,7 @@ class SceneMembers(ApiEntryPoint):
 
         :raises PvApiError when an error occurs.
         """
+
         resources = await self.get_resources(**kwargs)
         if self.api_version < 3:
             resources = resources[SCENE_MEMBER_DATA]

@@ -65,11 +65,7 @@ class Scenes(ApiEntryPoint):
         _LOGGER.debug("Raw scenes data: %s", resources)
 
         processed = {
-            entry[ATTR_ID]: Scene(
-                entry,
-                self.request,
-                scenemembers
-            )
+            entry[ATTR_ID]: Scene(entry, self.request, scenemembers)
             for entry in resources
         }
 

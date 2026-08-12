@@ -52,7 +52,7 @@ class Automation(ApiResource):
         """Return the automation name."""
         if self._name is not None:
             return self._name
-        return self._raw_data.get(ATTR_SCENE_ID)
+        return self._raw_data.get(ATTR_ID)
 
     @property
     def scene_id(self) -> str:

@@ -213,8 +213,8 @@ class FakePowerViewHub:
                     web.get("/api/shades", self.get_shades),
                     web.get("/api/shades/11155", self.get_shade),
                     web.put("/api/shades/{shade_id}", self.add_shade_to_room),
-                    web.get("/api/sceneMembers", self.get_scene_members),
-                    web.delete("/api/sceneMembers", self.remove_shade_from_scene),
+                    web.get("/api/scenemembers", self.get_scene_members),
+                    web.delete("/api/scenemembers", self.remove_shade_from_scene),
                     web.get("/api/fwversion", self.get_fwversion),
                     web.get("/api/userdata", self.get_user_data),
                 ]

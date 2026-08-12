@@ -90,6 +90,17 @@ Shades not listed will get their features from their **capabilities**, unfortuna
 
 ## Changelog
 
+### v3.4.1
+- Correct erroneous naming in function naming
+- Handle empty responses from gen 1 hubs
+- Handle scenemembers api endpoint case sensitive
+- Update automation primary key to eventid
+
+### v3.4.0
+- BREAKING CHANGE: Update SceneMembers api to use Scene ID as index over Shade ID
+- Patch bad logging of errornous warning message
+- Update scene tests to use fixtures
+
 ### v3.3.0
 - Limit battery max to 100%
 - Move co-ordinator of shades from HA to API Core
@@ -116,7 +127,7 @@ Shades not listed will get their features from their **capabilities**, unfortuna
 - Handle kwargs in websessions for management of timeout internally
 - Update error handling in tools
 - Handle empty values and zeros better
-- Add type 53 (Sonnette) and yype 95 (Aura Illuminated, Roller). Note: *Type 95 do not support light control*
+- Add type 53 (Sonnette) and type 95 (Aura Illuminated, Roller). Note: *Type 95 do not support light control*
 - Handle PowerType 11 + 12. Both are fixed and cannot be edited
 
 ### v3.0.2
@@ -128,7 +139,7 @@ Shades not listed will get their features from their **capabilities**, unfortuna
 - Fix tests
 - Remove unneeded declerations
 - Fix shade position reporting for v2 shades
-- Dandle empty hub data being returned
+- Handle empty hub data being returned
 
 ### v3.0.1
 
